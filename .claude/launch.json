@@ -1,0 +1,6 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    { "name": "prototipo", "runtimeExecutable": "python", "runtimeArgs": ["-m", "http.server", "5180", "--directory", "prototipo"], "port": 5180 }
+  ]
+}

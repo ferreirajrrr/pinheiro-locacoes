@@ -1,0 +1,884 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pinheiro Locações</title>
+<style>
+  :root{
+    --bg:#f1f5f2; --surface:#fff; --surface-2:#eef3ee; --line:#dce5dc;
+    --text:#10210f; --muted:#5f7360; --brand:#2f8f1f; --brand-d:#0b3d0b; --accent:#f5b800;
+    --good:#2e9e44; --bad:#d63a35; --warn:#b7791f; --radius:14px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0c120c; --surface:#131b13; --surface-2:#1a241a; --line:#263326; --text:#e6f0e6; --muted:#8fa38f;
+      --brand:#4cb83a; --brand-d:#0f3a0f; --good:#4ade80; --bad:#f87171; --warn:#fbbf24;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0c120c; --surface:#131b13; --surface-2:#1a241a; --line:#263326; --text:#e6f0e6; --muted:#8fa38f;
+    --brand:#4cb83a; --brand-d:#0f3a0f; --good:#4ade80; --bad:#f87171; --warn:#fbbf24;
+  }
+
+  /* ===== BASE: celular ===== */
+  *{box-sizing:border-box;} h1,h2,h3,p{margin:0;}
+  html{-webkit-text-size-adjust:100%;}
+  body{margin:0; background:var(--bg); color:var(--text); font-family:'Roboto',sans-serif; font-size:15px; line-height:1.4;}
+  button,input,select,textarea{font-family:inherit; font-size:16px; color:inherit;}
+  svg{width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; flex:none;}
+
+  .shell{padding:.75rem .75rem calc(5.4rem + env(safe-area-inset-bottom)); min-height:100vh;}
+  .main{min-width:0;}
+
+  /* menu: barra inferior */
+  .side{position:fixed; left:0; right:0; bottom:0; z-index:40; background:var(--surface); border-top:1px solid var(--line); padding:.25rem .3rem calc(.25rem + env(safe-area-inset-bottom));}
+  #nav{display:flex; gap:.1rem;}
+  .logo,.who,.side .foot{display:none;}
+  .nav{position:relative; flex:1 1 0; min-width:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.15rem; min-height:54px; padding:.35rem .1rem; border:none; background:transparent; color:var(--muted); border-radius:10px; cursor:pointer; font-size:.66rem; font-weight:500; text-align:center;}
+  .nav .lg{display:none;}
+  .nav.on{background:var(--surface-2); color:var(--brand);}
+  .badge{position:absolute; top:2px; left:calc(50% + 4px); background:var(--bad); color:#fff; border-radius:99px; font-size:.6rem; padding:.02rem .4rem; font-weight:700;}
+
+  .logo b{display:block; font-size:1.05rem; color:var(--brand-d); letter-spacing:.02em;} :root[data-theme="dark"] .logo b{color:var(--text);}
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .logo b{color:var(--text);} }
+  .logo small{display:block; background:var(--brand); color:#fff; font-size:.6rem; letter-spacing:.3em; text-align:center; border-radius:4px; padding:.1rem 0; margin-top:.15rem;}
+  .who{padding:.7rem .5rem 0; border-top:1px solid var(--line); font-size:.78rem; color:var(--muted); line-height:1.7;}
+  .who button{border:none; background:none; color:var(--brand); cursor:pointer; padding:0; font-size:.78rem; text-decoration:underline;}
+
+  /* topo */
+  .mbar{display:flex; align-items:center; justify-content:space-between; margin-bottom:.9rem;}
+  .mbrand{display:flex; align-items:center; gap:.5rem; font-weight:700; letter-spacing:.02em; color:var(--brand-d);}
+  :root[data-theme="dark"] .mbrand{color:var(--text);}
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .mbrand{color:var(--text);} }
+  .mbar .acts{gap:.4rem;}
+  .top{display:flex; justify-content:space-between; align-items:flex-start; gap:.75rem; margin-bottom:1.1rem;}
+  .top h2{font-size:1.35rem;} .top p{color:var(--muted); font-size:.85rem; margin-top:.1rem;}
+  .top .js-theme{display:none;}
+  .newc{position:fixed; right:1rem; bottom:calc(4.9rem + env(safe-area-inset-bottom)); z-index:35; width:56px; height:56px; border-radius:50%; padding:0; font-size:1.8rem; font-weight:400; box-shadow:0 8px 22px -6px rgba(0,0,0,.5);}
+  .newc .lbl{display:none;}
+
+  /* botões */
+  .btn{display:inline-flex; align-items:center; justify-content:center; gap:.4rem; min-height:44px; border:1px solid var(--line); background:var(--surface); color:var(--text); border-radius:10px; padding:.55rem 1rem; cursor:pointer; font-weight:500; text-decoration:none; white-space:nowrap; line-height:1.2;}
+  .btn:hover{filter:brightness(.97);}
+  .btn:disabled{opacity:.5; cursor:not-allowed;}
+  .btn.p{background:var(--brand); border-color:var(--brand); color:#fff;}
+  .btn.sm{min-height:38px; padding:.3rem .75rem; font-size:.85rem;}
+  .btn.big{padding:.95rem 1.5rem; font-size:1rem; font-weight:700;}
+  .btn.bad{color:var(--bad);}
+  .btn.icon{min-width:44px; padding:.4rem;}
+  .quick{display:flex; flex-direction:column; gap:.7rem; margin-bottom:1.2rem;}
+  .quick .btn{width:100%;}
+
+  /* cartões e grades */
+  .card{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);}
+  .kpis{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.75rem; margin-bottom:1.2rem;}
+  .kpis .kpi:last-child:nth-child(odd){grid-column:1/-1;}
+  .kpi{padding:.9rem 1rem;} .kpi span{color:var(--muted); font-size:.8rem;} .kpi b{display:block; font-size:1.4rem; margin-top:.2rem; white-space:nowrap;}
+  .kpi.warn b{color:var(--bad);}
+  .grid2{display:grid; grid-template-columns:1fr; gap:1rem;}
+  .head{padding:1rem 1.1rem .5rem;} .head h3{font-size:1rem;} .head p{color:var(--muted); font-size:.82rem; margin-top:.2rem;}
+  .note{color:var(--muted); font-size:.75rem; padding:.3rem 1.1rem 1rem;}
+  .empty{color:var(--muted); text-align:center; padding:2rem 1rem; font-size:.85rem;}
+  .avail{display:flex; align-items:center; gap:.7rem; padding:.55rem 1.1rem; font-size:.85rem;} .avail span:first-child{width:112px; flex:none;} .avail b{width:64px; text-align:right; flex:none;}
+  .bar{height:8px; background:var(--surface-2); border-radius:99px; overflow:hidden; flex:1;} .bar i{display:block; height:100%; background:var(--brand);}
+  .pill{font-size:.7rem; font-weight:700; padding:.15rem .55rem; border-radius:99px; background:var(--surface-2); white-space:nowrap;}
+  .pill.g{color:var(--good);} .pill.r{color:var(--bad);} .pill.y{color:var(--warn);}
+  .info{padding:.9rem 1rem; margin-bottom:1rem; background:var(--surface-2); font-size:.9rem; line-height:1.6; border-radius:10px;}
+
+  /* tabelas: cartões no celular */
+  table{width:100%; border-collapse:collapse;}
+  th{text-align:left; padding:.7rem .8rem; color:var(--muted); font-size:.68rem; text-transform:uppercase; font-weight:500; border-top:1px solid var(--line); border-bottom:1px solid var(--line); white-space:nowrap;}
+  td{padding:.7rem .8rem; border-bottom:1px solid var(--line); white-space:nowrap; vertical-align:middle;}
+  .wrap{overflow-x:auto;}
+  .wrap table,.wrap tbody,.wrap tr,.wrap td{display:block;}
+  .wrap thead{display:none;}
+  .wrap tr{padding:.7rem 1.1rem; border-top:1px solid var(--line);}
+  .wrap td{display:flex; justify-content:space-between; align-items:center; gap:1rem; padding:.3rem 0; border:none; white-space:normal; text-align:right;}
+  .wrap td::before{content:attr(data-label); color:var(--muted); font-size:.7rem; text-transform:uppercase; letter-spacing:.03em; text-align:left; flex:none;}
+  .wrap td[data-label=""]{justify-content:flex-end;} .wrap td[data-label=""]::before{content:none;}
+  .wrap td.none{display:block; text-align:center; color:var(--muted); padding:1.6rem 0;} .wrap td.none::before{content:none;}
+  .acts{display:flex; gap:.4rem; flex-wrap:wrap; justify-content:flex-end;}
+  .price{width:96px; padding:.45rem .5rem; border:1px solid var(--line); border-radius:8px; background:var(--surface-2); min-height:40px;}
+
+  /* mapa */
+  .map{margin:.4rem 1.1rem 1.1rem; height:260px; border-radius:10px; border:1px solid var(--line); background:
+    linear-gradient(var(--line) 1px,transparent 1px) 0 0/40px 40px, linear-gradient(90deg,var(--line) 1px,transparent 1px) 0 0/40px 40px, var(--surface-2); position:relative; overflow:hidden;}
+  .mapreal{position:relative; z-index:0; margin:.4rem 1.1rem 1rem; height:300px; border-radius:10px; border:1px solid var(--line);}
+  .pin{position:absolute; width:14px; height:14px; border-radius:50% 50% 50% 0; background:var(--brand); transform:rotate(-45deg); border:2px solid #fff; cursor:pointer;}
+  .pin.late{background:var(--bad);}
+  .pinI{width:22px; height:22px; border-radius:50% 50% 50% 0; background:#2f8f1f; transform:rotate(-45deg); border:3px solid #fff; box-shadow:0 2px 6px rgba(0,0,0,.45);}
+  .pinI.late{background:#d63a35;}
+  .nogeo{padding:0 1.1rem 1rem; font-size:.82rem; color:var(--muted); display:flex; flex-direction:column; gap:.5rem;}
+
+  /* diálogos: tela cheia no celular */
+  dialog{border:none; border-radius:0; background:var(--surface); color:var(--text); padding:1.1rem 1rem calc(1.2rem + env(safe-area-inset-bottom)); width:100%; max-width:100%; height:100%; max-height:100%; margin:0; overflow-y:auto;}
+  dialog::backdrop{background:rgba(0,0,0,.5);}
+  dialog form > div[style*="justify-content:flex-end"]{position:sticky; bottom:calc(-1.2rem - env(safe-area-inset-bottom)); background:var(--surface); padding:.7rem 0; margin-top:.5rem; border-top:1px solid var(--line);}
+  dialog form div[style*="justify-content:flex-end"] .btn{flex:1;}
+  @media (max-width:1023px){ body[data-page="cobrar"] .newc, body[data-page="equip"] .newc, body[data-page="config"] .newc{display:none;} }
+
+  /* formulários */
+  .f{margin-bottom:.85rem;} .f label{display:block; font-size:.78rem; color:var(--muted); margin-bottom:.25rem;}
+  .f input,.f select,.f textarea{width:100%; min-height:44px; padding:.65rem .75rem; border:1px solid var(--line); border-radius:10px; background:var(--surface-2);}
+  .row{display:grid; grid-template-columns:1fr; gap:0 .7rem;}
+  .r3{display:grid; grid-template-columns:1fr 72px; gap:0 .7rem;} .r3>:first-child{grid-column:1/-1;}
+  .sec{display:grid; grid-template-columns:1fr; gap:0 .7rem; padding:.5rem 1.1rem 1.2rem;}
+  .adduser{display:grid; grid-template-columns:1fr; gap:.5rem; padding:0 1.1rem 1.2rem;}
+  .item{display:grid; grid-template-columns:1fr 72px 44px; gap:.5rem; margin-bottom:.5rem;}
+  .total{display:flex; justify-content:space-between; font-size:1.15rem; font-weight:700; padding:.8rem 0; border-top:1px solid var(--line); margin-top:.5rem;}
+  .err{color:var(--bad); font-size:.85rem; margin:.3rem 0;}
+  .ok{color:var(--good); font-size:.85rem; margin:.3rem 0;}
+  .hint{display:block; color:var(--muted); font-size:.72rem; margin-top:.2rem; min-height:1em;}
+  .cred{background:var(--surface-2); border:1px dashed var(--brand); border-radius:10px; padding:.8rem 1rem; margin:0 1.1rem 1.2rem; font-size:.88rem; word-break:break-all;}
+  .cred code{font-size:1rem; font-weight:700; letter-spacing:.05em;}
+
+  /* login e rodapé */
+  .login{position:fixed; inset:0; z-index:100; display:flex; align-items:center; justify-content:center; background:var(--bg); padding:1rem;}
+  .login form{width:min(360px,100%); padding:1.6rem;}
+  .foot{display:flex; flex-direction:column; align-items:center; gap:.5rem; margin-top:1.4rem;}
+  .foot p{font-size:.72rem; color:var(--muted); margin:0; text-align:center;}
+  .credit{display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px; border:1px solid #2a2a2e; border-radius:100px; background:#0b0b0d; transition:transform .25s ease, border-color .25s ease;}
+  .credit:hover{transform:translateY(-1px); border-color:var(--brand);}
+  .credit img{height:18px; width:auto; opacity:.85;} .credit:hover img{opacity:1;}
+  .mfoot{padding-bottom:.5rem;}
+
+  /* documentos */
+  #docBody{background:#fff; color:#111; padding:1.1rem; border-radius:8px; font-size:.88rem; line-height:1.5;}
+  #docBody .dh{border-bottom:2px solid #2f8f1f; padding-bottom:.6rem; margin-bottom:1rem; font-size:.8rem; color:#333;} #docBody .dh b{font-size:1.2rem; color:#0b3d0b; display:block;}
+  #docBody p{margin:.55rem 0;}
+  #docBody h3{font-size:1.05rem; text-align:center; margin:.4rem 0 1rem; letter-spacing:.04em;}
+  #docBody table{margin:.6rem 0;} #docBody th{color:#333; border-color:#ccc; padding:.35rem .5rem;} #docBody td{color:#111; border-color:#ddd; padding:.35rem .5rem; white-space:normal;}
+  #docBody .sign{display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; margin-top:3rem; text-align:center; font-size:.78rem;} #docBody .sign div{border-top:1px solid #111; padding-top:.3rem;}
+  #docBody .warn{background:#fff4d6; color:#7a5300; padding:.5rem .7rem; border-radius:6px; font-size:.78rem; margin-bottom:.8rem;}
+
+  /* ===== a partir de 600px: celulares grandes / tablets pequenos ===== */
+  @media (min-width:600px){
+    .shell{padding:1rem 1rem calc(5.6rem + env(safe-area-inset-bottom));}
+    .quick{flex-direction:row;} .quick .btn{width:auto;}
+    .row{grid-template-columns:1fr 1fr;}
+    .r3{grid-template-columns:1fr 1fr 64px;} .r3>:first-child{grid-column:auto;}
+    .sec{grid-template-columns:repeat(6,minmax(0,1fr));}
+    .s6{grid-column:span 6;} .s3{grid-column:span 3;} .s2{grid-column:span 2;} .s1{grid-column:span 1;}
+    dialog{border:1px solid var(--line); border-radius:var(--radius); padding:1.4rem; width:min(560px,94vw); height:auto; max-height:92vh; margin:auto;}
+    #docDlg{width:min(720px,96vw);}
+    dialog form > div[style*="justify-content:flex-end"]{bottom:-1.4rem;}
+    dialog form div[style*="justify-content:flex-end"] .btn{flex:none;}
+    #docBody{padding:1.6rem;} #docBody .sign{gap:2rem;}
+  }
+
+  /* ===== a partir de 768px: tablets ===== */
+  @media (min-width:768px){
+    .wrap tbody{display:grid; grid-template-columns:repeat(2,minmax(0,1fr));}
+    .wrap tbody tr{border-left:1px solid var(--line);} .wrap tbody tr:nth-child(odd){border-left:none;}
+    .wrap tbody tr:has(.none){grid-column:1/-1; border-left:none;}
+    .kpis{grid-template-columns:repeat(6,minmax(0,1fr));} .kpis .kpi{grid-column:span 2;} .kpis .kpi:nth-child(n+4),.kpis .kpi:last-child:nth-child(odd){grid-column:span 3;}
+    .map{height:340px; margin:.4rem 1.3rem 1.3rem;} .mapreal{height:400px; margin:.4rem 1.3rem 1rem;}
+    .head{padding:1.1rem 1.3rem .5rem;} .note,.nogeo{padding-left:1.3rem; padding-right:1.3rem;} .avail{padding-left:1.3rem; padding-right:1.3rem;}
+    .sec{padding:.5rem 1.3rem 1.3rem;} .adduser{grid-template-columns:1fr 1fr 130px auto; align-items:end; padding:0 1.3rem 1.3rem;} .cred{margin:0 1.3rem 1.2rem;}
+    .price{width:80px;}
+  }
+
+  /* ===== a partir de 1180px: tabelas de verdade ===== */
+  @media (min-width:1180px){
+    .wrap table{display:table; min-width:560px;}
+    .wrap thead{display:table-header-group;} .wrap tbody{display:table-row-group;}
+    .wrap tbody tr{border-left:none;}
+    .wrap tr{display:table-row; padding:0; border:none;}
+    .wrap td{display:table-cell; padding:.7rem .8rem; border-bottom:1px solid var(--line); text-align:left; white-space:nowrap;}
+    .wrap td::before{content:none;}
+    .wrap td.none{display:table-cell; padding:2rem 1rem; text-align:center;}
+    .wrap tr:last-child td{border-bottom:none;}
+    .wrap th:first-child,.wrap td:first-child{padding-left:1.3rem;} .wrap th:last-child,.wrap td:last-child{padding-right:1.3rem;}
+    .wrap td.acts-c{white-space:normal; width:1%;} .wrap td.acts-c .acts{min-width:150px; justify-content:flex-start;}
+    .price{width:72px; min-height:0; padding:.3rem .4rem;}
+  }
+
+  /* ===== a partir de 1024px: computadores ===== */
+  @media (min-width:1024px){
+    button,input,select,textarea{font-size:14px;}
+    .shell{display:grid; grid-template-columns:260px 1fr; gap:1.25rem; padding:1rem;}
+    .side{position:sticky; top:1rem; height:calc(100vh - 2rem); left:auto; right:auto; bottom:auto; z-index:1; border:1px solid var(--line); border-radius:var(--radius); padding:1.2rem .9rem; display:flex; flex-direction:column; gap:.3rem; overflow-y:auto;}
+    #nav{display:block;}
+    .logo{display:flex; align-items:center; gap:.6rem; padding:.2rem .5rem 1.3rem;}
+    .who{display:block; margin-top:auto;} .side .foot{display:flex;}
+    .nav{flex-direction:row; justify-content:flex-start; gap:.8rem; width:100%; min-height:0; padding:.75rem .9rem; font-size:.95rem; border-radius:9px; text-align:left;}
+    .nav .lg{display:inline;} .nav .sh{display:none;}
+    .nav:hover{background:var(--surface-2);}
+    .nav.on{background:linear-gradient(180deg,var(--brand),var(--brand-d)); color:#fff; box-shadow:0 4px 10px -3px rgba(0,60,0,.45);}
+    .badge{position:static; margin-left:auto;}
+    .mbar,.mfoot{display:none;}
+    .main{padding:.2rem .2rem 3rem;}
+    .top{align-items:center; margin-bottom:1.6rem;} .top h2{font-size:1.25rem;} .top .js-theme{display:inline-flex;}
+    .newc{position:static; width:auto; height:auto; border-radius:10px; padding:.55rem 1rem; font-size:inherit; font-weight:500; box-shadow:none;} .newc .lbl{display:inline; white-space:pre;}
+    .btn{min-height:0;} .btn.sm{min-height:0; padding:.3rem .65rem; font-size:.8rem;} .btn.icon{min-width:0;}
+    .f input,.f select,.f textarea{min-height:0; padding:.5rem .6rem;}
+    .kpis{grid-template-columns:repeat(5,minmax(0,1fr)); gap:1rem; margin-bottom:1.5rem;} .kpis .kpi,.kpis .kpi:nth-child(n+4),.kpis .kpi:last-child:nth-child(odd){grid-column:auto;} .kpi b{font-size:1.35rem;}
+    .grid2{grid-template-columns:1.4fr 1fr; gap:1.2rem;}
+    .mapreal{height:380px;}
+  }
+
+  /* impressão */
+  @media print{
+    body{background:#fff;}
+    #shell,#login,dialog:not(#docDlg){display:none!important;}
+    #docDlg{display:block!important; position:static; width:100%; max-width:none; height:auto; max-height:none; border:none; padding:0; overflow:visible;}
+    .noprint{display:none!important;}
+  }
+  [hidden]{display:none!important;}
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
+
+<div class="login" id="login">
+  <form id="loginForm" class="card">
+    <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:1.4rem">
+      <svg viewBox="0 0 24 24" style="width:34px;height:34px;color:var(--brand);fill:currentColor;stroke:none"><path d="M12 2l5 7h-3l4 6h-4l3 5H7l3-5H6l4-6H7z"/><rect x="11" y="20" width="2" height="3"/></svg>
+      <div style="font-weight:700;font-size:1.1rem">Pinheiro Locações</div>
+    </div>
+    <div class="f"><label for="lUser">Usuário</label><input id="lUser" autocomplete="username" maxlength="20" autofocus></div>
+    <div class="f"><label for="lPass">Senha</label><input id="lPass" type="password" autocomplete="current-password" maxlength="64"></div>
+    <p class="err" id="lErr"></p>
+    <button class="btn p" style="width:100%;justify-content:center">Entrar</button>
+  </form>
+  <footer class="foot" style="position:absolute;bottom:1.2rem">
+    <p>© <span class="js-year"></span> Pinheiro Locações · <span class="js-ver"></span></p>
+    <a class="credit" href="https://auralandingpages.com.br/" target="_blank" rel="noopener noreferrer" aria-label="Powered by AURA Digital Studio"><img src="assets/logo_AURA_white.png" alt="AURA Digital Studio" width="24" height="27" loading="lazy"></a>
+  </footer>
+</div>
+
+<div class="shell" id="shell" hidden>
+  <aside class="side">
+    <div class="logo">
+      <svg viewBox="0 0 24 24" style="width:34px;height:34px;color:var(--brand);fill:currentColor;stroke:none"><path d="M12 2l5 7h-3l4 6h-4l3 5H7l3-5H6l4-6H7z"/><rect x="11" y="20" width="2" height="3"/></svg>
+      <div><b>PINHEIRO</b><small>LOCAÇÕES</small></div>
+    </div>
+    <div id="nav"></div>
+    <div class="who" id="who"></div>
+    <footer class="foot">
+      <p>© <span class="js-year"></span> Pinheiro Locações · <span class="js-ver"></span></p>
+      <a class="credit" href="https://auralandingpages.com.br/" target="_blank" rel="noopener noreferrer" aria-label="Powered by AURA Digital Studio"><img src="assets/logo_AURA_white.png" alt="AURA Digital Studio" width="24" height="27" loading="lazy"></a>
+    </footer>
+  </aside>
+  <main class="main">
+    <div class="mbar">
+      <div class="mbrand"><svg viewBox="0 0 24 24" style="width:28px;height:28px;color:var(--brand);fill:currentColor;stroke:none"><path d="M12 2l5 7h-3l4 6h-4l3 5H7l3-5H6l4-6H7z"/><rect x="11" y="20" width="2" height="3"/></svg>PINHEIRO LOCAÇÕES</div>
+      <div class="acts">
+        <button class="btn icon js-theme-m" title="Alternar tema" aria-label="Alternar tema">🌓</button>
+        <button class="btn icon" id="acct" title="Conta" aria-label="Conta"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.5-6 8-6s8 2 8 6"/></svg></button>
+      </div>
+    </div>
+    <div class="top">
+      <div><h2 id="title"></h2><p id="sub"></p></div>
+      <div style="display:flex;gap:.5rem">
+        <button class="btn js-theme" id="theme" title="Alternar tema" aria-label="Alternar tema">🌓</button>
+        <button class="btn p newc" id="newC" aria-label="Nova locação"><span>+</span><span class="lbl"> Nova locação</span></button>
+      </div>
+    </div>
+    <div id="view"></div>
+    <footer class="foot mfoot">
+      <p>© <span class="js-year"></span> Pinheiro Locações · <span class="js-ver"></span></p>
+      <a class="credit" href="https://auralandingpages.com.br/" target="_blank" rel="noopener noreferrer" aria-label="Powered by AURA Digital Studio"><img src="assets/logo_AURA_white.png" alt="AURA Digital Studio" width="24" height="27" loading="lazy"></a>
+    </footer>
+  </main>
+</div>
+
+<dialog id="acctDlg">
+  <h3 style="margin-bottom:.3rem">Conta</h3>
+  <p class="hint" id="acctWho" style="margin-bottom:1rem"></p>
+  <div style="display:flex;flex-direction:column;gap:.6rem">
+    <button class="btn" id="chgPw2">Alterar senha</button>
+    <button class="btn bad" id="logout2">Sair</button>
+    <button class="btn" id="acctClose">Fechar</button>
+  </div>
+</dialog>
+
+<dialog id="dlg">
+  <h3 style="margin-bottom:1rem">Nova locação</h3>
+  <form id="form" method="dialog">
+    <div class="f"><label for="fCli">Cliente</label><select id="fCli"></select></div>
+    <div id="newCli">
+      <div class="row">
+        <div class="f"><label for="cNome">Nome completo</label><input id="cNome" maxlength="80" autocomplete="off"></div>
+        <div class="f"><label for="cTel">WhatsApp</label><input id="cTel" data-mask="phone" maxlength="15" inputmode="numeric" placeholder="(85) 99999-9999"></div>
+      </div>
+      <div class="row">
+        <div class="f"><label for="cDoc">CPF ou CNPJ</label><input id="cDoc" data-mask="doc" maxlength="18" inputmode="numeric" placeholder="000.000.000-00"></div>
+        <div class="f"><label for="cNasc">Data de nascimento (opcional)</label><input id="cNasc" data-mask="date" maxlength="10" inputmode="numeric" placeholder="dd/mm/aaaa"></div>
+      </div>
+      <div class="f"><label for="cMail">E-mail (opcional)</label><input id="cMail" type="email" maxlength="80"></div>
+      <div class="row">
+        <div class="f"><label for="cCep">CEP da obra</label><input id="cCep" data-mask="cep" maxlength="9" inputmode="numeric" placeholder="00000-000"><small class="hint" id="cepMsg"></small></div>
+        <div class="f"><label for="cNum">Número</label><input id="cNum" maxlength="10"></div>
+      </div>
+      <div class="f"><label for="cRua">Rua</label><input id="cRua" maxlength="80"></div>
+      <div class="r3">
+        <div class="f"><label for="cBairro">Bairro</label><input id="cBairro" maxlength="60"></div>
+        <div class="f"><label for="cCidade">Cidade</label><input id="cCidade" maxlength="60"></div>
+        <div class="f"><label for="cUf">UF</label><input id="cUf" data-mask="uf" maxlength="2"></div>
+      </div>
+      <label style="display:flex;gap:.5rem;font-size:.8rem;margin-bottom:.8rem"><input type="checkbox" id="cLgpd"> Cliente autorizou o uso dos dados para locação e cobrança (LGPD)</label>
+    </div>
+    <div class="f"><label>Equipamentos</label><div id="items"></div><button type="button" class="btn sm" id="addItem">+ item</button></div>
+    <div class="row">
+      <div class="f"><label for="fPer">Período</label><select id="fPer"><option value="1">1 dia</option><option value="7" selected>7 dias</option><option value="15">15 dias</option><option value="30">30 dias</option></select></div>
+      <div class="f"><label for="fIni">Início</label><input id="fIni" type="date"></div>
+    </div>
+    <div class="f"><label for="fFrete">Frete (R$)</label><input id="fFrete" type="number" min="0" step="0.01" value="0"></div>
+    <div class="total"><span>Total</span><span id="fTotal">R$ 0,00</span></div>
+    <p class="err" id="fErr"></p>
+    <div style="display:flex;gap:.5rem;justify-content:flex-end">
+      <button type="button" class="btn" id="fCancel">Cancelar</button>
+      <button type="submit" class="btn p" id="fSave">Fechar locação</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="pickDlg">
+  <h3 id="pickTitle" style="margin-bottom:1rem"></h3>
+  <form id="pickForm">
+    <div class="f"><label for="pickSel">Locação</label><select id="pickSel"></select></div>
+    <p class="err" id="pickErr"></p>
+    <div style="display:flex;gap:.5rem;justify-content:flex-end">
+      <button type="button" class="btn" id="pickCancel">Cancelar</button>
+      <button type="submit" class="btn p" id="pickOk">Continuar</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="retDlg">
+  <h3 style="margin-bottom:1rem">Receber equipamento</h3>
+  <form id="retForm">
+    <div class="info" id="retInfo"></div>
+    <div class="row">
+      <div class="f"><label for="rData">Data da devolução</label><input id="rData" type="date"></div>
+      <div class="f"><label for="rCond">Condição</label><select id="rCond"><option>Sem avarias</option><option>Com avarias</option><option>Peças faltando</option></select></div>
+    </div>
+    <div class="f"><label for="rAvaria">Cobrança por avaria ou reposição (R$)</label><input id="rAvaria" type="number" min="0" step="0.01" value="0"><small class="hint">entra como acréscimo no pagamento</small></div>
+    <div class="f"><label for="rObs">Observações</label><textarea id="rObs" rows="2" maxlength="300"></textarea></div>
+    <p class="err" id="rErr"></p>
+    <div style="display:flex;gap:.5rem;justify-content:flex-end">
+      <button type="button" class="btn" id="rCancel">Cancelar</button>
+      <button type="submit" class="btn p">Confirmar recebimento</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="payDlg">
+  <h3 style="margin-bottom:1rem">Registrar pagamento</h3>
+  <form id="payForm">
+    <div class="info" id="payInfo"></div>
+    <div class="row">
+      <div class="f"><label for="pAcr">Acréscimos (R$)</label><input id="pAcr" type="number" min="0" step="0.01" value="0"><small class="hint">ex.: peça extra, avaria, entrega</small></div>
+      <div class="f"><label for="pMulta">Multa e juros por atraso (R$)</label><input id="pMulta" type="number" min="0" step="0.01" value="0"><small class="hint" id="pMultaHint"></small></div>
+    </div>
+    <div class="row">
+      <div class="f"><label for="pDesc">Desconto (R$)</label><input id="pDesc" type="number" min="0" step="0.01" value="0"></div>
+      <div class="f"><label for="pForma">Forma de pagamento</label><select id="pForma"><option>Pix</option><option>Dinheiro</option><option>Cartão</option><option>Transferência</option></select></div>
+    </div>
+    <div class="f"><label for="pData">Data do pagamento</label><input id="pData" type="date"></div>
+    <div class="total"><span>Total recebido</span><span id="pTotal">R$ 0,00</span></div>
+    <p class="err" id="pErr"></p>
+    <div style="display:flex;gap:.5rem;justify-content:flex-end">
+      <button type="button" class="btn" id="pCancel">Cancelar</button>
+      <button type="submit" class="btn p">Confirmar pagamento</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="pwDlg">
+  <h3 style="margin-bottom:.3rem">Alterar senha</h3>
+  <p class="hint" id="pwHint" style="margin-bottom:1rem">mínimo 8 caracteres, com letras e números</p>
+  <form id="pwForm">
+    <div class="f"><label for="pwOld">Senha atual</label><input id="pwOld" type="password" autocomplete="current-password" maxlength="64"></div>
+    <div class="f"><label for="pwNew">Nova senha</label><input id="pwNew" type="password" autocomplete="new-password" maxlength="64"></div>
+    <div class="f"><label for="pwNew2">Confirmar nova senha</label><input id="pwNew2" type="password" autocomplete="new-password" maxlength="64"></div>
+    <p class="err" id="pwMsg"></p>
+    <div style="display:flex;gap:.5rem;justify-content:flex-end">
+      <button type="button" class="btn" id="pwCancel">Cancelar</button>
+      <button type="submit" class="btn p">Trocar senha</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="docDlg">
+  <div id="docBody"></div>
+  <div class="noprint" style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:1rem">
+    <button class="btn" id="docClose">Fechar</button>
+    <button class="btn p" id="docPrint">Imprimir / salvar PDF</button>
+  </div>
+</dialog>
+
+<script>
+(function(){
+  "use strict";
+  const $ = id => document.getElementById(id);
+  const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+  const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const BRL = n => (n || 0).toLocaleString("pt-BR", {style:"currency", currency:"BRL"});
+  const day = 864e5;
+  const iso = d => d.toISOString().slice(0, 10);
+  const fmt = s => s ? s.split("-").reverse().join("/") : "";
+  const today = () => { const d = new Date(); return new Date(d - d.getTimezoneOffset() * 6e4).toISOString().slice(0, 10); };
+
+  /*V*/
+  var dg = function(s){return String(s||"").replace(/\D/g,"");};
+  var MASK = {
+    phone:function(v){var d=dg(v).slice(0,11),n=d.length;if(!n)return "";if(n<3)return "("+d;var c=n>10?7:6;return "("+d.slice(0,2)+") "+d.slice(2,c)+(n>c?"-"+d.slice(c):"");},
+    doc:function(v){var d=dg(v).slice(0,14);
+      if(d.length<=11)return d.replace(/^(\d{3})(\d{1,3})/,"$1.$2").replace(/^(\d{3}\.\d{3})(\d{1,3})/,"$1.$2").replace(/^(\d{3}\.\d{3}\.\d{3})(\d{1,2})/,"$1-$2");
+      return d.replace(/^(\d{2})(\d{1,3})/,"$1.$2").replace(/^(\d{2}\.\d{3})(\d{1,3})/,"$1.$2").replace(/^(\d{2}\.\d{3}\.\d{3})(\d{1,4})/,"$1/$2").replace(/^(\d{2}\.\d{3}\.\d{3}\/\d{4})(\d{1,2})/,"$1-$2");},
+    date:function(v){return dg(v).slice(0,8).replace(/^(\d{2})(\d{1,2})/,"$1/$2").replace(/^(\d{2}\/\d{2})(\d{1,4})/,"$1/$2");},
+    cep:function(v){var d=dg(v).slice(0,8);return d.length>5?d.slice(0,5)+"-"+d.slice(5):d;},
+    uf:function(v){return String(v).toUpperCase().replace(/[^A-Z]/g,"").slice(0,2);}
+  };
+  function cpfOk(d){if(d.length!==11||/^(\d)\1+$/.test(d))return false;for(var t=9;t<11;t++){var s=0;for(var i=0;i<t;i++)s+=d[i]*(t+1-i);if((s*10)%11%10!=d[t])return false;}return true;}
+  function cnpjOk(d){if(d.length!==14||/^(\d)\1+$/.test(d))return false;var w=[5,4,3,2,9,8,7,6,5,4,3,2];for(var t=12;t<14;t++){var ww=t===12?w:[6].concat(w),s=0;for(var i=0;i<t;i++)s+=d[i]*ww[i];var r=s%11;r=r<2?0:11-r;if(r!=d[t])return false;}return true;}
+  var docOk = function(d){return d.length===11?cpfOk(d):d.length===14?cnpjOk(d):false;};
+  var phoneOk = function(d){return d.length===11?/^[1-9][1-9]9/.test(d):d.length===10?/^[1-9][1-9][2-5]/.test(d):false;};
+  function dateOk(s){if(!s)return true;var m=/^(\d{2})\/(\d{2})\/(\d{4})$/.exec(s);if(!m)return false;var d=+m[1],mo=+m[2],y=+m[3],x=new Date(y,mo-1,d);return y>=1900&&x<=new Date()&&x.getFullYear()===y&&x.getMonth()===mo-1&&x.getDate()===d;}
+  /*/V*/
+
+  const mailOk = m => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(m);
+  const pwErr = n => n.length < 8 || !/[A-Za-z]/.test(n) || !/\d/.test(n) ? "A nova senha precisa de 8+ caracteres, com letras e números." : "";
+
+  /* ---- senha: PBKDF2 (o sistema real faz isso no servidor) ---- */
+  const hex = b => Array.from(new Uint8Array(b), x => x.toString(16).padStart(2, "0")).join("");
+  const newSalt = () => hex(crypto.getRandomValues(new Uint8Array(16)));
+  async function hashPw(pw, salt){
+    const k = await crypto.subtle.importKey("raw", new TextEncoder().encode(pw), "PBKDF2", false, ["deriveBits"]);
+    return hex(await crypto.subtle.deriveBits({name:"PBKDF2", hash:"SHA-256", salt:new TextEncoder().encode(salt), iterations:100000}, k, 256));
+  }
+  function tempPass(){const a="ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789", b=crypto.getRandomValues(new Uint32Array(12)); return Array.from(b, x => a[x % a.length]).join("") + "7";}
+
+  const S = {
+    me:null, page:"painel", emp:{}, cred:null, forcePw:false, fails:0, lockUntil:0, leaflet:false, map:null,
+    eq:[
+      {id:1,nome:"Escora P3",estoque:25,p:{1:7,7:13,15:16,30:18}},
+      {id:2,nome:"Andaime 1x1,5 m",estoque:7,p:{1:5,7:10,15:13,30:18}},
+      {id:3,nome:"Andaime 1x1 m",estoque:4,p:{1:5,7:10,15:13,30:18}},
+      {id:4,nome:"Plataforma",estoque:2,p:{1:null,7:10,15:13,30:18}},
+      {id:5,nome:"Misturador de tinta",estoque:1,p:{1:25,7:130,15:160,30:190}},
+      {id:6,nome:"Betoneira",estoque:0,p:{1:null,7:null,15:null,30:null}}
+    ],
+    cli:[], con:[], seq:1, cseq:1, draft:[], useq:2,
+    users:[{id:1,nome:"Administrador",user:"admin",role:"admin",
+      salt:"94999927fd0f54362d6bad23408fbd9c",hash:"93fc271cdbf9aec9ca1f347b3f4de99be3ad7ab53414a69393c36a75d54eea52"}]
+  };
+  const eqById = id => S.eq.find(e => e.id == id);
+  const cliById = id => S.cli.find(c => c.id == id);
+  const conById = id => S.con.find(c => c.id == id);
+  const rented = eqId => S.con.filter(c => c.status === "ativo").reduce((a, c) => a + c.itens.filter(i => i.eq == eqId).reduce((s, i) => s + i.qtd, 0), 0);
+  const avail = e => e.estoque - rented(e.id);
+  const late = c => c.status === "ativo" && c.fim < today();
+  const overdue = c => !c.pago && c.fim < today();
+  const itensTxt = c => c.itens.map(i => i.qtd + "× " + esc(eqById(i.eq).nome)).join(", ");
+  const diasAtraso = c => Math.max(0, Math.floor((new Date(c.dev ? c.dev.data : today()) - new Date(c.fim)) / day));
+  const fantasia = () => S.emp.fantasia || "Pinheiro Locações";
+
+  /* ---- máscaras e CEP ---- */
+  function attachMasks(root){ $$("[data-mask]", root).forEach(el => el.addEventListener("input", () => { el.value = MASK[el.dataset.mask](el.value); })); }
+  function bindCep(p){
+    $(p.cep).addEventListener("input", function(){
+      const d = dg(this.value), m = $(p.msg);
+      if (d.length !== 8){ m.textContent = ""; return; }
+      m.textContent = "Buscando endereço…";
+      fetch("https://viacep.com.br/ws/" + d + "/json/").then(r => { if(!r.ok) throw 0; return r.json(); }).then(j => {
+        if (dg($(p.cep).value) !== d) return;
+        if (j.erro){ m.textContent = "CEP não encontrado. Preencha manualmente."; return; }
+        $(p.rua).value = j.logradouro || ""; $(p.bairro).value = j.bairro || ""; $(p.cidade).value = j.localidade || ""; $(p.uf).value = j.uf || "";
+        m.textContent = "Endereço preenchido. Informe o número."; $(p.num).focus();
+      }).catch(() => { m.textContent = "Não foi possível consultar o CEP agora. Preencha manualmente."; });
+    });
+  }
+
+  /* ---- geolocalização (endereço -> coordenadas) ---- */
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  async function nominatim(q){
+    const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 7000);
+    try{
+      const r = await fetch("https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=br&" + q, {signal:ctl.signal, headers:{"Accept-Language":"pt-BR"}});
+      if (!r.ok) throw 0;
+      const j = await r.json(), lat = j[0] && parseFloat(j[0].lat), lng = j[0] && parseFloat(j[0].lon);
+      return lat > -34 && lat < 6 && lng > -74 && lng < -32 ? {lat, lng} : null;
+    } finally { clearTimeout(t); }
+  }
+  async function geocode(c){
+    const enc = encodeURIComponent, tail = ", " + c.bairro + ", " + c.cidade + ", " + c.uf + ", Brasil";
+    const tries = [["endereço", "q=" + enc(c.rua + " " + c.num + tail)], ["rua", "q=" + enc(c.rua + tail)], ["CEP", "postalcode=" + MASK.cep(c.cep)], ["bairro", "q=" + enc(c.bairro + ", " + c.cidade + ", " + c.uf + ", Brasil")]];
+    try{
+      for (let i = 0; i < tries.length; i++){
+        if (i) await wait(1100);
+        const g = await nominatim(tries[i][1]);
+        if (g){ c.lat = g.lat; c.lng = g.lng; c.prec = tries[i][0]; return true; }
+      }
+    } catch(e){}
+    return false;
+  }
+
+  /* ---- mapa (Leaflet + OpenStreetMap; cai para grade ilustrativa se não carregar) ---- */
+  function loadMap(){
+    let pend = 2, bad = false;
+    const done = () => { if (--pend === 0 && !bad && window.L){ S.leaflet = true; if (S.me && S.page === "painel") render(); } };
+    const css = document.createElement("link");
+    css.rel = "stylesheet"; css.href = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css";
+    css.integrity = "sha512-h9FcoyWjHcOcmEVkxOfTLnmZFWIH0iZhZT1H2TbOq55xssQGEJHEaIm+PgoUaZbRvQTNTluNOEfb1ZRy6D3BOw=="; css.crossOrigin = "anonymous";
+    css.onload = done; css.onerror = () => { bad = true; };
+    const js = document.createElement("script");
+    js.src = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js";
+    js.integrity = "sha512-puJW3E/qXDqYp9IfhAI54BJEaWIfloJ7JWs7OeD5i6ruC9JZL1gERT1wjtwXFlh7CjE7ZJ+/vcRZRkIYIb6p4g=="; js.crossOrigin = "anonymous";
+    js.onload = done; js.onerror = () => { bad = true; };
+    document.head.append(css, js);
+  }
+  const ativas = () => S.con.filter(c => c.status === "ativo");
+  function mapCard(){
+    const semGeo = ativas().filter(c => cliById(c.cli).lat == null);
+    let body;
+    if (S.leaflet) body = '<div id="map" class="mapreal"></div>';
+    else {
+      const pins = ativas().map(c => { const cl = cliById(c.cli); let h = 0; const s = cl.bairro + cl.end; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+        return `<div class="pin${late(c) ? " late" : ""}" title="#${c.id} — ${esc(cl.nome)} · ${esc(cl.end)}" style="left:${6 + h % 88}%;top:${8 + (h >> 8) % 80}%"></div>`; }).join("");
+      body = '<div class="map">' + pins + (pins ? "" : '<div class="empty" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">Nenhuma locação ativa para mostrar</div>') + '</div>';
+    }
+    return `<div class="card"><div class="head"><h3>Equipamentos em campo</h3><p>uma marca por locação ativa, no endereço da obra; vermelho = atrasada.${S.leaflet ? " Atualiza a cada mudança." : ""}</p></div>${body}` +
+      (S.leaflet ? "" : '<p class="note">Este ambiente não carregou o mapa de ruas; as posições acima são ilustrativas. Abra o sistema em localhost ou no endereço publicado para ver o mapa real.</p>') +
+      (S.leaflet && semGeo.length ? '<div class="nogeo">' + semGeo.map(c => { const cl = cliById(c.cli); return `<div>Sem localização: #${c.id} · ${esc(cl.nome)} — ${esc(cl.end)}, ${esc(cl.bairro)} <button class="btn sm" data-geo="${cl.id}">Localizar</button></div>`; }).join("") + '</div>' : "") + '</div>';
+  }
+  function drawMap(){
+    if (S.map){ S.map.remove(); S.map = null; }
+    const el = $("map"); if (!el || !window.L) return;
+    const m = S.map = L.map(el).setView([-3.7361, -38.6531], 11);
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {maxZoom:19, attribution:"© OpenStreetMap"}).addTo(m);
+    const pts = [];
+    ativas().forEach(c => {
+      const cl = cliById(c.cli); if (cl.lat == null) return;
+      pts.push([cl.lat, cl.lng]);
+      L.marker([cl.lat, cl.lng], {icon:L.divIcon({className:"", html:`<div class="pinI${late(c) ? " late" : ""}"></div>`, iconSize:[22,22], iconAnchor:[11,22], popupAnchor:[0,-22]})})
+        .bindPopup(`<b>#${c.id} · ${esc(cl.nome)}</b><br>${itensTxt(c)}<br>${esc(cl.end)}, ${esc(cl.bairro)}<br>Devolução: ${fmt(c.fim)}${late(c) ? " (atrasada)" : ""}<br><i>posição por ${esc(cl.prec)}</i>`).addTo(m);
+    });
+    if (pts.length) m.fitBounds(pts, {padding:[40, 40], maxZoom:16});
+  }
+
+  /* ---- documentos com os dados da empresa ---- */
+  function empHead(){
+    const e = S.emp, j = (a, sep) => a.filter(Boolean).map(esc).join(sep);
+    const l1 = j([e.razao, e.cnpj && "CNPJ " + MASK.doc(e.cnpj), e.ie && "IE " + e.ie], " · ");
+    const l2 = j([e.rua && e.rua + (e.num ? ", " + e.num : ""), e.bairro, e.cidade && e.cidade + (e.uf ? "/" + e.uf : ""), e.cep && "CEP " + MASK.cep(e.cep)], " — ");
+    const l3 = j([e.tel && MASK.phone(e.tel), e.mail], " · ");
+    const warn = e.razao && e.cnpj ? "" : '<div class="warn noprint">Dados da empresa incompletos. Preencha em Configurações para saírem no documento.</div>';
+    return warn + `<div class="dh"><b>${esc(fantasia())}</b>${[l1, l2, l3].filter(Boolean).map(x => "<div>" + x + "</div>").join("")}</div>`;
+  }
+  function cliBlock(cl){
+    return `<p><b>${esc(cl.nome)}</b> · ${esc(MASK.doc(cl.doc))} · ${esc(MASK.phone(cl.tel))}<br>Obra: ${esc(cl.end)} — ${esc(cl.bairro)}, ${esc(cl.cidade)}/${esc(cl.uf)} — CEP ${esc(MASK.cep(cl.cep))}</p>`;
+  }
+  const itemsTable = c => '<table><thead><tr><th>Equipamento</th><th>Qtd</th><th>Valor unit.</th><th>Subtotal</th></tr></thead><tbody>' +
+    c.itens.map(i => `<tr><td>${esc(eqById(i.eq).nome)}</td><td>${i.qtd}</td><td>${BRL(i.pu)}</td><td>${BRL(i.pu * i.qtd)}</td></tr>`).join("") + "</tbody></table>";
+  const sign = () => `<div class="sign"><div>Cliente</div><div>${esc(S.emp.resp || fantasia())}</div></div>`;
+  function docHtml(kind, c){
+    const cl = cliById(c.cli), head = empHead() + `<p style="text-align:right;font-size:.78rem">Emitido em ${fmt(today())}</p>`;
+    if (kind === "locacao") return head + `<h3>COMPROVANTE DE LOCAÇÃO Nº ${c.id}</h3>${cliBlock(cl)}${itemsTable(c)}<p>Período: ${c.per} dia(s), de ${fmt(c.ini)} a ${fmt(c.fim)}.<br>Frete: ${BRL(c.frete)}<br><b>Total: ${BRL(c.total)}</b></p><p style="font-size:.78rem">O cliente declara ter recebido os equipamentos acima e se compromete a devolvê-los na data indicada e no mesmo estado.</p>${sign()}`;
+    if (kind === "recibo"){ const p = c.pgto; return head + `<h3>RECIBO DE PAGAMENTO Nº ${c.id}</h3><p>Recebemos de <b>${esc(cl.nome)}</b> (${esc(MASK.doc(cl.doc))}) a importância de <b>${BRL(p.total)}</b>, referente à locação nº ${c.id} (${itensTxt(c)}), paga em ${fmt(p.data)} via ${esc(p.forma)}.</p><table><tbody><tr><td>Valor acertado</td><td>${BRL(c.total)}</td></tr><tr><td>Acréscimos</td><td>${BRL(p.acr)}</td></tr><tr><td>Multa e juros por atraso</td><td>${BRL(p.multa)}</td></tr><tr><td>Desconto</td><td>− ${BRL(p.desc)}</td></tr><tr><td><b>Total recebido</b></td><td><b>${BRL(p.total)}</b></td></tr></tbody></table><div class="sign"><div>Assinatura do cliente</div><div>${esc(S.emp.resp || fantasia())}</div></div>`; }
+    const d = c.dev; return head + `<h3>TERMO DE DEVOLUÇÃO Nº ${c.id}</h3>${cliBlock(cl)}${itemsTable(c)}<p>Devolvido em <b>${fmt(d.data)}</b> (previsto: ${fmt(c.fim)}).<br>Condição: <b>${esc(d.cond)}</b>${d.avaria ? "<br>Cobrança por avaria/reposição: <b>" + BRL(d.avaria) + "</b>" : ""}${d.obs ? "<br>Observações: " + esc(d.obs) : ""}</p>${sign()}`;
+  }
+  function showDoc(kind, id){ $("docBody").innerHTML = docHtml(kind, conById(id)); if (!$("docDlg").open) $("docDlg").showModal(); }
+
+  /* ---- telas ---- */
+  const V = {
+    painel(){
+      const receber = S.con.filter(c => !c.pago).reduce((a, c) => a + c.total, 0), mes = today().slice(0, 7);
+      const recebido = S.con.filter(c => c.pago && c.pgto.data.slice(0, 7) === mes).reduce((a, c) => a + c.pgto.total, 0);
+      const k = [["Locações ativas", ativas().length, ""], ["A receber", BRL(receber), ""], ["Recebido no mês", BRL(recebido), ""], ["Cobranças vencidas", S.con.filter(overdue).length, "warn"], ["Equipamentos na rua", S.eq.reduce((a, e) => a + rented(e.id), 0), ""]];
+      const prox = ativas().filter(c => c.fim <= iso(new Date(Date.now() + 3 * day)));
+      return `<div class="quick"><button class="btn p big" id="qEq">Receber equipamento</button><button class="btn p big" id="qPay">Receber pagamento</button></div>` +
+      `<div class="kpis">${k.map(x => `<div class="card kpi ${x[2]}"><span>${x[0]}</span><b>${x[1]}</b></div>`).join("")}</div>` +
+      `<div class="grid2"><div class="card"><div class="head"><h3>Disponibilidade agora</h3><p>estoque menos o que está alugado</p></div>` +
+      S.eq.map(e => { const a = avail(e), pct = e.estoque ? Math.max(0, a / e.estoque * 100) : 0; return `<div class="avail"><span>${esc(e.nome)}</span><div class="bar"><i style="width:${pct}%"></i></div><b>${a} / ${e.estoque}</b></div>`; }).join("") + '<div style="height:.8rem"></div></div>' +
+      `<div class="card"><div class="head"><h3>Devoluções próximas</h3><p>locações que vencem em até 3 dias</p></div>` +
+      (prox.length ? prox.map(c => `<div class="avail"><span style="width:auto;flex:1">#${c.id} · ${esc(cliById(c.cli).nome)}</span><span class="pill ${late(c) ? "r" : "y"}">${fmt(c.fim)}</span></div>`).join("") : '<div class="empty">Nenhuma devolução nos próximos dias</div>') +
+      `</div></div><div style="height:1.2rem"></div>` + mapCard();
+    },
+    locacoes(){
+      return '<div class="card"><div class="wrap"><table><thead><tr><th>Nº</th><th>Cliente</th><th>Itens</th><th>Devolução</th><th>Total</th><th>Status</th><th></th></tr></thead><tbody>' +
+      (S.con.length ? S.con.slice().reverse().map(c => {
+        const st = c.status === "devolvido" ? '<span class="pill g">Devolvido</span>' : late(c) ? '<span class="pill r">Atrasado</span>' : '<span class="pill y">Em locação</span>';
+        return `<tr><td>#${c.id}</td><td>${esc(cliById(c.cli).nome)}</td><td>${itensTxt(c)}</td><td><span>${fmt(c.fim)} <span style="color:var(--muted);font-size:.75rem">· ${c.per} dias</span></span></td><td>${BRL(c.total)}</td><td>${st}</td><td class="acts-c"><div class="acts"><button class="btn sm" data-doc="locacao:${c.id}">Comprovante</button>${c.status === "ativo" ? `<button class="btn sm" data-ret="${c.id}">Receber equipamento</button>` : `<button class="btn sm" data-doc="dev:${c.id}">Termo</button>`}</div></td></tr>`; }).join("")
+        : '<tr><td class="none" colspan="7">Nenhuma locação ainda</td></tr>') + '</tbody></table></div></div>';
+    },
+    clientes(){
+      return '<div class="card"><div class="wrap"><table><thead><tr><th>Nome</th><th>WhatsApp</th><th>Documento</th><th>Endereço da obra</th><th>Mapa</th><th>Locações</th><th>Consentimento</th></tr></thead><tbody>' +
+      (S.cli.length ? S.cli.map(c => `<tr><td>${esc(c.nome)}</td><td>${esc(MASK.phone(c.tel))}</td><td>•••.${esc(dg(c.doc).slice(-3))}</td><td>${esc(c.end + " — " + c.bairro + ", " + c.cidade + "/" + c.uf)}</td><td>${c.lat != null ? '<span class="pill g">' + esc(c.prec) + "</span>" : '<span class="pill y">sem posição</span>'}</td><td>${S.con.filter(x => x.cli === c.id).length}</td><td><span class="pill g">LGPD ${fmt(c.lgpd)}</span></td></tr>`).join("")
+        : '<tr><td class="none" colspan="7">Nenhum cliente ainda</td></tr>') + '</tbody></table></div><p class="note">Documento aparece mascarado na tela. No sistema real: criptografado no banco, com registro de quem acessou.</p></div>';
+    },
+    equip(){
+      return '<div class="card"><div class="head"><h3>Catálogo e tabela de preços</h3><p>preço por unidade (R$) em cada período — edite direto na tabela</p></div><div class="wrap"><table><thead><tr><th>Equipamento</th><th>Estoque total</th><th>Disponível</th><th>1 dia</th><th>7 dias</th><th>15 dias</th><th>30 dias</th></tr></thead><tbody>' +
+      S.eq.map(e => `<tr><td>${esc(e.nome)}</td><td><input class="price" type="number" min="0" data-e="${e.id}" data-k="estoque" value="${e.estoque}"></td><td>${avail(e)}</td>` +
+        [1, 7, 15, 30].map(p => `<td><input class="price" type="number" min="0" step="0.01" data-e="${e.id}" data-k="${p}" value="${e.p[p] == null ? "" : e.p[p]}" placeholder="—"></td>`).join("") + "</tr>").join("") + '</tbody></table></div></div>';
+    },
+    cobrar(){
+      const l = S.con.filter(c => !c.pago), paid = S.con.filter(c => c.pago).sort((a, b) => b.pgto.data < a.pgto.data ? -1 : 1);
+      return '<div class="card"><div class="wrap"><table><thead><tr><th>Nº</th><th>Cliente</th><th>Valor</th><th>Vencimento</th><th>Situação</th><th>Ações</th></tr></thead><tbody>' +
+      (l.length ? l.map(c => { const cl = cliById(c.cli);
+        return `<tr><td>#${c.id}</td><td>${esc(cl.nome)}</td><td>${BRL(c.total)}</td><td>${fmt(c.fim)}</td><td>${overdue(c) ? '<span class="pill r">Vencida</span>' : '<span class="pill y">A vencer</span>'}</td><td class="acts-c"><div class="acts"><a class="btn sm" target="_blank" rel="noopener" href="${waLink(c, cl)}">WhatsApp</a><a class="btn sm" href="${mailLink(c, cl)}">E-mail</a><button class="btn sm" data-paid="${c.id}">Registrar pagamento</button></div></td></tr>`; }).join("")
+        : '<tr><td class="none" colspan="6">Nada a cobrar</td></tr>') + '</tbody></table></div><p class="note">Hoje o envio abre o WhatsApp/e-mail com a mensagem pronta. O disparo automático (API oficial da Meta) entra na fase 2.</p></div>' +
+      `<div style="height:1.2rem"></div><div class="card"><div class="head"><h3>Histórico de recebidos</h3><p>${paid.length ? paid.length + " pagamento(s) · total " + BRL(paid.reduce((a, c) => a + c.pgto.total, 0)) : "nenhum pagamento registrado ainda"}</p></div><div class="wrap"><table><thead><tr><th>Data</th><th>Locação</th><th>Cliente</th><th>Forma</th><th>Valor acertado</th><th>Acréscimos</th><th>Multa/juros</th><th>Desconto</th><th>Total recebido</th><th></th></tr></thead><tbody>` +
+      (paid.length ? paid.map(c => { const p = c.pgto; return `<tr><td>${fmt(p.data)}</td><td>#${c.id}</td><td>${esc(cliById(c.cli).nome)}</td><td>${esc(p.forma)}</td><td>${BRL(c.total)}</td><td>${BRL(p.acr)}</td><td>${BRL(p.multa)}</td><td>${BRL(p.desc)}</td><td><b>${BRL(p.total)}</b></td><td><div class="acts"><button class="btn sm" data-doc="recibo:${c.id}">Recibo</button></div></td></tr>`; }).join("") : '<tr><td class="none" colspan="10">Nenhum pagamento registrado ainda</td></tr>') + '</tbody></table></div></div>';
+    },
+    config(){
+      const e = S.emp, v = k => esc(e[k] || ""), admins = S.users.filter(u => u.role === "admin").length;
+      return `<div class="grid2"><div class="card"><div class="head"><h3>Dados da empresa</h3><p>saem no cabeçalho de recibos, comprovantes e termos</p></div>
+      <form id="empForm" class="sec">
+        <div class="f s6"><label for="eRazao">Razão social</label><input id="eRazao" maxlength="100" value="${v("razao")}"></div>
+        <div class="f s3"><label for="eFant">Nome fantasia</label><input id="eFant" maxlength="80" value="${v("fantasia")}"></div>
+        <div class="f s3"><label for="eCnpj">CNPJ</label><input id="eCnpj" data-mask="doc" maxlength="18" inputmode="numeric" placeholder="00.000.000/0000-00" value="${esc(MASK.doc(e.cnpj || ""))}"></div>
+        <div class="f s3"><label for="eIe">Inscrição estadual</label><input id="eIe" maxlength="20" placeholder="ou Isento" value="${v("ie")}"></div>
+        <div class="f s3"><label for="eResp">Responsável</label><input id="eResp" maxlength="80" value="${v("resp")}"></div>
+        <div class="f s3"><label for="eTel">Telefone / WhatsApp</label><input id="eTel" data-mask="phone" maxlength="15" inputmode="numeric" placeholder="(85) 99999-9999" value="${esc(MASK.phone(e.tel || ""))}"></div>
+        <div class="f s3"><label for="eMail">E-mail</label><input id="eMail" type="email" maxlength="80" value="${v("mail")}"></div>
+        <div class="f s2"><label for="eCep">CEP</label><input id="eCep" data-mask="cep" maxlength="9" inputmode="numeric" placeholder="00000-000" value="${esc(MASK.cep(e.cep || ""))}"><small class="hint" id="eCepMsg"></small></div>
+        <div class="f s1"><label for="eNum">Nº</label><input id="eNum" maxlength="10" value="${v("num")}"></div>
+        <div class="f s3"><label for="eRua">Rua</label><input id="eRua" maxlength="80" value="${v("rua")}"></div>
+        <div class="f s3"><label for="eBairro">Bairro</label><input id="eBairro" maxlength="60" value="${v("bairro")}"></div>
+        <div class="f s2"><label for="eCidade">Cidade</label><input id="eCidade" maxlength="60" value="${v("cidade")}"></div>
+        <div class="f s1"><label for="eUf">UF</label><input id="eUf" data-mask="uf" maxlength="2" value="${v("uf")}"></div>
+        <div class="s6"><p class="err" id="eMsg"></p><button class="btn p">Salvar dados da empresa</button></div>
+      </form></div>
+      <div class="card"><div class="head"><h3>Usuários</h3><p>administrador vê tudo; operador não acessa Configurações</p></div><div class="wrap"><table style="min-width:0"><thead><tr><th>Nome</th><th>Usuário</th><th>Papel</th><th></th></tr></thead><tbody>` +
+      S.users.map(u => `<tr><td>${esc(u.nome)}</td><td>${esc(u.user)}</td><td><span class="pill ${u.role === "admin" ? "g" : "y"}">${u.role === "admin" ? "Administrador" : "Operador"}</span></td><td>${u.id === 1 || u.id === S.me.id || (u.role === "admin" && admins < 2) ? "" : `<button class="btn sm bad" data-rm="${u.id}">Remover</button>`}</td></tr>`).join("") +
+      `</tbody></table></div><h3 style="font-size:.9rem;padding:1rem 1.3rem .5rem">Novo usuário</h3>
+      <form id="userForm" class="adduser"><div class="f"><label for="uNome">Nome</label><input id="uNome" maxlength="60"></div><div class="f"><label for="uUser">Usuário</label><input id="uUser" maxlength="20" autocomplete="off"></div><div class="f"><label for="uRole">Papel</label><select id="uRole"><option value="operador">Operador</option><option value="admin">Administrador</option></select></div><button class="btn p" style="margin-bottom:.8rem">Criar</button></form>
+      <p id="uMsg" class="err" style="padding:0 1.3rem"></p>` +
+      (S.cred ? `<div class="cred">Usuário <b>${esc(S.cred.user)}</b> criado. Senha temporária: <code>${esc(S.cred.pass)}</code><br>Copie agora e envie com segurança; ela não aparece de novo. No primeiro acesso a pessoa define a própria senha.</div>` : "") + "</div></div>";
+    }
+  };
+  const TITLES = {painel:["Painel","visão da operação hoje"], locacoes:["Locações","abertas e encerradas"], clientes:["Clientes","dados protegidos conforme a LGPD"], equip:["Equipamentos","estoque e preços"], cobrar:["Cobranças","o que ainda não foi pago"], config:["Configurações","empresa e usuários"]};
+
+  function waLink(c, cl){
+    const msg = `Olá, ${cl.nome}! Aqui é da ${fantasia()}. A locação #${c.id} (${BRL(c.total)}) venceu em ${fmt(c.fim)}. Podemos combinar o pagamento/devolução?${S.emp.tel ? " Contato: " + MASK.phone(S.emp.tel) + "." : ""} Obrigado!`;
+    return "https://wa.me/55" + dg(cl.tel) + "?text=" + encodeURIComponent(msg);
+  }
+  function mailLink(c, cl){
+    return "mailto:" + encodeURIComponent(cl.mail || "") + "?subject=" + encodeURIComponent(fantasia() + " — locação #" + c.id) + "&body=" + encodeURIComponent(`Olá, ${cl.nome}. A locação #${c.id} no valor de ${BRL(c.total)} venceu em ${fmt(c.fim)}.\n\n${fantasia()}${S.emp.cnpj ? "\nCNPJ " + MASK.doc(S.emp.cnpj) : ""}${S.emp.tel ? "\n" + MASK.phone(S.emp.tel) : ""}`);
+  }
+
+  function nav(){
+    const od = S.con.filter(overdue).length;
+    const IC = {
+      painel:'<path d="M3 11l9-8 9 8v9a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"/>',
+      locacoes:'<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/>',
+      clientes:'<circle cx="9" cy="8" r="3.5"/><path d="M2 20c0-3.5 3-6 7-6s7 2.5 7 6M17 5a3 3 0 010 6M22 20c0-2.500-1.500-4.500-4-5.300"/>',
+      equip:'<path d="M21 8l-9-5-9 5v8l9 5 9-5zM3 8l9 5 9-5M12 13v8"/>',
+      cobrar:'<circle cx="12" cy="12" r="9"/><path d="M14.500 9.500c-.5-1-1.500-1.500-2.500-1.500-1.500 0-2.500.8-2.500 2s1 1.700 2.500 2 2.500.8 2.500 2-1 2-2.500 2c-1.100 0-2-.6-2.500-1.500M12 6v2M12 16v2"/>',
+      config:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.900 4.900l2.100 2.100M17 17l2.100 2.100M4.900 19.100L7 17M17 7l2.100-2.100"/>'
+    };
+    const list = [["painel","Painel","Painel"], ["locacoes","Locações","Locações"], ["clientes","Clientes","Clientes"], ["equip","Equipamentos","Equip."], ["cobrar","Cobranças","Cobrar"]];
+    if (S.me.role === "admin") list.push(["config","Configurações","Config."]);
+    $("nav").innerHTML = list.map(n => `<button class="nav${S.page === n[0] ? " on" : ""}" data-p="${n[0]}" aria-label="${n[1]}"><svg viewBox="0 0 24 24">${IC[n[0]]}</svg><span class="lg">${n[1]}</span><span class="sh">${n[2]}</span>${n[0] === "cobrar" && od ? `<span class="badge">${od}</span>` : ""}</button>`).join("");
+    $$(".nav").forEach(b => b.onclick = () => { S.page = b.dataset.p; S.cred = null; render(); scrollTo(0, 0); });
+    $("who").innerHTML = `<b>${esc(S.me.nome)}</b> (${esc(S.me.user)})<br><button id="chgPw">Alterar senha</button> · <button id="logout">Sair</button>`;
+    $("chgPw").onclick = () => openPw(false);
+    $("logout").onclick = logout;
+  }
+  function labelTables(){
+    $$("table").forEach(t => {
+      const h = $$("thead th", t).map(x => x.textContent);
+      $$("tbody tr", t).forEach(tr => $$("td", tr).forEach((td, i) => { if (!td.classList.contains("none")) td.dataset.label = h[i] || ""; }));
+    });
+  }
+
+  function render(){
+    if (!S.me) return;
+    if (S.page === "config" && S.me.role !== "admin") S.page = "painel";
+    if (S.map){ S.map.remove(); S.map = null; }
+    document.body.dataset.page = S.page;
+    nav(); $("title").textContent = TITLES[S.page][0]; $("sub").textContent = TITLES[S.page][1];
+    $("view").innerHTML = V[S.page]();
+    labelTables();
+    if (S.page === "config") bindConfig();
+    if (S.page === "painel"){
+      $("qEq").onclick = () => openPick("eq"); $("qPay").onclick = () => openPick("pay");
+      if (S.leaflet) drawMap();
+    }
+    $$("[data-ret]").forEach(b => b.onclick = () => openRet(+b.dataset.ret));
+    $$("[data-paid]").forEach(b => b.onclick = () => openPay(+b.dataset.paid));
+    $$("[data-doc]").forEach(b => { const [k, id] = b.dataset.doc.split(":"); b.onclick = () => showDoc(k, +id); });
+    $$("[data-geo]").forEach(b => b.onclick = async () => { b.disabled = true; b.textContent = "Localizando…"; await geocode(cliById(+b.dataset.geo)); render(); });
+    $$("input[data-e]").forEach(i => i.onchange = () => {
+      const e = eqById(i.dataset.e), v = i.value === "" ? null : Math.max(0, parseFloat(i.value));
+      if (i.dataset.k === "estoque") e.estoque = v || 0; else e.p[i.dataset.k] = v; render();
+    });
+  }
+
+  function bindConfig(){
+    attachMasks($("view"));
+    bindCep({cep:"eCep", msg:"eCepMsg", rua:"eRua", bairro:"eBairro", cidade:"eCidade", uf:"eUf", num:"eNum"});
+    $("empForm").onsubmit = ev => {
+      ev.preventDefault();
+      const g = id => $(id).value.trim(), cnpj = dg(g("eCnpj")), tel = dg(g("eTel")), mail = g("eMail");
+      const e = cnpj && !cnpjOk(cnpj) ? "CNPJ inválido. Confira os números." : tel && !phoneOk(tel) ? "Telefone inválido. Use DDD + número." : mail && !mailOk(mail) ? "E-mail inválido." : dg(g("eCep")) && dg(g("eCep")).length !== 8 ? "CEP incompleto." : "";
+      if (e){ $("eMsg").className = "err"; $("eMsg").textContent = e; return; }
+      S.emp = {razao:g("eRazao"), fantasia:g("eFant"), cnpj, ie:g("eIe"), resp:g("eResp"), tel, mail, cep:dg(g("eCep")), num:g("eNum"), rua:g("eRua"), bairro:g("eBairro"), cidade:g("eCidade"), uf:$("eUf").value};
+      $("eMsg").className = "ok"; $("eMsg").textContent = "Dados salvos. Já aparecem nos documentos.";
+    };
+    $("userForm").onsubmit = async ev => {
+      ev.preventDefault();
+      const nome = $("uNome").value.trim(), u = $("uUser").value.trim().toLowerCase();
+      const e = nome.length < 3 ? "Informe o nome." : !/^[a-z0-9._-]{3,20}$/.test(u) ? "Usuário: 3 a 20 letras minúsculas, números, ponto, hífen ou _." : S.users.some(x => x.user === u) ? "Esse usuário já existe." : "";
+      if (e){ $("uMsg").textContent = e; return; }
+      const pass = tempPass(), salt = newSalt();
+      S.users.push({id:S.useq++, nome, user:u, role:$("uRole").value, salt, hash:await hashPw(pass, salt), must:true});
+      S.cred = {user:u, pass}; render();
+    };
+    $$("[data-rm]").forEach(b => b.onclick = () => { S.users = S.users.filter(u => u.id != b.dataset.rm); render(); });
+  }
+
+  /* ---- login / senha ---- */
+  $("loginForm").onsubmit = async ev => {
+    ev.preventDefault();
+    const m = $("lErr");
+    if (Date.now() < S.lockUntil){ m.textContent = "Muitas tentativas. Aguarde " + Math.ceil((S.lockUntil - Date.now()) / 1000) + "s."; return; }
+    const u = S.users.find(x => x.user === $("lUser").value.trim().toLowerCase());
+    let ok = false;
+    try { ok = (await hashPw($("lPass").value, u ? u.salt : "x")) === (u && u.hash); }
+    catch(e){ m.textContent = "Este navegador não permite o login seguro. Abra por localhost ou https."; return; }
+    if (!ok){ if (++S.fails >= 5){ S.lockUntil = Date.now() + 30000; S.fails = 0; } m.textContent = "Usuário ou senha incorretos."; return; }
+    S.fails = 0; S.me = u; m.textContent = ""; $("lPass").value = "";
+    $("login").hidden = true; $("shell").hidden = false; S.page = "painel"; render();
+    if (u.must) openPw(true);
+  };
+  function logout(){
+    $$("dialog").forEach(d => d.open && d.close());
+    if (S.map){ S.map.remove(); S.map = null; }
+    S.me = null; S.cred = null; $("shell").hidden = true; $("login").hidden = false; $("lUser").value = ""; $("lUser").focus();
+  }
+  function openPw(force){
+    S.forcePw = force; ["pwOld", "pwNew", "pwNew2"].forEach(i => $(i).value = ""); $("pwMsg").textContent = "";
+    $("pwCancel").hidden = force; $("pwHint").textContent = force ? "Defina sua própria senha para continuar. Mínimo 8 caracteres, com letras e números." : "mínimo 8 caracteres, com letras e números";
+    $("pwDlg").showModal();
+  }
+  $("pwDlg").addEventListener("cancel", ev => { if (S.forcePw) ev.preventDefault(); });
+  $("pwCancel").onclick = () => $("pwDlg").close();
+  $("pwForm").onsubmit = async ev => {
+    ev.preventDefault();
+    const n = $("pwNew").value, m = $("pwMsg");
+    if (await hashPw($("pwOld").value, S.me.salt) !== S.me.hash){ m.textContent = "Senha atual incorreta."; return; }
+    const e = pwErr(n) || (n !== $("pwNew2").value ? "A confirmação não confere." : "");
+    if (e){ m.textContent = e; return; }
+    S.me.salt = newSalt(); S.me.hash = await hashPw(n, S.me.salt); S.me.must = false; S.forcePw = false;
+    $("pwDlg").close();
+  };
+
+  /* ---- locação ---- */
+  function calc(){
+    const per = $("fPer").value; let tot = 0, err = "";
+    S.draft.forEach(it => {
+      const e = eqById(it.eq), q = parseInt(it.qtd, 10) || 0, pr = e.p[per];
+      if (q > avail(e)) err = "Só há " + avail(e) + " " + e.nome + " disponível.";
+      else if (pr == null && !err) err = e.nome + " não tem preço para " + per + " dia(s). Defina em Equipamentos.";
+      tot += (pr || 0) * q;
+    });
+    tot += parseFloat($("fFrete").value) || 0;
+    $("fTotal").textContent = BRL(tot); $("fErr").textContent = err; return {tot, err};
+  }
+  function drawItems(){
+    $("items").innerHTML = S.draft.map((it, i) => `<div class="item"><select data-i="${i}" data-f="eq">${S.eq.map(e => `<option value="${e.id}"${e.id == it.eq ? " selected" : ""}>${esc(e.nome)} (${avail(e)} disp.)</option>`).join("")}</select><input type="number" min="1" data-i="${i}" data-f="qtd" value="${it.qtd}"><button type="button" class="btn sm bad" data-x="${i}">✕</button></div>`).join("");
+    $$("[data-f]", $("items")).forEach(el => el.onchange = el.oninput = () => { S.draft[el.dataset.i][el.dataset.f] = el.value; calc(); });
+    $$("[data-x]", $("items")).forEach(b => b.onclick = () => { S.draft.splice(b.dataset.x, 1); drawItems(); });
+    calc();
+  }
+  function openForm(){
+    S.draft = [{eq:S.eq[0].id, qtd:1}];
+    $("fCli").innerHTML = '<option value="new">+ Novo cliente</option>' + S.cli.map(c => `<option value="${c.id}">${esc(c.nome)}</option>`).join("");
+    $("fIni").value = today(); $("fFrete").value = 0; $("fSave").disabled = false;
+    ["cNome","cTel","cDoc","cNasc","cMail","cCep","cNum","cRua","cBairro","cCidade","cUf"].forEach(i => $(i).value = ""); $("cLgpd").checked = false; $("cepMsg").textContent = "";
+    $("newCli").hidden = false; drawItems(); $("dlg").showModal();
+  }
+  $("newC").onclick = openForm;
+  $("fCli").onchange = () => { $("newCli").hidden = $("fCli").value !== "new"; };
+  $("addItem").onclick = () => { S.draft.push({eq:S.eq[0].id, qtd:1}); drawItems(); };
+  $("fPer").onchange = $("fFrete").oninput = calc;
+  $("fCancel").onclick = () => $("dlg").close();
+  $("form").onsubmit = async ev => {
+    ev.preventDefault();
+    const r = calc(); if (r.err || !S.draft.length || r.tot <= 0){ if (!r.err) $("fErr").textContent = "Adicione ao menos um item com preço."; return; }
+    let cid = $("fCli").value;
+    if (cid === "new"){
+      const nome = $("cNome").value.trim(), tel = dg($("cTel").value), doc = dg($("cDoc").value), cep = dg($("cCep").value), mail = $("cMail").value.trim(),
+        rua = $("cRua").value.trim(), num = $("cNum").value.trim(), bairro = $("cBairro").value.trim(), cidade = $("cCidade").value.trim(), uf = $("cUf").value;
+      const e = nome.length < 3 ? "Informe o nome completo." : !phoneOk(tel) ? "WhatsApp inválido. Use DDD + número, ex.: (85) 99999-9999." : !docOk(doc) ? "CPF/CNPJ inválido. Confira os números." :
+        !dateOk($("cNasc").value) ? "Data de nascimento inválida." : mail && !mailOk(mail) ? "E-mail inválido." :
+        cep.length !== 8 ? "Informe o CEP da obra (8 números)." : !rua || !num || !bairro || !cidade || uf.length !== 2 ? "Complete rua, número, bairro, cidade e UF." :
+        S.cli.some(x => x.doc === doc) ? "Já existe cliente com esse CPF/CNPJ. Selecione-o na lista." : !$("cLgpd").checked ? "Registre a autorização do cliente (LGPD)." : "";
+      if (e){ $("fErr").textContent = e; return; }
+      const c = {id:S.cseq++, nome, tel, doc, mail, nasc:$("cNasc").value, cep, rua, num, end:rua + ", " + num, bairro, cidade, uf, lgpd:today(), lat:null, lng:null, prec:null};
+      $("fSave").disabled = true; $("fErr").textContent = "Localizando o endereço no mapa…";
+      await geocode(c);
+      S.cli.push(c); cid = c.id;
+    } else cid = parseInt(cid, 10);
+    const per = parseInt($("fPer").value, 10), ini = $("fIni").value || today();
+    S.con.push({id:S.seq++, cli:cid, itens:S.draft.map(i => ({eq:parseInt(i.eq, 10), qtd:parseInt(i.qtd, 10), pu:eqById(i.eq).p[per]})), per, ini, fim:iso(new Date(new Date(ini).getTime() + per * day)), frete:parseFloat($("fFrete").value) || 0, total:r.tot, status:"ativo", pago:false});
+    $("fSave").disabled = false; $("dlg").close(); S.page = "locacoes"; render();
+  };
+  attachMasks(document);
+  bindCep({cep:"cCep", msg:"cepMsg", rua:"cRua", bairro:"cBairro", cidade:"cCidade", uf:"cUf", num:"cNum"});
+
+  /* ---- receber equipamento / pagamento ---- */
+  let pickMode = null, cur = null;
+  function openPick(mode){
+    pickMode = mode;
+    const l = mode === "eq" ? ativas() : S.con.filter(c => !c.pago);
+    $("pickTitle").textContent = mode === "eq" ? "Receber equipamento" : "Receber pagamento";
+    $("pickSel").innerHTML = l.length ? l.map(c => `<option value="${c.id}">#${c.id} · ${esc(cliById(c.cli).nome)} · ${BRL(c.total)} · vence ${fmt(c.fim)}</option>`).join("") : "<option>Nenhuma locação disponível</option>";
+    $("pickSel").disabled = $("pickOk").disabled = !l.length;
+    $("pickErr").textContent = ""; $("pickDlg").showModal();
+  }
+  $("pickCancel").onclick = () => $("pickDlg").close();
+  $("pickForm").onsubmit = ev => { ev.preventDefault(); const id = +$("pickSel").value; $("pickDlg").close(); pickMode === "eq" ? openRet(id) : openPay(id); };
+
+  function openRet(id){
+    cur = conById(id); const cl = cliById(cur.cli), d = diasAtraso(cur);
+    $("retInfo").innerHTML = `<b>Locação #${cur.id}</b> · ${esc(cl.nome)}<br>${itensTxt(cur)}<br>${fmt(cur.ini)} a ${fmt(cur.fim)}${d ? ` · <span style="color:var(--bad)">${d} dia(s) de atraso</span>` : ""}`;
+    $("rData").value = today(); $("rData").max = today(); $("rData").min = cur.ini; $("rCond").selectedIndex = 0; $("rAvaria").value = 0; $("rObs").value = ""; $("rErr").textContent = "";
+    $("retDlg").showModal();
+  }
+  $("rCancel").onclick = () => $("retDlg").close();
+  $("retForm").onsubmit = ev => {
+    ev.preventDefault();
+    const dt = $("rData").value, av = Math.max(0, parseFloat($("rAvaria").value) || 0);
+    if (!dt || dt < cur.ini || dt > today()){ $("rErr").textContent = "Data inválida: use entre o início da locação e hoje."; return; }
+    cur.status = "devolvido"; cur.dev = {data:dt, cond:$("rCond").value, avaria:av, obs:$("rObs").value.trim()};
+    $("retDlg").close(); render(); showDoc("dev", cur.id);
+  };
+
+  const num = id => Math.max(0, parseFloat($(id).value) || 0);
+  function payTotal(){
+    const base = cur.total + num("pAcr") + num("pMulta");
+    $("pTotal").textContent = BRL(base - num("pDesc"));
+    $("pErr").textContent = num("pDesc") > base ? "O desconto não pode ser maior que o valor da locação." : "";
+    return base - num("pDesc");
+  }
+  function openPay(id){
+    cur = conById(id); const cl = cliById(cur.cli), dias = diasAtraso(cur);
+    const multa = dias ? Math.round((cur.total * 0.02 + cur.total * 0.01 / 30 * dias) * 100) / 100 : 0;
+    $("payInfo").innerHTML = `<b>Locação #${cur.id}</b> · ${esc(cl.nome)}<br>${itensTxt(cur)}<br>${cur.per} dias · ${fmt(cur.ini)} a ${fmt(cur.fim)}${dias ? ` · <span style="color:var(--bad)">${dias} dia(s) de atraso</span>` : ""}<br>Valor acertado: <b>${BRL(cur.total)}</b>`;
+    $("pAcr").value = cur.dev ? cur.dev.avaria : 0; $("pDesc").value = 0; $("pMulta").value = multa; $("pData").value = today(); $("pForma").selectedIndex = 0;
+    $("pMultaHint").textContent = dias ? "sugerido: 2% + 1% ao mês proporcional. Pode ajustar." : "sem atraso";
+    payTotal(); $("payDlg").showModal();
+  }
+  ["pAcr", "pMulta", "pDesc"].forEach(i => $(i).addEventListener("input", payTotal));
+  $("pCancel").onclick = () => $("payDlg").close();
+  $("payForm").onsubmit = ev => {
+    ev.preventDefault();
+    const t = payTotal(); if ($("pErr").textContent || !$("pData").value) return;
+    cur.pago = true; cur.pgto = {acr:num("pAcr"), multa:num("pMulta"), desc:num("pDesc"), forma:$("pForma").value, data:$("pData").value, total:t};
+    $("payDlg").close(); render(); showDoc("recibo", cur.id);
+  };
+
+  $("docClose").onclick = () => $("docDlg").close();
+  $("docPrint").onclick = () => window.print();
+  $$(".js-theme, .js-theme-m").forEach(b => b.onclick = () => { const r = document.documentElement; r.setAttribute("data-theme", r.getAttribute("data-theme") === "dark" ? "light" : "dark"); });
+  $("acct").onclick = () => { $("acctWho").textContent = S.me.nome + " (" + S.me.user + ")"; $("acctDlg").showModal(); };
+  $("acctClose").onclick = () => $("acctDlg").close();
+  $("chgPw2").onclick = () => { $("acctDlg").close(); openPw(false); };
+  $("logout2").onclick = logout;
+  const APP_VERSION = "0.1.0-beta";
+  $$(".js-year").forEach(el => el.textContent = new Date().getFullYear());
+  $$(".js-ver").forEach(el => el.textContent = "v" + APP_VERSION);
+  loadMap();
+})();
+</script>
