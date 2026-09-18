@@ -30,9 +30,9 @@
 
   /* menu: barra inferior */
   .side{position:fixed; left:0; right:0; bottom:0; z-index:40; background:var(--surface); border-top:1px solid var(--line); padding:.25rem .3rem calc(.25rem + env(safe-area-inset-bottom));}
-  #nav{display:flex; gap:.1rem;}
+  #nav{display:flex; gap:.1rem; overflow-x:auto; scrollbar-width:none;} #nav::-webkit-scrollbar{display:none;}
   .logo,.who,.side .foot{display:none;}
-  .nav{position:relative; flex:1 1 0; min-width:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.15rem; min-height:54px; padding:.35rem .1rem; border:none; background:transparent; color:var(--muted); border-radius:10px; cursor:pointer; font-size:.66rem; font-weight:500; text-align:center;}
+  .nav{position:relative; flex:1 0 64px; min-width:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.15rem; min-height:54px; padding:.35rem .1rem; border:none; background:transparent; color:var(--muted); border-radius:10px; cursor:pointer; font-size:.66rem; font-weight:500; text-align:center;}
   .nav .lg{display:none;}
   .nav.on{background:var(--surface-2); color:var(--brand);}
   .badge{position:absolute; top:2px; left:calc(50% + 4px); background:var(--bad); color:#fff; border-radius:99px; font-size:.6rem; padding:.02rem .4rem; font-weight:700;}
@@ -113,7 +113,7 @@
   dialog::backdrop{background:rgba(0,0,0,.5);}
   dialog form > div[style*="justify-content:flex-end"]{position:sticky; bottom:calc(-1.2rem - env(safe-area-inset-bottom)); background:var(--surface); padding:.7rem 0; margin-top:.5rem; border-top:1px solid var(--line);}
   dialog form div[style*="justify-content:flex-end"] .btn{flex:1;}
-  @media (max-width:1023px){ body[data-page="cobrar"] .newc, body[data-page="equip"] .newc, body[data-page="config"] .newc{display:none;} }
+  @media (max-width:1023px){ body[data-page="cobrar"] .newc, body[data-page="config"] .newc, body[data-page="fin"] .newc{display:none;} }
 
   /* formulários */
   .f{margin-bottom:.85rem;} .f label{display:block; font-size:.78rem; color:var(--muted); margin-bottom:.25rem;}
@@ -215,6 +215,18 @@
     .mapreal{height:380px;}
   }
 
+  .sub{font-size:.9rem; margin:.9rem 0 .5rem; font-weight:700;}
+  .chk{display:flex; gap:.5rem; align-items:center; font-size:.85rem; margin-bottom:.8rem;} .chk input{width:auto; min-height:0;}
+  .tabs{display:flex; gap:.4rem; padding:0 1.1rem .8rem; flex-wrap:wrap;}
+  .tab{border:1px solid var(--line); background:transparent; color:var(--muted); border-radius:99px; padding:.45rem 1rem; cursor:pointer; min-height:40px;}
+  .tab.on{background:var(--brand); border-color:var(--brand); color:#fff;}
+  .stars{color:#f5b800; letter-spacing:.1em; white-space:nowrap;}
+  .best{color:var(--good); font-weight:700;}
+  .riskbox{padding:.6rem .8rem; border-radius:10px; background:var(--surface-2); font-size:.85rem; margin-bottom:.8rem;}
+  .assume{display:flex; align-items:center; gap:.5rem; padding:0 1.1rem .8rem; font-size:.82rem; color:var(--muted); flex-wrap:wrap;} .assume input{width:80px; min-height:38px; padding:.3rem .5rem; border:1px solid var(--line); border-radius:8px; background:var(--surface-2);}
+  .plan{margin:0; padding:.2rem 1.1rem 1.1rem 2.2rem; font-size:.88rem; line-height:1.7; color:var(--muted);}
+  .lgpd{font-size:.75rem; color:var(--muted); margin:.6rem 0;}
+
   /* impressão */
   @media print{
     body{background:#fff;}
@@ -289,10 +301,134 @@
   </div>
 </dialog>
 
+<dialog id="buyDlg">
+  <h3 style="margin-bottom:1rem">Novo equipamento</h3>
+  <form id="buyForm">
+    <div class="f"><label for="bEq">Equipamento</label><select id="bEq"></select></div>
+    <div id="bNovo">
+      <div class="f"><label for="bNome">Nome do equipamento</label><input id="bNome" maxlength="60"></div>
+      <div class="row">
+        <div class="f"><label for="bVol">Volume unitário (m³)</label><input id="bVol" type="number" min="0" step="0.001"></div>
+        <div class="f"><label for="bVida">Vida útil (meses)</label><input id="bVida" type="number" min="1" value="60"><small class="hint">base da depreciação</small></div>
+      </div>
+      <label class="chk"><input type="checkbox" id="bFragil"> Equipamento frágil</label>
+    </div>
+    <h4 class="sub">Compra</h4>
+    <div class="row">
+      <div class="f"><label for="bData">Data da compra</label><input id="bData" type="date"></div>
+      <div class="f"><label for="bForn">Fornecedor</label><select id="bForn"></select></div>
+    </div>
+    <div id="bFornNovo" hidden class="f"><label for="bFornNome">Nome do novo fornecedor</label><input id="bFornNome" maxlength="80"><small class="hint">complete os dados depois em Fornecedores</small></div>
+    <div class="row">
+      <div class="f"><label for="bQtd">Quantidade</label><input id="bQtd" type="number" min="1" step="1" value="1"></div>
+      <div class="f"><label for="bUnit">Custo unitário (R$)</label><input id="bUnit" type="number" min="0" step="0.01"></div>
+    </div>
+    <div class="row">
+      <div class="f"><label for="bFrete">Frete total (R$)</label><input id="bFrete" type="number" min="0" step="0.01" value="0"></div>
+      <div class="f"><label for="bGar">Garantia (meses)</label><input id="bGar" type="number" min="0" step="1" value="0"></div>
+    </div>
+    <div class="row">
+      <div class="f"><label for="bJuros">Juros / financiamento total (R$)</label><input id="bJuros" type="number" min="0" step="0.01" value="0"></div>
+      <div class="f"><label for="bParc">Parcelas</label><input id="bParc" type="number" min="1" step="1" value="1"></div>
+    </div>
+    <div class="f"><label for="bNF">Nota fiscal (número)</label><input id="bNF" maxlength="40"></div>
+    <div class="f"><label for="bDocs">Nota fiscal e outros documentos da compra</label><input id="bDocs" type="file" multiple accept=".pdf,image/*"><small class="hint">nesta demonstração só o nome do arquivo é guardado; no sistema real vão para armazenamento seguro</small></div>
+    <div class="f"><label for="bObs">Observações</label><textarea id="bObs" rows="2" maxlength="300"></textarea></div>
+    <div class="total"><span>Custo total da compra</span><span id="bTotal">R$ 0,00</span></div>
+    <p class="err" id="bErr"></p>
+    <div style="display:flex;gap:.5rem;justify-content:flex-end">
+      <button type="button" class="btn" id="bCancel">Cancelar</button>
+      <button type="submit" class="btn p">Salvar</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="fornDlg">
+  <h3 style="margin-bottom:1rem">Novo fornecedor</h3>
+  <form id="fornForm">
+    <div class="f"><label for="fnNome">Nome / razão social</label><input id="fnNome" maxlength="80"></div>
+    <div class="row">
+      <div class="f"><label for="fnDoc">CNPJ ou CPF</label><input id="fnDoc" data-mask="doc" maxlength="18" inputmode="numeric" placeholder="00.000.000/0000-00"></div>
+      <div class="f"><label for="fnTel">Telefone / WhatsApp</label><input id="fnTel" data-mask="phone" maxlength="15" inputmode="numeric" placeholder="(85) 99999-9999"></div>
+    </div>
+    <div class="f"><label for="fnMail">E-mail</label><input id="fnMail" type="email" maxlength="80"></div>
+    <div class="row">
+      <div class="f"><label for="fnCidade">Cidade de origem</label><input id="fnCidade" maxlength="60"></div>
+      <div class="f"><label for="fnUf">UF</label><input id="fnUf" data-mask="uf" maxlength="2"></div>
+    </div>
+    <div class="row">
+      <div class="f"><label for="fnPrazo">Prazo de entrega (dias)</label><input id="fnPrazo" type="number" min="0" step="1"></div>
+      <div class="f"><label for="fnNota">Avaliação</label><select id="fnNota"><option value="5">★★★★★ Excelente</option><option value="4">★★★★☆ Bom</option><option value="3" selected>★★★☆☆ Regular</option><option value="2">★★☆☆☆ Ruim</option><option value="1">★☆☆☆☆ Péssimo</option></select></div>
+    </div>
+    <div class="f"><label for="fnCond">Condições de pagamento</label><input id="fnCond" maxlength="100" placeholder="ex.: 30/60/90 dias, à vista com 5%"></div>
+    <div class="f"><label for="fnObs">Observações</label><textarea id="fnObs" rows="2" maxlength="300"></textarea></div>
+    <p class="err" id="fnErr"></p>
+    <div style="display:flex;gap:.5rem;justify-content:flex-end">
+      <button type="button" class="btn" id="fnCancel">Cancelar</button>
+      <button type="submit" class="btn p">Salvar</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="cotDlg">
+  <h3 style="margin-bottom:1rem">Nova cotação</h3>
+  <form id="cotForm">
+    <div class="f"><label for="cqEq">Equipamento cotado</label><input id="cqEq" list="eqList" maxlength="60" autocomplete="off"><datalist id="eqList"></datalist></div>
+    <div class="f"><label for="cqForn">Fornecedor</label><select id="cqForn"></select></div>
+    <div id="cqFornNovo" hidden class="f"><label for="cqFornNome">Nome do novo fornecedor</label><input id="cqFornNome" maxlength="80"></div>
+    <div class="row">
+      <div class="f"><label for="cqQtd">Quantidade cotada</label><input id="cqQtd" type="number" min="1" step="1" value="1"></div>
+      <div class="f"><label for="cqUnit">Preço unitário (R$)</label><input id="cqUnit" type="number" min="0" step="0.01"></div>
+    </div>
+    <div class="row">
+      <div class="f"><label for="cqFrete">Frete (R$)</label><input id="cqFrete" type="number" min="0" step="0.01" value="0"></div>
+      <div class="f"><label for="cqGar">Garantia (meses)</label><input id="cqGar" type="number" min="0" step="1" value="0"></div>
+    </div>
+    <div class="row">
+      <div class="f"><label for="cqVal">Validade da cotação</label><input id="cqVal" type="date"></div>
+      <div class="f"><label for="cqCond">Condições</label><input id="cqCond" maxlength="100"></div>
+    </div>
+    <div class="f"><label for="cqObs">Observações</label><textarea id="cqObs" rows="2" maxlength="300"></textarea></div>
+    <p class="err" id="cqErr"></p>
+    <div style="display:flex;gap:.5rem;justify-content:flex-end">
+      <button type="button" class="btn" id="cqCancel">Cancelar</button>
+      <button type="submit" class="btn p">Salvar</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="riskDlg">
+  <h3 style="margin-bottom:1rem">Análise de risco do cliente</h3>
+  <div class="info" id="riskInfo"></div>
+  <h4 class="sub">Consultas registradas</h4>
+  <div id="riskList"></div>
+  <h4 class="sub">Registrar nova consulta</h4>
+  <form id="riskForm">
+    <div class="row">
+      <div class="f"><label for="rkFonte">Fonte</label><select id="rkFonte"><option>Serasa</option><option>SPC Brasil</option><option>Boa Vista</option><option>Certidão de antecedentes (apresentada pelo cliente)</option><option>Consulta de processos (tribunal)</option><option>Outra</option></select></div>
+      <div class="f"><label for="rkRes">Resultado</label><select id="rkRes"><option>Sem restrições</option><option>Com restrições</option></select></div>
+    </div>
+    <div class="row">
+      <div class="f"><label for="rkValor">Valor das pendências (R$)</label><input id="rkValor" type="number" min="0" step="0.01" value="0"></div>
+      <div class="f"><label for="rkData">Data da consulta</label><input id="rkData" type="date"></div>
+    </div>
+    <div class="f"><label for="rkObs">Observações</label><input id="rkObs" maxlength="200"></div>
+    <label class="chk"><input type="checkbox" id="rkOk"> O cliente autorizou esta consulta (LGPD)</label>
+    <p class="lgpd">Use critérios objetivos e guarde o consentimento. A consulta automática ao Serasa, SPC e Boa Vista depende de contrato com o provedor; por ora o resultado é registrado à mão. Empresas não têm acesso direto a bases de segurança pública: peça a certidão ao cliente.</p>
+    <p class="err" id="rkErr"></p>
+    <div style="display:flex;gap:.5rem;justify-content:flex-end">
+      <button type="button" class="btn" id="rkClose">Fechar</button>
+      <button type="submit" class="btn p">Registrar consulta</button>
+    </div>
+  </form>
+</dialog>
+
 <dialog id="dlg">
   <h3 style="margin-bottom:1rem">Nova locação</h3>
   <form id="form" method="dialog">
     <div class="f"><label for="fCli">Cliente</label><select id="fCli"></select></div>
+    <div class="riskbox" id="riskBox" hidden></div>
+    <label class="chk" id="fAprovaW" hidden><input type="checkbox" id="fAprova"> Aprovo esta locação mesmo com o cliente de alto risco (administrador)</label>
     <div id="newCli">
       <div class="row">
         <div class="f"><label for="cNome">Nome completo</label><input id="cNome" maxlength="80" autocomplete="off"></div>
@@ -320,7 +456,10 @@
       <div class="f"><label for="fPer">Período</label><select id="fPer"><option value="1">1 dia</option><option value="7" selected>7 dias</option><option value="15">15 dias</option><option value="30">30 dias</option></select></div>
       <div class="f"><label for="fIni">Início</label><input id="fIni" type="date"></div>
     </div>
-    <div class="f"><label for="fFrete">Frete (R$)</label><input id="fFrete" type="number" min="0" step="0.01" value="0"></div>
+    <div class="row">
+      <div class="f"><label for="fFrete">Frete (R$)</label><input id="fFrete" type="number" min="0" step="0.01" value="0"></div>
+      <div class="f"><label for="fCaucao">Caução (R$)</label><input id="fCaucao" type="number" min="0" step="0.01" value="0"><small class="hint">devolvida na entrega, se sem avarias</small></div>
+    </div>
     <div class="total"><span>Total</span><span id="fTotal">R$ 0,00</span></div>
     <p class="err" id="fErr"></p>
     <div style="display:flex;gap:.5rem;justify-content:flex-end">
@@ -458,9 +597,11 @@
       {id:6,nome:"Betoneira",estoque:0,p:{1:null,7:null,15:null,30:null}}
     ],
     cli:[], con:[], seq:1, cseq:1, draft:[], useq:2,
+    forn:[], compras:[], cot:[], fseq:1, bseq:1, qseq:1, eseq:7, fTab:"forn", finTab:"fin", ocup:60,
     users:[{id:1,nome:"Administrador",user:"admin",role:"admin",
       salt:"94999927fd0f54362d6bad23408fbd9c",hash:"93fc271cdbf9aec9ca1f347b3f4de99be3ad7ab53414a69393c36a75d54eea52"}]
   };
+  S.eq.forEach(e => { e.fragil = false; e.vol = null; e.vida = 60; });
   const eqById = id => S.eq.find(e => e.id == id);
   const cliById = id => S.cli.find(c => c.id == id);
   const conById = id => S.con.find(c => c.id == id);
@@ -471,6 +612,39 @@
   const itensTxt = c => c.itens.map(i => i.qtd + "× " + esc(eqById(i.eq).nome)).join(", ");
   const diasAtraso = c => Math.max(0, Math.floor((new Date(c.dev ? c.dev.data : today()) - new Date(c.fim)) / day));
   const fantasia = () => S.emp.fantasia || "Pinheiro Locações";
+
+  /* ---- compras, retorno do investimento e risco ---- */
+  const months = d => Math.max(0, (new Date(today()) - new Date(d)) / day / 30.44);
+  const custoCompra = k => k.qtd * k.unit + k.frete + k.juros;
+  const stars = n => "★".repeat(n) + "☆".repeat(5 - n);
+  const fornById = id => S.forn.find(f => f.id == id);
+  const addMonths = (d, m) => { const x = new Date(d); x.setUTCMonth(x.getUTCMonth() + m); return iso(x); };
+  const norm = s => String(s).trim().toLowerCase();
+  const dec = (n, d) => n.toFixed(d).replace(".", ",");
+  function eqStats(e){
+    const ks = S.compras.filter(k => k.eq === e.id);
+    const inv = ks.reduce((a, k) => a + custoCompra(k), 0);
+    const depr = ks.reduce((a, k) => a + Math.min(custoCompra(k), custoCompra(k) / e.vida * months(k.data)), 0);
+    const rec = S.con.reduce((a, c) => a + c.itens.filter(i => i.eq === e.id).reduce((s, i) => s + i.pu * i.qtd, 0), 0);
+    const mo = ks.length ? Math.max(1, months(ks.map(k => k.data).sort()[0])) : 0;
+    return {ks, inv, depr, rec, atual:inv - depr, ret:inv ? rec / inv : null, payback:inv && rec ? inv / (rec / mo) : null};
+  }
+  const RISK = {novo:["Sem histórico","y"], baixo:["Baixo","g"], medio:["Médio","y"], alto:["Alto","r"]};
+  const REC = {novo:"Cliente novo: registre a consulta de crédito e considere exigir caução.", baixo:"Bom histórico: pode alugar sem caução.", medio:"Pontos de atenção no histórico: sugerido exigir caução.", alto:"Alto risco: exigir caução e aprovação do administrador."};
+  function riskOf(cl){
+    const cons = S.con.filter(c => c.cli === cl.id), notes = []; let score = 100;
+    cons.forEach(c => {
+      if (c.dev && c.dev.data > c.fim){ score -= 15; notes.push("devolução atrasada #" + c.id); }
+      if (late(c)){ score -= 15; notes.push("locação atrasada #" + c.id); }
+      if (overdue(c)){ score -= 20; notes.push("cobrança vencida #" + c.id); }
+      if (c.dev && (c.dev.avaria > 0 || c.dev.cond !== "Sem avarias")){ score -= 10; notes.push("avaria #" + c.id); }
+      if (c.pgto && c.pgto.multa > 0){ score -= 5; notes.push("pagou com multa #" + c.id); }
+    });
+    score = Math.max(0, score);
+    const ext = (cl.consultas || []).slice(-1)[0], restr = !!ext && ext.res === "Com restrições", semHist = !cons.length;
+    return {score, notes, ext, restr, semHist, nivel:restr ? "alto" : semHist ? "novo" : score >= 80 ? "baixo" : score >= 50 ? "medio" : "alto"};
+  }
+  const riskPill = r => `<span class="pill ${RISK[r.nivel][1]}">${RISK[r.nivel][0]}${r.restr ? " · restrição" : ""}</span>`;
 
   /* ---- máscaras e CEP ---- */
   function attachMasks(root){ $$("[data-mask]", root).forEach(el => el.addEventListener("input", () => { el.value = MASK[el.dataset.mask](el.value); })); }
@@ -572,9 +746,9 @@
   const sign = () => `<div class="sign"><div>Cliente</div><div>${esc(S.emp.resp || fantasia())}</div></div>`;
   function docHtml(kind, c){
     const cl = cliById(c.cli), head = empHead() + `<p style="text-align:right;font-size:.78rem">Emitido em ${fmt(today())}</p>`;
-    if (kind === "locacao") return head + `<h3>COMPROVANTE DE LOCAÇÃO Nº ${c.id}</h3>${cliBlock(cl)}${itemsTable(c)}<p>Período: ${c.per} dia(s), de ${fmt(c.ini)} a ${fmt(c.fim)}.<br>Frete: ${BRL(c.frete)}<br><b>Total: ${BRL(c.total)}</b></p><p style="font-size:.78rem">O cliente declara ter recebido os equipamentos acima e se compromete a devolvê-los na data indicada e no mesmo estado.</p>${sign()}`;
+    if (kind === "locacao") return head + `<h3>COMPROVANTE DE LOCAÇÃO Nº ${c.id}</h3>${cliBlock(cl)}${itemsTable(c)}<p>Período: ${c.per} dia(s), de ${fmt(c.ini)} a ${fmt(c.fim)}.<br>Frete: ${BRL(c.frete)}<br>${c.caucao ? `Caução: ${BRL(c.caucao)} (devolvida na entrega dos equipamentos, se em bom estado)<br>` : ""}<b>Total: ${BRL(c.total)}</b></p><p style="font-size:.78rem">O cliente declara ter recebido os equipamentos acima e se compromete a devolvê-los na data indicada e no mesmo estado.</p>${sign()}`;
     if (kind === "recibo"){ const p = c.pgto; return head + `<h3>RECIBO DE PAGAMENTO Nº ${c.id}</h3><p>Recebemos de <b>${esc(cl.nome)}</b> (${esc(MASK.doc(cl.doc))}) a importância de <b>${BRL(p.total)}</b>, referente à locação nº ${c.id} (${itensTxt(c)}), paga em ${fmt(p.data)} via ${esc(p.forma)}.</p><table><tbody><tr><td>Valor acertado</td><td>${BRL(c.total)}</td></tr><tr><td>Acréscimos</td><td>${BRL(p.acr)}</td></tr><tr><td>Multa e juros por atraso</td><td>${BRL(p.multa)}</td></tr><tr><td>Desconto</td><td>− ${BRL(p.desc)}</td></tr><tr><td><b>Total recebido</b></td><td><b>${BRL(p.total)}</b></td></tr></tbody></table><div class="sign"><div>Assinatura do cliente</div><div>${esc(S.emp.resp || fantasia())}</div></div>`; }
-    const d = c.dev; return head + `<h3>TERMO DE DEVOLUÇÃO Nº ${c.id}</h3>${cliBlock(cl)}${itemsTable(c)}<p>Devolvido em <b>${fmt(d.data)}</b> (previsto: ${fmt(c.fim)}).<br>Condição: <b>${esc(d.cond)}</b>${d.avaria ? "<br>Cobrança por avaria/reposição: <b>" + BRL(d.avaria) + "</b>" : ""}${d.obs ? "<br>Observações: " + esc(d.obs) : ""}</p>${sign()}`;
+    const d = c.dev; return head + `<h3>TERMO DE DEVOLUÇÃO Nº ${c.id}</h3>${cliBlock(cl)}${itemsTable(c)}<p>Devolvido em <b>${fmt(d.data)}</b> (previsto: ${fmt(c.fim)}).${c.caucao ? `<br>Caução recebida na locação: <b>${BRL(c.caucao)}</b>` : ""}<br>Condição: <b>${esc(d.cond)}</b>${d.avaria ? "<br>Cobrança por avaria/reposição: <b>" + BRL(d.avaria) + "</b>" : ""}${d.obs ? "<br>Observações: " + esc(d.obs) : ""}</p>${sign()}`;
   }
   function showDoc(kind, id){ $("docBody").innerHTML = docHtml(kind, conById(id)); if (!$("docDlg").open) $("docDlg").showModal(); }
 
@@ -601,11 +775,17 @@
         : '<tr><td class="none" colspan="7">Nenhuma locação ainda</td></tr>') + '</tbody></table></div></div>';
     },
     clientes(){
-      return '<div class="card"><div class="wrap"><table><thead><tr><th>Nome</th><th>WhatsApp</th><th>Documento</th><th>Endereço da obra</th><th>Mapa</th><th>Locações</th><th>Consentimento</th></tr></thead><tbody>' +
-      (S.cli.length ? S.cli.map(c => `<tr><td>${esc(c.nome)}</td><td>${esc(MASK.phone(c.tel))}</td><td>•••.${esc(dg(c.doc).slice(-3))}</td><td>${esc(c.end + " — " + c.bairro + ", " + c.cidade + "/" + c.uf)}</td><td>${c.lat != null ? '<span class="pill g">' + esc(c.prec) + "</span>" : '<span class="pill y">sem posição</span>'}</td><td>${S.con.filter(x => x.cli === c.id).length}</td><td><span class="pill g">LGPD ${fmt(c.lgpd)}</span></td></tr>`).join("")
-        : '<tr><td class="none" colspan="7">Nenhum cliente ainda</td></tr>') + '</tbody></table></div><p class="note">Documento aparece mascarado na tela. No sistema real: criptografado no banco, com registro de quem acessou.</p></div>';
+      return '<div class="card"><div class="wrap"><table><thead><tr><th>Nome</th><th>WhatsApp</th><th>Documento</th><th>Endereço da obra</th><th>Mapa</th><th>Locações</th><th>Consentimento</th><th>Risco</th><th></th></tr></thead><tbody>' +
+      (S.cli.length ? S.cli.map(c => `<tr><td>${esc(c.nome)}</td><td>${esc(MASK.phone(c.tel))}</td><td>•••.${esc(dg(c.doc).slice(-3))}</td><td>${esc(c.end + " — " + c.bairro + ", " + c.cidade + "/" + c.uf)}</td><td>${c.lat != null ? '<span class="pill g">' + esc(c.prec) + "</span>" : '<span class="pill y">sem posição</span>'}</td><td>${S.con.filter(x => x.cli === c.id).length}</td><td><span class="pill g">LGPD ${fmt(c.lgpd)}</span></td><td>${riskPill(riskOf(c))}</td><td class="acts-c"><div class="acts"><button class="btn sm" data-risk="${c.id}">Análise de risco</button></div></td></tr>`).join("")
+        : '<tr><td class="none" colspan="9">Nenhum cliente ainda</td></tr>') + '</tbody></table></div><p class="note">Documento aparece mascarado na tela. No sistema real: criptografado no banco, com registro de quem acessou.</p></div>';
     },
     equip(){
+      const rows = S.eq.map(e => ({e, s:eqStats(e)})).filter(r => r.s.inv);
+      return V.equipTable() + '<div style="height:1.2rem"></div><div class="card"><div class="head"><h3>Retorno do investimento</h3><p>calculado com as compras registradas e a receita das locações</p></div><div class="wrap"><table><thead><tr><th>Equipamento</th><th>Investido</th><th>Receita acumulada</th><th>Retorno</th><th>Payback est.</th><th>Depreciação</th><th>Valor atual</th></tr></thead><tbody>' +
+      (rows.length ? rows.map(({e, s}) => `<tr><td>${esc(e.nome)}${e.fragil ? ' <span class="pill y">frágil</span>' : ""}</td><td>${BRL(s.inv)}</td><td>${BRL(s.rec)}</td><td>${s.ret == null ? "—" : Math.round(s.ret * 100) + "%"}</td><td>${s.payback ? dec(s.payback, 1) + " meses" : "—"}</td><td>${BRL(s.depr)}</td><td>${BRL(s.atual)}</td></tr>`).join("") : '<tr><td class="none" colspan="7">Registre a compra dos equipamentos para ver o retorno</td></tr>') +
+      '</tbody></table></div><p class="note">Retorno = receita acumulada ÷ investido (100% = já se pagou). Depreciação linear pela vida útil informada.</p></div>';
+    },
+    equipTable(){
       return '<div class="card"><div class="head"><h3>Catálogo e tabela de preços</h3><p>preço por unidade (R$) em cada período — edite direto na tabela</p></div><div class="wrap"><table><thead><tr><th>Equipamento</th><th>Estoque total</th><th>Disponível</th><th>1 dia</th><th>7 dias</th><th>15 dias</th><th>30 dias</th></tr></thead><tbody>' +
       S.eq.map(e => `<tr><td>${esc(e.nome)}</td><td><input class="price" type="number" min="0" data-e="${e.id}" data-k="estoque" value="${e.estoque}"></td><td>${avail(e)}</td>` +
         [1, 7, 15, 30].map(p => `<td><input class="price" type="number" min="0" step="0.01" data-e="${e.id}" data-k="${p}" value="${e.p[p] == null ? "" : e.p[p]}" placeholder="—"></td>`).join("") + "</tr>").join("") + '</tbody></table></div></div>';
@@ -618,6 +798,37 @@
         : '<tr><td class="none" colspan="6">Nada a cobrar</td></tr>') + '</tbody></table></div><p class="note">Hoje o envio abre o WhatsApp/e-mail com a mensagem pronta. O disparo automático (API oficial da Meta) entra na fase 2.</p></div>' +
       `<div style="height:1.2rem"></div><div class="card"><div class="head"><h3>Histórico de recebidos</h3><p>${paid.length ? paid.length + " pagamento(s) · total " + BRL(paid.reduce((a, c) => a + c.pgto.total, 0)) : "nenhum pagamento registrado ainda"}</p></div><div class="wrap"><table><thead><tr><th>Data</th><th>Locação</th><th>Cliente</th><th>Forma</th><th>Valor acertado</th><th>Acréscimos</th><th>Multa/juros</th><th>Desconto</th><th>Total recebido</th><th></th></tr></thead><tbody>` +
       (paid.length ? paid.map(c => { const p = c.pgto; return `<tr><td>${fmt(p.data)}</td><td>#${c.id}</td><td>${esc(cliById(c.cli).nome)}</td><td>${esc(p.forma)}</td><td>${BRL(c.total)}</td><td>${BRL(p.acr)}</td><td>${BRL(p.multa)}</td><td>${BRL(p.desc)}</td><td><b>${BRL(p.total)}</b></td><td><div class="acts"><button class="btn sm" data-doc="recibo:${c.id}">Recibo</button></div></td></tr>`; }).join("") : '<tr><td class="none" colspan="10">Nenhum pagamento registrado ainda</td></tr>') + '</tbody></table></div></div>';
+    },
+    forn(){
+      const tabs = [["forn","Fornecedores"], ["compras","Compras"], ["cot","Cotações"]], tab = S.fTab;
+      const ef = k => custoCompra(k) / k.qtd, qef = q => q.unit + q.frete / q.qtd;
+      let body;
+      if (tab === "forn"){
+        body = '<div class="wrap"><table><thead><tr><th>Fornecedor</th><th>Origem</th><th>Contato</th><th>Prazo</th><th>Condições</th><th>Avaliação</th><th>Compras</th><th>Total gasto</th></tr></thead><tbody>' +
+        (S.forn.length ? S.forn.map(f => { const ks = S.compras.filter(k => k.forn === f.id);
+          return `<tr><td>${esc(f.nome)}${f.doc ? `<br><span class="hint">${esc(MASK.doc(f.doc))}</span>` : ""}</td><td>${esc([f.cidade, f.uf].filter(Boolean).join("/") || "—")}</td><td>${esc([f.tel && MASK.phone(f.tel), f.mail].filter(Boolean).join(" · ") || "—")}</td><td>${f.prazo ? f.prazo + " dias" : "—"}</td><td>${esc(f.cond || "—")}</td><td><span class="stars">${stars(f.nota)}</span></td><td>${ks.length}</td><td>${BRL(ks.reduce((a, k) => a + custoCompra(k), 0))}</td></tr>`; }).join("")
+          : '<tr><td class="none" colspan="8">Nenhum fornecedor cadastrado ainda</td></tr>') + '</tbody></table></div>';
+      } else if (tab === "compras"){
+        const groups = S.eq.map(e => ({e, ks:S.compras.filter(k => k.eq === e.id)})).filter(g => g.ks.length);
+        const best = groups.map(({e, ks}) => { const b = ks.reduce((m, k) => ef(k) < ef(m) ? k : m), avg = ks.reduce((a, k) => a + custoCompra(k), 0) / ks.reduce((a, k) => a + k.qtd, 0);
+          return `<div class="avail"><span style="width:auto;flex:1">${esc(e.nome)}</span><span>menor custo: <b class="best">${BRL(ef(b))}</b> (${esc(fornById(b.forn).nome)}) · médio: ${BRL(avg)}</span></div>`; }).join("");
+        body = `<h4 class="sub" style="padding:0 1.1rem">Melhor preço já pago por equipamento</h4>${best || '<div class="empty">Sem compras registradas</div>'}<h4 class="sub" style="padding:0 1.1rem;margin-top:1.2rem">Histórico de compras</h4>` +
+        '<div class="wrap"><table><thead><tr><th>Data</th><th>Equipamento</th><th>Fornecedor</th><th>Qtd</th><th>Unitário</th><th>Frete</th><th>Juros</th><th>Custo total</th><th>Efetivo/un</th><th>NF</th><th>Garantia até</th><th>Documentos</th></tr></thead><tbody>' +
+        (S.compras.length ? S.compras.slice().sort((a, b) => b.data < a.data ? -1 : 1).map(k => `<tr><td>${fmt(k.data)}</td><td>${esc(eqById(k.eq).nome)}</td><td>${esc(fornById(k.forn).nome)}</td><td>${k.qtd}</td><td>${BRL(k.unit)}</td><td>${BRL(k.frete)}</td><td>${BRL(k.juros)}${k.parc > 1 ? ` <span class="hint">${k.parc}x</span>` : ""}</td><td><b>${BRL(custoCompra(k))}</b></td><td>${BRL(ef(k))}</td><td>${esc(k.nf || "—")}</td><td>${k.garantia ? fmt(addMonths(k.data, k.garantia)) : "—"}</td><td title="${esc(k.docs.join(", "))}">${k.docs.length ? k.docs.length + " arquivo(s)" : "—"}</td></tr>`).join("") : '<tr><td class="none" colspan="12">Nenhuma compra registrada ainda</td></tr>') + '</tbody></table></div>';
+      } else {
+        const bestOf = {}; S.cot.forEach(q => { const k = norm(q.eq); bestOf[k] = Math.min(bestOf[k] == null ? Infinity : bestOf[k], qef(q)); });
+        const cnt = {}; S.cot.forEach(q => { const k = norm(q.eq); cnt[k] = (cnt[k] || 0) + 1; });
+        body = `<div class="assume">Ocupação assumida para estimar o payback: <input id="ocup" type="number" min="1" max="100" value="${S.ocup}"> % do mês alugado</div><div class="wrap"><table><thead><tr><th>Data</th><th>Equipamento</th><th>Fornecedor</th><th>Qtd</th><th>Unitário</th><th>Frete</th><th>Efetivo/un</th><th>Garantia</th><th>Validade</th><th>Payback est.</th></tr></thead><tbody>` +
+        (S.cot.length ? S.cot.slice().sort((a, b) => norm(a.eq) < norm(b.eq) ? -1 : 1).map(q => { const e = S.eq.find(x => norm(x.nome) === norm(q.eq)), p30 = e && e.p[30], pb = p30 ? qef(q) / (p30 * S.ocup / 100) : null, k = norm(q.eq);
+          return `<tr><td>${fmt(q.data)}</td><td>${esc(q.eq)}</td><td>${esc(fornById(q.forn).nome)}</td><td>${q.qtd}</td><td>${BRL(q.unit)}</td><td>${BRL(q.frete)}</td><td><b>${BRL(qef(q))}</b>${cnt[k] > 1 && qef(q) === bestOf[k] ? ' <span class="pill g">melhor</span>' : ""}</td><td>${q.garantia ? q.garantia + " m" : "—"}</td><td>${q.valid ? fmt(q.valid) + (q.valid < today() ? ' <span class="pill r">vencida</span>' : "") : "—"}</td><td>${pb ? dec(pb, 1) + " meses" : "—"}</td></tr>`; }).join("") : '<tr><td class="none" colspan="10">Nenhuma cotação registrada ainda</td></tr>') + '</tbody></table></div><p class="note">Efetivo/un = preço unitário + frete rateado. Payback estimado = custo efetivo ÷ (preço de 30 dias × ocupação), quando o equipamento tem preço cadastrado.</p>';
+      }
+      return `<div class="card"><div class="head"><h3>Fornecedores e compras</h3><p>banco de dados de preços para apoiar a decisão de comprar</p></div><div class="tabs">${tabs.map(t => `<button class="tab${tab === t[0] ? " on" : ""}" data-ft="${t[0]}">${t[1]}</button>`).join("")}</div>${body}</div>`;
+    },
+    fin(){
+      const box = (t, items) => `<div class="card"><div class="head"><h3>${t} <span class="pill y">em preparação</span></h3><p>estrutura planejada; ainda não implementada</p></div><ul class="plan">${items.map(i => "<li>" + i + "</li>").join("")}</ul></div>`;
+      const fin = box("Visão financeira", ["Receita por período, equipamento e cliente", "Despesas: compras, fretes, juros e financiamentos (dados já coletados em Compras)", "Contas a pagar (parcelas de compras) e a receber (locações em aberto)", "Fluxo de caixa e projeção dos próximos meses", "Inadimplência e multas cobradas", "Margem e retorno por equipamento (usa o payback já calculado)", "Resumo para a contabilidade (exportação)"]);
+      const nf = box("Venda com nota fiscal", ["Venda de equipamento usado ou de sucata com emissão de nota", "Dados fiscais do cliente (CPF/CNPJ, inscrição, endereço) — já coletados no cadastro", "Item vendido sai do estoque e registra baixa contábil pelo valor depreciado", "Emissão da nota por integração com um emissor (NF-e / NFS-e), conforme o município e o regime tributário", "Guarda do XML e do PDF da nota junto à venda", "Nota de locação (serviço): definir com a contabilidade se será emitida"]);
+      return `<div class="card"><div class="tabs" style="padding-top:1rem">${[["fin","Financeiro"], ["nf","Venda com nota fiscal"]].map(t => `<button class="tab${S.finTab === t[0] ? " on" : ""}" data-fn="${t[0]}">${t[1]}</button>`).join("")}</div></div><div style="height:1rem"></div>` + (S.finTab === "fin" ? fin : nf);
     },
     config(){
       const e = S.emp, v = k => esc(e[k] || ""), admins = S.users.filter(u => u.role === "admin").length;
@@ -646,7 +857,7 @@
       (S.cred ? `<div class="cred">Usuário <b>${esc(S.cred.user)}</b> criado. Senha temporária: <code>${esc(S.cred.pass)}</code><br>Copie agora e envie com segurança; ela não aparece de novo. No primeiro acesso a pessoa define a própria senha.</div>` : "") + "</div></div>";
     }
   };
-  const TITLES = {painel:["Painel","visão da operação hoje"], locacoes:["Locações","abertas e encerradas"], clientes:["Clientes","dados protegidos conforme a LGPD"], equip:["Equipamentos","estoque e preços"], cobrar:["Cobranças","o que ainda não foi pago"], config:["Configurações","empresa e usuários"]};
+  const TITLES = {painel:["Painel","visão da operação hoje"], locacoes:["Locações","abertas e encerradas"], clientes:["Clientes","dados protegidos conforme a LGPD"], equip:["Equipamentos","estoque, preços e retorno do investimento"], forn:["Fornecedores","compras, cotações e comparativo de preços"], cobrar:["Cobranças","o que ainda não foi pago"], fin:["Financeiro","em preparação"], config:["Configurações","empresa e usuários"]};
 
   function waLink(c, cl){
     const msg = `Olá, ${cl.nome}! Aqui é da ${fantasia()}. A locação #${c.id} (${BRL(c.total)}) venceu em ${fmt(c.fim)}. Podemos combinar o pagamento/devolução?${S.emp.tel ? " Contato: " + MASK.phone(S.emp.tel) + "." : ""} Obrigado!`;
@@ -663,10 +874,12 @@
       locacoes:'<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/>',
       clientes:'<circle cx="9" cy="8" r="3.5"/><path d="M2 20c0-3.5 3-6 7-6s7 2.5 7 6M17 5a3 3 0 010 6M22 20c0-2.500-1.500-4.500-4-5.300"/>',
       equip:'<path d="M21 8l-9-5-9 5v8l9 5 9-5zM3 8l9 5 9-5M12 13v8"/>',
+      forn:'<path d="M2 6h11v10H2zM13 9h4l3 3v4h-7z"/><circle cx="6" cy="18" r="1.8"/><circle cx="17" cy="18" r="1.8"/>',
+      fin:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
       cobrar:'<circle cx="12" cy="12" r="9"/><path d="M14.500 9.500c-.5-1-1.500-1.500-2.500-1.500-1.500 0-2.500.8-2.500 2s1 1.700 2.500 2 2.500.8 2.500 2-1 2-2.500 2c-1.100 0-2-.6-2.500-1.500M12 6v2M12 16v2"/>',
       config:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.900 4.900l2.100 2.100M17 17l2.100 2.100M4.900 19.100L7 17M17 7l2.100-2.100"/>'
     };
-    const list = [["painel","Painel","Painel"], ["locacoes","Locações","Locações"], ["clientes","Clientes","Clientes"], ["equip","Equipamentos","Equip."], ["cobrar","Cobranças","Cobrar"]];
+    const list = [["painel","Painel","Painel"], ["locacoes","Locações","Locações"], ["clientes","Clientes","Clientes"], ["equip","Equipamentos","Equip."], ["forn","Fornecedores","Fornec."], ["cobrar","Cobranças","Cobrar"], ["fin","Financeiro","Financ."]];
     if (S.me.role === "admin") list.push(["config","Configurações","Config."]);
     $("nav").innerHTML = list.map(n => `<button class="nav${S.page === n[0] ? " on" : ""}" data-p="${n[0]}" aria-label="${n[1]}"><svg viewBox="0 0 24 24">${IC[n[0]]}</svg><span class="lg">${n[1]}</span><span class="sh">${n[2]}</span>${n[0] === "cobrar" && od ? `<span class="badge">${od}</span>` : ""}</button>`).join("");
     $$(".nav").forEach(b => b.onclick = () => { S.page = b.dataset.p; S.cred = null; render(); scrollTo(0, 0); });
@@ -687,8 +900,14 @@
     if (S.map){ S.map.remove(); S.map = null; }
     document.body.dataset.page = S.page;
     nav(); $("title").textContent = TITLES[S.page][0]; $("sub").textContent = TITLES[S.page][1];
+    const act = S.page === "equip" ? ["Novo equipamento", openBuy] : S.page === "forn" ? (S.fTab === "forn" ? ["Novo fornecedor", openForn] : S.fTab === "compras" ? ["Registrar compra", openBuy] : ["Nova cotação", openCot]) : ["Nova locação", openForm];
+    $("newC").querySelector(".lbl").textContent = " " + act[0]; $("newC").setAttribute("aria-label", act[0]); $("newC").onclick = act[1];
     $("view").innerHTML = V[S.page]();
     labelTables();
+    $$("[data-ft]").forEach(b => b.onclick = () => { S.fTab = b.dataset.ft; render(); });
+    $$("[data-fn]").forEach(b => b.onclick = () => { S.finTab = b.dataset.fn; render(); });
+    $$("[data-risk]").forEach(b => b.onclick = () => openRisk(+b.dataset.risk));
+    if ($("ocup")) $("ocup").onchange = () => { S.ocup = Math.min(100, Math.max(1, +$("ocup").value || 60)); render(); };
     if (S.page === "config") bindConfig();
     if (S.page === "painel"){
       $("qEq").onclick = () => openPick("eq"); $("qPay").onclick = () => openPick("pay");
@@ -786,10 +1005,18 @@
     $("fCli").innerHTML = '<option value="new">+ Novo cliente</option>' + S.cli.map(c => `<option value="${c.id}">${esc(c.nome)}</option>`).join("");
     $("fIni").value = today(); $("fFrete").value = 0; $("fSave").disabled = false;
     ["cNome","cTel","cDoc","cNasc","cMail","cCep","cNum","cRua","cBairro","cCidade","cUf"].forEach(i => $(i).value = ""); $("cLgpd").checked = false; $("cepMsg").textContent = "";
-    $("newCli").hidden = false; drawItems(); $("dlg").showModal();
+    $("fCaucao").value = 0; $("newCli").hidden = false; updateRisk(); drawItems(); $("dlg").showModal();
   }
   $("newC").onclick = openForm;
-  $("fCli").onchange = () => { $("newCli").hidden = $("fCli").value !== "new"; };
+  function updateRisk(){
+    const v = $("fCli").value, box = $("riskBox");
+    box.hidden = false;
+    if (v === "new"){ box.textContent = "Cliente novo: depois do cadastro, faça a análise de risco e considere exigir caução."; $("fAprovaW").hidden = true; return; }
+    const r = riskOf(cliById(+v));
+    box.innerHTML = "Risco: " + riskPill(r) + " · " + esc(REC[r.nivel]);
+    $("fAprovaW").hidden = r.nivel !== "alto" || S.me.role !== "admin"; $("fAprova").checked = false;
+  }
+  $("fCli").onchange = () => { $("newCli").hidden = $("fCli").value !== "new"; updateRisk(); };
   $("addItem").onclick = () => { S.draft.push({eq:S.eq[0].id, qtd:1}); drawItems(); };
   $("fPer").onchange = $("fFrete").oninput = calc;
   $("fCancel").onclick = () => $("dlg").close();
@@ -809,13 +1036,100 @@
       $("fSave").disabled = true; $("fErr").textContent = "Localizando o endereço no mapa…";
       await geocode(c);
       S.cli.push(c); cid = c.id;
-    } else cid = parseInt(cid, 10);
+    } else {
+      cid = parseInt(cid, 10);
+      if (riskOf(cliById(cid)).nivel === "alto"){
+        if (S.me.role !== "admin"){ $("fErr").textContent = "Cliente de alto risco: peça a aprovação de um administrador."; return; }
+        if (!$("fAprova").checked){ $("fErr").textContent = "Marque a aprovação do administrador para alugar a cliente de alto risco."; return; }
+      }
+    }
     const per = parseInt($("fPer").value, 10), ini = $("fIni").value || today();
-    S.con.push({id:S.seq++, cli:cid, itens:S.draft.map(i => ({eq:parseInt(i.eq, 10), qtd:parseInt(i.qtd, 10), pu:eqById(i.eq).p[per]})), per, ini, fim:iso(new Date(new Date(ini).getTime() + per * day)), frete:parseFloat($("fFrete").value) || 0, total:r.tot, status:"ativo", pago:false});
+    S.con.push({id:S.seq++, cli:cid, itens:S.draft.map(i => ({eq:parseInt(i.eq, 10), qtd:parseInt(i.qtd, 10), pu:eqById(i.eq).p[per]})), per, ini, fim:iso(new Date(new Date(ini).getTime() + per * day)), frete:parseFloat($("fFrete").value) || 0, caucao:Math.max(0, parseFloat($("fCaucao").value) || 0), total:r.tot, status:"ativo", pago:false});
     $("fSave").disabled = false; $("dlg").close(); S.page = "locacoes"; render();
   };
   attachMasks(document);
   bindCep({cep:"cCep", msg:"cepMsg", rua:"cRua", bairro:"cBairro", cidade:"cCidade", uf:"cUf", num:"cNum"});
+
+  /* ---- equipamento novo / compra ---- */
+  function fornOptions(sel, first){ sel.innerHTML = first + '<option value="new">+ Novo fornecedor</option>' + S.forn.map(f => `<option value="${f.id}">${esc(f.nome)}</option>`).join(""); }
+  function buyTotal(){ $("bTotal").textContent = BRL((parseInt($("bQtd").value, 10) || 0) * num("bUnit") + num("bFrete") + num("bJuros")); }
+  function openBuy(){
+    $("bEq").innerHTML = '<option value="new">+ Novo tipo de equipamento</option>' + S.eq.map(e => `<option value="${e.id}">${esc(e.nome)} (mais unidades)</option>`).join("");
+    fornOptions($("bForn"), '<option value="">Selecione…</option>');
+    ["bNome", "bVol", "bUnit", "bNF", "bObs", "bFornNome"].forEach(i => $(i).value = "");
+    $("bVida").value = 60; $("bQtd").value = 1; $("bFrete").value = 0; $("bJuros").value = 0; $("bParc").value = 1; $("bGar").value = 0; $("bData").value = today(); $("bData").max = today(); $("bDocs").value = ""; $("bFragil").checked = false;
+    $("bNovo").hidden = false; $("bFornNovo").hidden = true; $("bErr").textContent = ""; buyTotal(); $("buyDlg").showModal();
+  }
+  $("bEq").onchange = () => { $("bNovo").hidden = $("bEq").value !== "new"; };
+  $("bForn").onchange = () => { $("bFornNovo").hidden = $("bForn").value !== "new"; };
+  ["bQtd", "bUnit", "bFrete", "bJuros"].forEach(i => $(i).addEventListener("input", buyTotal));
+  $("bCancel").onclick = () => $("buyDlg").close();
+  $("buyForm").onsubmit = ev => {
+    ev.preventDefault();
+    const isNew = $("bEq").value === "new", nome = $("bNome").value.trim(), qtd = parseInt($("bQtd").value, 10), unit = parseFloat($("bUnit").value), data = $("bData").value;
+    let fv = $("bForn").value; const fn = $("bFornNome").value.trim();
+    const e = isNew && nome.length < 2 ? "Informe o nome do equipamento." : isNew && S.eq.some(x => norm(x.nome) === norm(nome)) ? "Esse equipamento já existe. Selecione-o na lista." : !fv ? "Selecione o fornecedor." :
+      fv === "new" && fn.length < 2 ? "Informe o nome do novo fornecedor." : !(qtd >= 1) ? "Quantidade inválida." : !(unit > 0) ? "Informe o custo unitário." : !data || data > today() ? "Data da compra inválida." : "";
+    if (e){ $("bErr").textContent = e; return; }
+    let eq;
+    if (isNew){ eq = {id:S.eseq++, nome, estoque:0, p:{1:null, 7:null, 15:null, 30:null}, fragil:$("bFragil").checked, vol:parseFloat($("bVol").value) || null, vida:Math.max(1, parseInt($("bVida").value, 10) || 60)}; S.eq.push(eq); }
+    else eq = eqById($("bEq").value);
+    if (fv === "new"){ const f = {id:S.fseq++, nome:fn, nota:3}; S.forn.push(f); fv = f.id; } else fv = +fv;
+    eq.estoque += qtd;
+    S.compras.push({id:S.bseq++, eq:eq.id, forn:fv, data, qtd, unit, frete:num("bFrete"), juros:num("bJuros"), parc:parseInt($("bParc").value, 10) || 1, nf:$("bNF").value.trim(),
+      docs:Array.from($("bDocs").files).map(f => f.name + " (" + Math.max(1, Math.round(f.size / 1024)) + " KB)"), garantia:parseInt($("bGar").value, 10) || 0, obs:$("bObs").value.trim()});
+    $("buyDlg").close(); if (S.page !== "forn") S.page = "equip"; render();
+  };
+
+  /* ---- fornecedores e cotações ---- */
+  function openForn(){ ["fnNome", "fnDoc", "fnTel", "fnMail", "fnCidade", "fnUf", "fnPrazo", "fnCond", "fnObs"].forEach(i => $(i).value = ""); $("fnNota").value = "3"; $("fnErr").textContent = ""; $("fornDlg").showModal(); }
+  $("fnCancel").onclick = () => $("fornDlg").close();
+  $("fornForm").onsubmit = ev => {
+    ev.preventDefault();
+    const nome = $("fnNome").value.trim(), doc = dg($("fnDoc").value), tel = dg($("fnTel").value), mail = $("fnMail").value.trim();
+    const e = nome.length < 2 ? "Informe o nome do fornecedor." : doc && !docOk(doc) ? "CNPJ/CPF inválido. Confira os números." : tel && !phoneOk(tel) ? "Telefone inválido. Use DDD + número." : mail && !mailOk(mail) ? "E-mail inválido." :
+      doc && S.forn.some(f => f.doc === doc) ? "Já existe fornecedor com esse CNPJ/CPF." : "";
+    if (e){ $("fnErr").textContent = e; return; }
+    S.forn.push({id:S.fseq++, nome, doc, tel, mail, cidade:$("fnCidade").value.trim(), uf:$("fnUf").value, prazo:parseInt($("fnPrazo").value, 10) || 0, cond:$("fnCond").value.trim(), nota:parseInt($("fnNota").value, 10), obs:$("fnObs").value.trim()});
+    $("fornDlg").close(); render();
+  };
+  function openCot(){
+    $("eqList").innerHTML = S.eq.map(e => `<option value="${esc(e.nome)}">`).join("");
+    fornOptions($("cqForn"), '<option value="">Selecione…</option>');
+    ["cqEq", "cqUnit", "cqCond", "cqObs", "cqFornNome", "cqVal"].forEach(i => $(i).value = "");
+    $("cqQtd").value = 1; $("cqFrete").value = 0; $("cqGar").value = 0; $("cqFornNovo").hidden = true; $("cqErr").textContent = ""; $("cotDlg").showModal();
+  }
+  $("cqForn").onchange = () => { $("cqFornNovo").hidden = $("cqForn").value !== "new"; };
+  $("cqCancel").onclick = () => $("cotDlg").close();
+  $("cotForm").onsubmit = ev => {
+    ev.preventDefault();
+    const eq = $("cqEq").value.trim(), qtd = parseInt($("cqQtd").value, 10), unit = parseFloat($("cqUnit").value); let fv = $("cqForn").value; const fn = $("cqFornNome").value.trim();
+    const e = eq.length < 2 ? "Informe o equipamento cotado." : !fv ? "Selecione o fornecedor." : fv === "new" && fn.length < 2 ? "Informe o nome do novo fornecedor." : !(qtd >= 1) ? "Quantidade inválida." : !(unit > 0) ? "Informe o preço unitário." : "";
+    if (e){ $("cqErr").textContent = e; return; }
+    if (fv === "new"){ const f = {id:S.fseq++, nome:fn, nota:3}; S.forn.push(f); fv = f.id; } else fv = +fv;
+    S.cot.push({id:S.qseq++, eq, forn:fv, data:today(), qtd, unit, frete:num("cqFrete"), garantia:parseInt($("cqGar").value, 10) || 0, valid:$("cqVal").value, cond:$("cqCond").value.trim(), obs:$("cqObs").value.trim()});
+    $("cotDlg").close(); render();
+  };
+
+  /* ---- análise de risco do cliente ---- */
+  let riskCli = null;
+  function openRisk(id){
+    riskCli = cliById(id); const r = riskOf(riskCli);
+    $("riskInfo").innerHTML = `<b>${esc(riskCli.nome)}</b><br>Risco: ${riskPill(r)} · nota interna ${r.semHist ? "—" : r.score + "/100"}<br>${esc(REC[r.nivel])}${r.notes.length ? `<br><span class="hint">${esc(r.notes.join("; "))}</span>` : ""}`;
+    $("riskList").innerHTML = (riskCli.consultas || []).slice().reverse().map(k => { const velha = (new Date(today()) - new Date(k.data)) / day > 90;
+      return `<div class="avail"><span style="width:auto;flex:1">${esc(k.fonte)} · ${fmt(k.data)}${k.valor ? " · " + BRL(k.valor) : ""}${velha ? " (desatualizada)" : ""}<br><span class="hint">${esc(k.obs || "")} registrado por ${esc(k.por)}</span></span><span class="pill ${k.res === "Sem restrições" ? "g" : "r"}">${esc(k.res)}</span></div>`; }).join("") || '<div class="empty">Nenhuma consulta registrada</div>';
+    $("rkRes").selectedIndex = 0; $("rkFonte").selectedIndex = 0; $("rkValor").value = 0; $("rkData").value = today(); $("rkData").max = today(); $("rkObs").value = ""; $("rkOk").checked = false; $("rkErr").textContent = "";
+    if (!$("riskDlg").open) $("riskDlg").showModal();
+  }
+  $("rkClose").onclick = () => $("riskDlg").close();
+  $("riskForm").onsubmit = ev => {
+    ev.preventDefault();
+    const dt = $("rkData").value, valor = num("rkValor");
+    const e = !$("rkOk").checked ? "Registre a autorização do cliente para a consulta (LGPD)." : !dt || dt > today() ? "Data da consulta inválida." : "";
+    if (e){ $("rkErr").textContent = e; return; }
+    (riskCli.consultas = riskCli.consultas || []).push({fonte:$("rkFonte").value, res:$("rkRes").value, valor:$("rkRes").value === "Com restrições" ? valor : 0, data:dt, obs:$("rkObs").value.trim(), por:S.me.user});
+    const id = riskCli.id; render(); openRisk(id);
+  };
 
   /* ---- receber equipamento / pagamento ---- */
   let pickMode = null, cur = null;
