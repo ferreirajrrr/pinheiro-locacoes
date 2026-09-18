@@ -113,7 +113,7 @@
   dialog::backdrop{background:rgba(0,0,0,.5);}
   dialog form > div[style*="justify-content:flex-end"]{position:sticky; bottom:calc(-1.2rem - env(safe-area-inset-bottom)); background:var(--surface); padding:.7rem 0; margin-top:.5rem; border-top:1px solid var(--line);}
   dialog form div[style*="justify-content:flex-end"] .btn{flex:1;}
-  @media (max-width:1023px){ body[data-page="cobrar"] .newc, body[data-page="config"] .newc, body[data-page="fin"] .newc{display:none;} }
+  @media (max-width:1023px){ body[data-page="cobrar"] .newc, body[data-page="config"] .newc{display:none;} }
 
   /* formulários */
   .f{margin-bottom:.85rem;} .f label{display:block; font-size:.78rem; color:var(--muted); margin-bottom:.25rem;}
@@ -239,6 +239,12 @@
   .wrap.keep td.zero{color:var(--bad); font-weight:700;}
   .agd{padding:.5rem 1.1rem; border-top:1px solid var(--line); font-size:.85rem; display:flex; gap:.6rem; align-items:flex-start; flex-wrap:wrap;} .agd b{min-width:92px;}
   .alrt{display:flex; align-items:center; gap:.7rem; padding:.55rem 1.1rem; font-size:.85rem; border-top:1px solid var(--line);} .alrt span:nth-child(2){flex:1;}
+  .fmnav{display:flex; align-items:center; justify-content:center; gap:.8rem; padding:.7rem 1rem; flex-wrap:wrap;} .fmnav b{min-width:150px; text-align:center;}
+  .kpi small{font-size:.65em; color:var(--muted); font-weight:400; white-space:normal;}
+  .kpis.k6 .kpi b{white-space:normal;}
+  .wrap.keep td.zero{color:var(--bad);} .wrap.keep tr td:last-child{text-align:right;} .wrap.keep td:first-child{text-align:left;}
+  .kpis.k6{grid-template-columns:repeat(2,minmax(0,1fr))!important;} .kpis.k6 .kpi{grid-column:auto!important;}
+  @media (min-width:768px){ .kpis.k6{grid-template-columns:repeat(3,minmax(0,1fr))!important;} }
   .plan{margin:0; padding:.2rem 1.1rem 1.1rem 2.2rem; font-size:.88rem; line-height:1.7; color:var(--muted);}
   .lgpd{font-size:.75rem; color:var(--muted); margin:.6rem 0;}
 
@@ -472,6 +478,23 @@
   </form>
 </dialog>
 
+<dialog id="despDlg">
+  <h3 style="margin-bottom:1rem">Nova despesa</h3>
+  <form id="despForm">
+    <div class="row">
+      <div class="f"><label for="dsData">Data</label><input id="dsData" type="date"></div>
+      <div class="f"><label for="dsCat">Categoria</label><select id="dsCat"></select></div>
+    </div>
+    <div class="f"><label for="dsDesc">Descrição</label><input id="dsDesc" maxlength="100"></div>
+    <div class="f"><label for="dsValor">Valor (R$)</label><input id="dsValor" type="number" min="0" step="0.01"></div>
+    <p class="err" id="dsErr"></p>
+    <div style="display:flex;gap:.5rem;justify-content:flex-end">
+      <button type="button" class="btn" id="dsCancel">Cancelar</button>
+      <button type="submit" class="btn p">Salvar</button>
+    </div>
+  </form>
+</dialog>
+
 <dialog id="segDlg">
   <h3 style="margin-bottom:1rem">Nova apólice de seguro</h3>
   <form id="segForm">
@@ -694,6 +717,7 @@
     ],
     cli:[], con:[], seq:1, cseq:1, draft:[], useq:2,
     forn:[], compras:[], cot:[], fseq:1, bseq:1, qseq:1, eseq:7, fTab:"forn", finTab:"fin", ocup:60,
+    desp:[], dseq:1, finMonth:today().slice(0, 7),
     orc:[], oseq:1, manut:[], mseq:1, seg:[], sseq:1, log:[], priv:{dpo:"", dpoMail:"", guarda:5}, formMode:"loc", formFrom:null,
     users:[{id:1,nome:"Administrador",user:"admin",role:"admin",
       salt:"94999927fd0f54362d6bad23408fbd9c",hash:"93fc271cdbf9aec9ca1f347b3f4de99be3ad7ab53414a69393c36a75d54eea52"}]
@@ -899,6 +923,75 @@
     const cap = e.estoque * dias; return {du, rec, pct:cap ? du / cap : 0};
   }
 
+  /* ---- financeiro ---- */
+  const ym = d => d.slice(0, 7);
+  const monthAdd = (m, n) => { const [y, mo] = m.split("-").map(Number); return new Date(Date.UTC(y, mo - 1 + n, 1)).toISOString().slice(0, 7); };
+  const monthName = m => { const [y, mo] = m.split("-").map(Number); return new Date(Date.UTC(y, mo - 1, 15)).toLocaleDateString("pt-BR", {month:"long", year:"numeric", timeZone:"UTC"}); };
+  const parcelas = k => { const n = k.parc || 1, v = custoCompra(k) / n; return Array.from({length:n}, (_, i) => { const p = (k.pg || []).find(x => x.i === i); return {k, i, n, valor:v, venc:addMonths(k.data, n > 1 ? i + 1 : 0), paga:!!p, pagoEm:p && p.data}; }); };
+  const compact = n => n >= 1000 ? dec(n / 1000, 1) + "k" : String(Math.round(n));
+  const sum = (l, f) => l.reduce((a, x) => a + f(x), 0);
+  const DESP_CATS = ["Aluguel", "Salários e encargos", "Combustível", "Energia, água e internet", "Impostos e taxas", "Marketing", "Contabilidade", "Outros"];
+  function ledger(){
+    const L = [];
+    S.con.filter(c => c.pago).forEach(c => L.push({d:c.pgto.data, t:"E", cat:"Locação", desc:"Locação #" + c.id + " · " + cliById(c.cli).nome, v:c.pgto.total}));
+    S.manut.forEach(m => {
+      if (m.tipo === "Baixa" && m.motivo === "Venda" && m.valor) L.push({d:m.data, t:"E", cat:"Venda de equipamento", desc:eqById(m.eq).nome + " · " + m.qtd + " un.", v:m.valor});
+      if (m.tipo === "Manutenção" && m.custo) L.push({d:m.data, t:"S", cat:"Manutenção", desc:eqById(m.eq).nome, v:m.custo});
+    });
+    S.compras.forEach(k => parcelas(k).filter(p => p.paga).forEach(p => L.push({d:p.pagoEm, t:"S", cat:"Compra de equipamento", desc:eqById(k.eq).nome + " · parcela " + (p.i + 1) + "/" + p.n, v:p.valor})));
+    S.con.filter(c => c.status !== "cancelada" && c.freteReal).forEach(c => L.push({d:c.ini, t:"S", cat:"Frete (custo)", desc:"Locação #" + c.id, v:c.freteReal}));
+    S.seg.filter(s => s.premio).forEach(s => L.push({d:s.ini, t:"S", cat:"Seguros", desc:s.seguradora + " · " + s.tipo, v:s.premio}));
+    S.desp.forEach(x => L.push({d:x.data, t:"S", cat:x.cat, desc:x.desc, v:x.valor, id:x.id}));
+    return L.sort((a, b) => b.d < a.d ? -1 : b.d > a.d ? 1 : 0);
+  }
+  function barsSvg(ms){
+    const W = 600, H = 230, pad = 30, top = 22, base = H - 28, max = Math.max(1, ...ms.flatMap(x => [x.e, x.s])), bw = (W - pad * 2) / ms.length, h = v => (base - top) * v / max;
+    return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto" role="img" aria-label="Entradas e saídas dos últimos meses"><line x1="${pad}" y1="${base}" x2="${W - pad}" y2="${base}" style="stroke:var(--line)"/>` +
+      ms.map((x, i) => { const x0 = pad + i * bw + bw * .16, w = bw * .3, lab = x.m.slice(5) + "/" + x.m.slice(2, 4);
+        return `<rect x="${x0}" y="${base - h(x.e)}" width="${w}" height="${Math.max(1, h(x.e))}" rx="3" style="fill:var(--brand)"/><rect x="${x0 + w + 3}" y="${base - h(x.s)}" width="${w}" height="${Math.max(1, h(x.s))}" rx="3" style="fill:var(--bad)"/>` +
+          `<text x="${x0 + w}" y="${base - Math.max(h(x.e), h(x.s)) - 5}" text-anchor="middle" style="fill:var(--muted);font-size:11px">${x.e || x.s ? compact(Math.max(x.e, x.s)) : ""}</text><text x="${x0 + w}" y="${H - 8}" text-anchor="middle" style="fill:var(--muted);font-size:12px">${lab}</text>`; }).join("") + "</svg>";
+  }
+  function finDash(){
+    const M = S.finMonth, L = ledger(), inM = L.filter(x => ym(x.d) === M), E = sum(inM.filter(x => x.t === "E"), x => x.v), Sd = sum(inM.filter(x => x.t === "S"), x => x.v);
+    const paidM = S.con.filter(c => c.pago && ym(c.pgto.data) === M);
+    const rBruta = sum(paidM, c => c.total), rAcr = sum(paidM, c => c.pgto.acr), rMulta = sum(paidM, c => c.pgto.multa), rDesc = sum(paidM, c => c.pgto.desc), rOut = sum(inM.filter(x => x.cat === "Venda de equipamento"), x => x.v);
+    const rLiq = rBruta + rAcr + rMulta - rDesc + rOut, custos = sum(inM.filter(x => x.t === "S" && (x.cat === "Frete (custo)" || x.cat === "Manutenção")), x => x.v);
+    const opex = sum(inM.filter(x => x.t === "S" && !["Frete (custo)", "Manutenção", "Compra de equipamento"].includes(x.cat)), x => x.v);
+    const depr = S.compras.reduce((a, k) => { const e = eqById(k.eq); return a + (months(k.data) < e.vida ? custoCompra(k) / e.vida : 0); }, 0), res = rLiq - custos - opex - depr;
+    const ab = aReceber(), venc = sum(ab.filter(overdue), c => c.total), bk = {av:0, d30:0, d60:0, d90:0};
+    ab.forEach(c => { const d = Math.floor((new Date(today()) - new Date(c.fim)) / day); bk[d <= 0 ? "av" : d <= 30 ? "d30" : d <= 60 ? "d60" : "d90"] += c.total; });
+    const pend = S.compras.flatMap(parcelas).filter(p => !p.paga).sort((a, b) => a.venc < b.venc ? -1 : 1), aPagar = sum(pend, p => p.valor), aPagarVenc = sum(pend.filter(p => p.venc < today()), p => p.valor);
+    const caucoes = sum(S.con.filter(c => c.status === "ativo" || c.status === "reserva"), c => c.caucao || 0);
+    const ms = [-5, -4, -3, -2, -1, 0].map(n => { const m = monthAdd(M, n), l = L.filter(x => ym(x.d) === m); return {m, e:sum(l.filter(x => x.t === "E"), x => x.v), s:sum(l.filter(x => x.t === "S"), x => x.v)}; });
+    const cats = {}; inM.filter(x => x.t === "S").forEach(x => { cats[x.cat] = (cats[x.cat] || 0) + x.v; });
+    const eqRev = {}; paidM.forEach(c => c.itens.forEach(i => { const n = eqById(i.eq).nome; eqRev[n] = (eqRev[n] || 0) + i.pu * i.qtd; }));
+    const cliRev = {}; paidM.forEach(c => { const n = cliById(c.cli).nome; cliRev[n] = (cliRev[n] || 0) + c.pgto.total; });
+    const top = (o, n) => Object.entries(o).sort((a, b) => b[1] - a[1]).slice(0, n);
+    const kp = [["Recebido no mês", BRL(E), ""], ["Saídas no mês", BRL(Sd), ""], ["Saldo de caixa", BRL(E - Sd), E - Sd < 0 ? "warn" : ""], ["Resultado (DRE)", BRL(res) + (rLiq ? ` <small>${Math.round(res / rLiq * 100)}%</small>` : ""), res < 0 ? "warn" : ""], ["A receber", BRL(sum(ab, c => c.total)) + (venc ? `<small> · ${BRL(venc)} vencido</small>` : ""), ""], ["A pagar", BRL(aPagar) + (aPagarVenc ? `<small> · ${BRL(aPagarVenc)} vencido</small>` : ""), ""]];
+    const row = (t, v, cls) => `<tr><td>${t}</td><td class="${cls || ""}">${BRL(v)}</td></tr>`;
+    const list = (o, tot) => o.length ? o.map(([n, v]) => `<div class="avail"><span style="width:auto;flex:1">${esc(n)}</span><div class="bar" style="max-width:90px"><i style="width:${tot ? v / tot * 100 : 0}%"></i></div><b style="width:96px">${BRL(v)}</b></div>`).join("") : '<div class="empty">Sem movimento neste mês</div>';
+    return `<div class="card" style="margin-bottom:1.2rem"><div class="fmnav"><button class="btn icon" data-fm="-1" aria-label="Mês anterior">‹</button><b>${monthName(M).replace(/^./, c => c.toUpperCase())}</b><button class="btn icon" data-fm="1" aria-label="Próximo mês">›</button><button class="btn sm" data-fm="0">Mês atual</button></div></div>` +
+      `<div class="kpis k6">${kp.map(x => `<div class="card kpi ${x[2]}"><span>${x[0]}</span><b>${x[1]}</b></div>`).join("")}</div>` +
+      `<p class="note" style="padding:0 0 1rem">Caixa = o que entrou e saiu de fato. O resultado (DRE) usa a depreciação mensal dos equipamentos (${BRL(depr)}) e não conta a compra de equipamento como despesa. Cauções em custódia nas locações abertas: ${BRL(caucoes)} (não são receita).</p>` +
+      `<div class="grid2"><div class="card"><div class="head"><h3>Entradas e saídas nos últimos 6 meses</h3><p><span style="color:var(--brand)">■</span> entradas · <span style="color:var(--bad)">■</span> saídas</p></div><div style="padding:0 1rem 1rem">${barsSvg(ms)}</div></div>` +
+      `<div class="card"><div class="head"><h3>Resultado do mês (DRE)</h3><p>base: valores recebidos no mês</p></div><div class="wrap keep"><table style="min-width:0"><tbody>${row("Locações (valor acertado)", rBruta)}${row("+ Acréscimos", rAcr)}${row("+ Multas e juros", rMulta)}${row("− Descontos", -rDesc)}${row("+ Venda de equipamentos", rOut)}${row("<b>Receita líquida</b>", rLiq)}${row("− Custos diretos (frete e manutenção)", -custos)}${row("− Despesas operacionais", -opex)}${row("− Depreciação dos equipamentos", -depr)}${row("<b>Resultado</b>", res, res < 0 ? "zero" : "")}</tbody></table></div></div></div><div style="height:1.2rem"></div>` +
+      `<div class="grid2"><div class="card"><div class="head"><h3>Contas a receber</h3><p>locações ainda não pagas, por atraso</p></div><div class="wrap keep"><table style="min-width:0"><tbody>${row("A vencer", bk.av)}${row("Vencido há até 30 dias", bk.d30, bk.d30 ? "zero" : "")}${row("Vencido de 31 a 60 dias", bk.d60, bk.d60 ? "zero" : "")}${row("Vencido há mais de 60 dias", bk.d90, bk.d90 ? "zero" : "")}</tbody></table></div><p class="note">Cobre por WhatsApp ou e-mail na página Cobranças.</p></div>` +
+      `<div class="card"><div class="head"><h3>Contas a pagar</h3><p>parcelas de compras de equipamentos</p></div>` +
+      (pend.length ? pend.slice(0, 8).map(p => `<div class="avail"><span style="width:auto;flex:1">${esc(eqById(p.k.eq).nome)} · ${p.i + 1}/${p.n}<br><span class="hint">vence ${fmt(p.venc)}${p.venc < today() ? " · vencida" : ""}</span></span><b style="width:90px">${BRL(p.valor)}</b><button class="btn sm" data-pgparc="${p.k.id}:${p.i}">Pagar</button></div>`).join("") : '<div class="empty">Nenhuma parcela em aberto</div>') + `</div></div><div style="height:1.2rem"></div>` +
+      `<div class="grid2"><div class="card"><div class="head"><h3>Saídas por categoria</h3><p>${monthName(M)}</p></div>${list(top(cats, 8), Sd)}<div style="height:.6rem"></div></div>` +
+      `<div class="card"><div class="head"><h3>Receita por equipamento</h3><p>locações pagas no mês</p></div>${list(top(eqRev, 6), sum(Object.values(eqRev), v => v))}<div class="head" style="padding-top:.4rem"><h3>Maiores clientes</h3></div>${list(top(cliRev, 5), sum(Object.values(cliRev), v => v))}<div style="height:.6rem"></div></div></div><div style="height:1.2rem"></div>` +
+      `<div class="card"><div class="head"><h3>Extrato do mês</h3><p>todas as entradas e saídas de caixa</p></div><div class="wrap"><table><thead><tr><th>Data</th><th>Tipo</th><th>Categoria</th><th>Descrição</th><th>Valor</th><th></th></tr></thead><tbody>` +
+      (inM.length ? inM.map(x => `<tr><td>${fmt(x.d)}</td><td><span class="pill ${x.t === "E" ? "g" : "r"}">${x.t === "E" ? "Entrada" : "Saída"}</span></td><td>${esc(x.cat)}</td><td>${esc(x.desc)}</td><td><b>${x.t === "E" ? "" : "− "}${BRL(x.v)}</b></td><td>${x.id ? `<div class="acts"><button class="btn sm bad" data-deldesp="${x.id}">Excluir</button></div>` : ""}</td></tr>`).join("") : '<tr><td class="none" colspan="6">Nenhum lançamento neste mês</td></tr>') +
+      `</tbody></table></div><div style="padding:.3rem 1.1rem 1.1rem;display:flex;gap:.5rem;flex-wrap:wrap"><button class="btn" id="btnCsv">Exportar para a contabilidade (CSV)</button></div></div>`;
+  }
+  function openDesp(){ $("dsCat").innerHTML = DESP_CATS.map(c => `<option>${c}</option>`).join(""); $("dsData").value = today(); $("dsData").max = today(); $("dsDesc").value = ""; $("dsValor").value = ""; $("dsErr").textContent = ""; $("despDlg").showModal(); }
+  function exportCsv(){
+    const M = S.finMonth, rows = [["Data", "Tipo", "Categoria", "Descrição", "Valor"]].concat(ledger().filter(x => ym(x.d) === M).map(x => [fmt(x.d), x.t === "E" ? "Entrada" : "Saída", x.cat, x.desc, (x.t === "E" ? "" : "-") + x.v.toFixed(2).replace(".", ",")]));
+    const csv = "﻿" + rows.map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(";")).join("\r\n");
+    const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], {type:"text/csv;charset=utf-8"})); a.download = "extrato-" + M + ".csv"; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    audit("Exportou extrato financeiro", M);
+  }
+
   /* ---- telas ---- */
   const V = {
     painel(){
@@ -1015,7 +1108,7 @@
       const box = (t, items) => `<div class="card"><div class="head"><h3>${t} <span class="pill y">em preparação</span></h3><p>estrutura planejada; ainda não implementada</p></div><ul class="plan">${items.map(i => "<li>" + i + "</li>").join("")}</ul></div>`;
       const fin = box("Visão financeira", ["Receita por período, equipamento e cliente", "Despesas: compras, fretes, juros e financiamentos (dados já coletados em Compras)", "Contas a pagar (parcelas de compras) e a receber (locações em aberto)", "Fluxo de caixa e projeção dos próximos meses", "Inadimplência e multas cobradas", "Margem e retorno por equipamento (usa o payback já calculado)", "Resumo para a contabilidade (exportação)"]);
       const nf = box("Venda com nota fiscal", ["Venda de equipamento usado ou de sucata com emissão de nota", "Dados fiscais do cliente (CPF/CNPJ, inscrição, endereço) — já coletados no cadastro", "Item vendido sai do estoque e registra baixa contábil pelo valor depreciado", "Emissão da nota por integração com um emissor (NF-e / NFS-e), conforme o município e o regime tributário", "Guarda do XML e do PDF da nota junto à venda", "Locação de bem móvel: em regra o ISS não incide (Súmula Vinculante 31 do STF); a contabilidade define o documento fiscal da locação, conforme o regime tributário cadastrado em Configurações"]);
-      return `<div class="card"><div class="tabs" style="padding-top:1rem">${[["fin","Financeiro"], ["nf","Venda com nota fiscal"]].map(t => `<button class="tab${S.finTab === t[0] ? " on" : ""}" data-fn="${t[0]}">${t[1]}</button>`).join("")}</div></div><div style="height:1rem"></div>` + (S.finTab === "fin" ? fin : nf);
+      return `<div class="card"><div class="tabs" style="padding-top:1rem">${[["fin","Financeiro"], ["nf","Venda com nota fiscal"]].map(t => `<button class="tab${S.finTab === t[0] ? " on" : ""}" data-fn="${t[0]}">${t[1]}</button>`).join("")}</div></div><div style="height:1rem"></div>` + (S.finTab === "fin" ? finDash() : nf);
     },
     config(){
       const e = S.emp, v = k => esc(e[k] || ""), admins = S.users.filter(u => u.role === "admin").length;
@@ -1062,7 +1155,7 @@
     return '<div style="height:1.2rem"></div>' + seg + '<div style="height:1.2rem"></div>' + priv + '<div style="height:1.2rem"></div>' + aud;
   }
   const orcWa = (o, p) => "https://wa.me/55" + dg(p.tel) + "?text=" + encodeURIComponent(`Olá, ${p.nome}! Segue o orçamento nº ${o.id} da ${fantasia()}: ${o.itens.map(i => i.qtd + "× " + eqById(i.eq).nome).join(", ")}, ${o.per} dia(s) a partir de ${fmt(o.ini)}. Total: ${BRL(o.total)}. Válido até ${fmt(o.validade)}.`);
-  const TITLES = {painel:["Painel","visão da operação hoje"], agenda:["Agenda","entregas, coletas e disponibilidade por dia"], orc:["Orçamentos","propostas antes de fechar a locação"], locacoes:["Locações","abertas e encerradas"], clientes:["Clientes","dados protegidos conforme a LGPD"], equip:["Equipamentos","estoque, preços e retorno do investimento"], forn:["Fornecedores","compras, cotações e comparativo de preços"], cobrar:["Cobranças","o que ainda não foi pago"], fin:["Financeiro","em preparação"], config:["Configurações","empresa, usuários, seguros e privacidade"]};
+  const TITLES = {painel:["Painel","visão da operação hoje"], agenda:["Agenda","entregas, coletas e disponibilidade por dia"], orc:["Orçamentos","propostas antes de fechar a locação"], locacoes:["Locações","abertas e encerradas"], clientes:["Clientes","dados protegidos conforme a LGPD"], equip:["Equipamentos","estoque, preços e retorno do investimento"], forn:["Fornecedores","compras, cotações e comparativo de preços"], cobrar:["Cobranças","o que ainda não foi pago"], fin:["Financeiro","caixa, resultado e contas a pagar e receber"], config:["Configurações","empresa, usuários, seguros e privacidade"]};
 
   function waLink(c, cl){
     const msg = `Olá, ${cl.nome}! Aqui é da ${fantasia()}. A locação #${c.id} (${BRL(c.total)}) venceu em ${fmt(c.fim)}. Podemos combinar o pagamento/devolução?${S.emp.tel ? " Contato: " + MASK.phone(S.emp.tel) + "." : ""} Obrigado!`;
@@ -1107,7 +1200,7 @@
     if (S.map){ S.map.remove(); S.map = null; }
     document.body.dataset.page = S.page;
     nav(); $("title").textContent = TITLES[S.page][0]; $("sub").textContent = TITLES[S.page][1];
-    const act = S.page === "orc" ? ["Novo orçamento", () => openForm("orc")] : S.page === "equip" ? ["Novo equipamento", openBuy] : S.page === "forn" ? (S.fTab === "forn" ? ["Novo fornecedor", openForn] : S.fTab === "compras" ? ["Registrar compra", openBuy] : ["Nova cotação", openCot]) : ["Nova locação", () => openForm("loc")];
+    const act = S.page === "fin" && S.finTab === "fin" ? ["Nova despesa", openDesp] : S.page === "orc" ? ["Novo orçamento", () => openForm("orc")] : S.page === "equip" ? ["Novo equipamento", openBuy] : S.page === "forn" ? (S.fTab === "forn" ? ["Novo fornecedor", openForn] : S.fTab === "compras" ? ["Registrar compra", openBuy] : ["Nova cotação", openCot]) : ["Nova locação", () => openForm("loc")];
     $("newC").querySelector(".lbl").textContent = " " + act[0]; $("newC").setAttribute("aria-label", act[0]); $("newC").onclick = act[1];
     $("view").innerHTML = V[S.page]();
     labelTables();
@@ -1122,6 +1215,10 @@
     }
     $$("[data-ret]").forEach(b => b.onclick = () => openRet(+b.dataset.ret));
     $$("[data-chk]").forEach(b => b.onclick = () => openChk(+b.dataset.chk));
+    $$("[data-fm]").forEach(b => b.onclick = () => { const n = +b.dataset.fm; S.finMonth = n ? monthAdd(S.finMonth, n) : today().slice(0, 7); render(); });
+    $$("[data-pgparc]").forEach(b => b.onclick = () => { const [kid, i] = b.dataset.pgparc.split(":").map(Number), k = S.compras.find(x => x.id === kid); (k.pg = k.pg || []).push({i, data:today()}); audit("Pagou parcela de compra", eqById(k.eq).nome + " " + (i + 1) + "/" + k.parc); render(); });
+    $$("[data-deldesp]").forEach(b => b.onclick = () => askConfirm("Excluir esta despesa?", () => { S.desp = S.desp.filter(x => x.id !== +b.dataset.deldesp); audit("Excluiu despesa", "#" + b.dataset.deldesp); render(); }, "Excluir"));
+    if ($("btnCsv")) $("btnCsv").onclick = exportCsv;
     $$("[data-goto]").forEach(b => b.onclick = () => { S.page = b.dataset.goto; render(); scrollTo(0, 0); });
     $$("[data-saida]").forEach(b => b.onclick = () => { const c = conById(+b.dataset.saida); c.status = "ativo"; audit("Confirmou a saída", "locação #" + c.id); render(); openChk(c.id); });
     $$("[data-cancel]").forEach(b => b.onclick = () => askConfirm("Cancelar a reserva #" + b.dataset.cancel + "? Os equipamentos voltam a ficar disponíveis.", () => { const c = conById(+b.dataset.cancel); c.status = "cancelada"; audit("Cancelou a reserva", "locação #" + c.id); render(); }, "Cancelar reserva"));
@@ -1326,7 +1423,7 @@
     else eq = eqById($("bEq").value);
     if (fv === "new"){ const f = {id:S.fseq++, nome:fn, nota:3}; S.forn.push(f); fv = f.id; } else fv = +fv;
     eq.estoque += qtd;
-    S.compras.push({id:S.bseq++, eq:eq.id, forn:fv, data, qtd, unit, frete:num("bFrete"), juros:num("bJuros"), parc:parseInt($("bParc").value, 10) || 1, nf:$("bNF").value.trim(),
+    S.compras.push({id:S.bseq++, eq:eq.id, forn:fv, data, qtd, unit, frete:num("bFrete"), juros:num("bJuros"), parc:parseInt($("bParc").value, 10) || 1, pg:(parseInt($("bParc").value, 10) || 1) <= 1 ? [{i:0, data}] : [], nf:$("bNF").value.trim(),
       docs:Array.from($("bDocs").files).map(f => f.name + " (" + Math.max(1, Math.round(f.size / 1024)) + " KB)"), garantia:parseInt($("bGar").value, 10) || 0, obs:$("bObs").value.trim()});
     $("buyDlg").close(); if (S.page !== "forn") S.page = "equip"; render();
   };
@@ -1417,6 +1514,15 @@
     if (e){ $("sgErr").textContent = e; return; }
     S.seg.push({id:S.sseq++, seguradora, tipo:$("sgTipo").value, num:$("sgNum").value.trim(), ini, fim, valor:num("sgVal"), premio:num("sgPre"), docs:Array.from($("sgDoc").files).map(f => f.name)});
     audit("Cadastrou apólice", seguradora); $("segDlg").close(); render();
+  };
+  $("dsCancel").onclick = () => $("despDlg").close();
+  $("despForm").onsubmit = ev => {
+    ev.preventDefault();
+    const data = $("dsData").value, desc = $("dsDesc").value.trim(), valor = parseFloat($("dsValor").value);
+    const e = !data || data > today() ? "Data inválida." : desc.length < 3 ? "Descreva a despesa." : !(valor > 0) ? "Informe o valor." : "";
+    if (e){ $("dsErr").textContent = e; return; }
+    S.desp.push({id:S.dseq++, data, cat:$("dsCat").value, desc, valor, por:S.me.user});
+    audit("Lançou despesa", $("dsCat").value + " · " + BRL(valor)); S.finMonth = ym(data); $("despDlg").close(); render();
   };
   $("cfmNo").onclick = () => $("cfmDlg").close();
   $("cfmYes").onclick = () => { $("cfmDlg").close(); if (cfmFn) cfmFn(); };
