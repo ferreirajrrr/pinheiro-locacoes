@@ -224,6 +224,21 @@
   .best{color:var(--good); font-weight:700;}
   .riskbox{padding:.6rem .8rem; border-radius:10px; background:var(--surface-2); font-size:.85rem; margin-bottom:.8rem;}
   .assume{display:flex; align-items:center; gap:.5rem; padding:0 1.1rem .8rem; font-size:.82rem; color:var(--muted); flex-wrap:wrap;} .assume input{width:80px; min-height:38px; padding:.3rem .5rem; border:1px solid var(--line); border-radius:8px; background:var(--surface-2);}
+  .ckit{border:1px solid var(--line); border-radius:10px; padding:.8rem; margin-bottom:.7rem;}
+  .ckh{display:flex; justify-content:space-between; align-items:center; gap:.5rem; margin-bottom:.5rem; flex-wrap:wrap;}
+  .ph{display:flex; gap:.6rem; flex-wrap:wrap;}
+  .th{position:relative; width:72px; height:72px;} .th img{width:100%; height:100%; object-fit:cover; border-radius:8px;}
+  .th button{position:absolute; top:-6px; right:-6px; width:24px; height:24px; border-radius:50%; border:none; background:var(--bad); color:#fff; cursor:pointer; line-height:1;}
+  .addph{width:72px; height:72px; border:1.5px dashed var(--line); border-radius:8px; display:flex; align-items:center; justify-content:center; color:var(--muted); font-size:.78rem; cursor:pointer; text-align:center;}
+  #docBody .fotos img{width:84px; height:84px; object-fit:cover; margin:2px; border-radius:4px;}
+  #docBody h4{margin:1rem 0 .3rem; font-size:.95rem;}
+  #docBody table{font-size:.8rem;} #docBody th{padding:.35rem .3rem; font-size:.62rem;}
+  .wrap.keep table{display:table; min-width:640px;} .wrap.keep thead{display:table-header-group;} .wrap.keep tbody{display:table-row-group;}
+  .wrap.keep tr{display:table-row; padding:0; border:none;} .wrap.keep td{display:table-cell; padding:.55rem .6rem; border-bottom:1px solid var(--line); text-align:center; white-space:nowrap;} .wrap.keep td::before{content:none;}
+  .wrap.keep td:first-child,.wrap.keep th:first-child{text-align:left; padding-left:1.1rem;} .wrap.keep th{text-align:center;}
+  .wrap.keep td.zero{color:var(--bad); font-weight:700;}
+  .agd{padding:.5rem 1.1rem; border-top:1px solid var(--line); font-size:.85rem; display:flex; gap:.6rem; align-items:flex-start; flex-wrap:wrap;} .agd b{min-width:92px;}
+  .alrt{display:flex; align-items:center; gap:.7rem; padding:.55rem 1.1rem; font-size:.85rem; border-top:1px solid var(--line);} .alrt span:nth-child(2){flex:1;}
   .plan{margin:0; padding:.2rem 1.1rem 1.1rem 2.2rem; font-size:.88rem; line-height:1.7; color:var(--muted);}
   .lgpd{font-size:.75rem; color:var(--muted); margin:.6rem 0;}
 
@@ -307,6 +322,7 @@
     <div class="f"><label for="bEq">Equipamento</label><select id="bEq"></select></div>
     <div id="bNovo">
       <div class="f"><label for="bNome">Nome do equipamento</label><input id="bNome" maxlength="60"></div>
+      <div class="f"><label for="bRepos">Valor de reposição por unidade (R$)</label><input id="bRepos" type="number" min="0" step="0.01"><small class="hint">cobrado se o equipamento for perdido; se vazio, usa o custo da compra</small></div>
       <div class="row">
         <div class="f"><label for="bVol">Volume unitário (m³)</label><input id="bVol" type="number" min="0" step="0.001"></div>
         <div class="f"><label for="bVida">Vida útil (meses)</label><input id="bVida" type="number" min="1" value="60"><small class="hint">base da depreciação</small></div>
@@ -423,8 +439,66 @@
   </form>
 </dialog>
 
+<dialog id="cfmDlg">
+  <h3 style="margin-bottom:.6rem">Confirmar</h3>
+  <p id="cfmMsg" style="margin-bottom:1rem"></p>
+  <div style="display:flex;gap:.5rem;justify-content:flex-end">
+    <button type="button" class="btn" id="cfmNo">Voltar</button>
+    <button type="button" class="btn p" id="cfmYes">Confirmar</button>
+  </div>
+</dialog>
+
+<dialog id="mnDlg">
+  <h3 id="mnTitle" style="margin-bottom:.3rem"></h3>
+  <p class="hint" id="mnSub" style="margin-bottom:1rem"></p>
+  <form id="mnForm">
+    <div class="row">
+      <div class="f" id="mnQtdW"><label for="mnQtd">Quantidade</label><input id="mnQtd" type="number" min="1" step="1" value="1"></div>
+      <div class="f"><label for="mnData">Data</label><input id="mnData" type="date"></div>
+    </div>
+    <div class="f" id="mnPrevW"><label for="mnPrev">Previsão de retorno (opcional)</label><input id="mnPrev" type="date"></div>
+    <div class="f" id="mnMotW"><label for="mnMot">Motivo da baixa</label><select id="mnMot"><option>Perda</option><option>Furto</option><option>Venda</option><option>Sucata / descarte</option></select></div>
+    <div class="row" id="mnResW">
+      <div class="f"><label for="mnRes">Resultado da inspeção</label><select id="mnRes"><option>Aprovado</option><option>Reprovado (enviar para manutenção)</option></select></div>
+      <div class="f"><label for="mnInt">Próxima inspeção em (dias)</label><input id="mnInt" type="number" min="7" step="1" value="90"></div>
+    </div>
+    <div class="f" id="mnCustoW"><label for="mnCusto" id="mnCustoL">Custo (R$)</label><input id="mnCusto" type="number" min="0" step="0.01" value="0"></div>
+    <div class="f"><label for="mnObs">Observações</label><textarea id="mnObs" rows="2" maxlength="300"></textarea></div>
+    <p class="err" id="mnErr"></p>
+    <div style="display:flex;gap:.5rem;justify-content:flex-end">
+      <button type="button" class="btn" id="mnCancel">Cancelar</button>
+      <button type="submit" class="btn p">Salvar</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="segDlg">
+  <h3 style="margin-bottom:1rem">Nova apólice de seguro</h3>
+  <form id="segForm">
+    <div class="row">
+      <div class="f"><label for="sgSeg">Seguradora</label><input id="sgSeg" maxlength="60"></div>
+      <div class="f"><label for="sgTipo">Tipo</label><select id="sgTipo"><option>Responsabilidade civil</option><option>Equipamentos</option><option>Patrimonial / outro</option></select></div>
+    </div>
+    <div class="f"><label for="sgNum">Número da apólice</label><input id="sgNum" maxlength="40"></div>
+    <div class="row">
+      <div class="f"><label for="sgIni">Início da vigência</label><input id="sgIni" type="date"></div>
+      <div class="f"><label for="sgFim">Fim da vigência</label><input id="sgFim" type="date"></div>
+    </div>
+    <div class="row">
+      <div class="f"><label for="sgVal">Valor segurado (R$)</label><input id="sgVal" type="number" min="0" step="0.01"></div>
+      <div class="f"><label for="sgPre">Prêmio pago (R$)</label><input id="sgPre" type="number" min="0" step="0.01"></div>
+    </div>
+    <div class="f"><label for="sgDoc">Apólice (arquivo)</label><input id="sgDoc" type="file" accept=".pdf,image/*"><small class="hint">nesta demonstração só o nome do arquivo é guardado</small></div>
+    <p class="err" id="sgErr"></p>
+    <div style="display:flex;gap:.5rem;justify-content:flex-end">
+      <button type="button" class="btn" id="sgCancel">Cancelar</button>
+      <button type="submit" class="btn p">Salvar</button>
+    </div>
+  </form>
+</dialog>
+
 <dialog id="dlg">
-  <h3 style="margin-bottom:1rem">Nova locação</h3>
+  <h3 id="formTitle" style="margin-bottom:1rem">Nova locação</h3>
   <form id="form" method="dialog">
     <div class="f"><label for="fCli">Cliente</label><select id="fCli"></select></div>
     <div class="riskbox" id="riskBox" hidden></div>
@@ -434,22 +508,22 @@
         <div class="f"><label for="cNome">Nome completo</label><input id="cNome" maxlength="80" autocomplete="off"></div>
         <div class="f"><label for="cTel">WhatsApp</label><input id="cTel" data-mask="phone" maxlength="15" inputmode="numeric" placeholder="(85) 99999-9999"></div>
       </div>
-      <div class="row">
+      <div class="row onlyloc">
         <div class="f"><label for="cDoc">CPF ou CNPJ</label><input id="cDoc" data-mask="doc" maxlength="18" inputmode="numeric" placeholder="000.000.000-00"></div>
         <div class="f"><label for="cNasc">Data de nascimento (opcional)</label><input id="cNasc" data-mask="date" maxlength="10" inputmode="numeric" placeholder="dd/mm/aaaa"></div>
       </div>
-      <div class="f"><label for="cMail">E-mail (opcional)</label><input id="cMail" type="email" maxlength="80"></div>
-      <div class="row">
+      <div class="f onlyloc"><label for="cMail">E-mail (opcional)</label><input id="cMail" type="email" maxlength="80"></div>
+      <div class="row onlyloc">
         <div class="f"><label for="cCep">CEP da obra</label><input id="cCep" data-mask="cep" maxlength="9" inputmode="numeric" placeholder="00000-000"><small class="hint" id="cepMsg"></small></div>
         <div class="f"><label for="cNum">Número</label><input id="cNum" maxlength="10"></div>
       </div>
-      <div class="f"><label for="cRua">Rua</label><input id="cRua" maxlength="80"></div>
-      <div class="r3">
+      <div class="f onlyloc"><label for="cRua">Rua</label><input id="cRua" maxlength="80"></div>
+      <div class="r3 onlyloc">
         <div class="f"><label for="cBairro">Bairro</label><input id="cBairro" maxlength="60"></div>
         <div class="f"><label for="cCidade">Cidade</label><input id="cCidade" maxlength="60"></div>
         <div class="f"><label for="cUf">UF</label><input id="cUf" data-mask="uf" maxlength="2"></div>
       </div>
-      <label style="display:flex;gap:.5rem;font-size:.8rem;margin-bottom:.8rem"><input type="checkbox" id="cLgpd"> Cliente autorizou o uso dos dados para locação e cobrança (LGPD)</label>
+      <label class="onlyloc" style="display:flex;gap:.5rem;font-size:.8rem;margin-bottom:.8rem"><input type="checkbox" id="cLgpd"> Cliente autorizou o uso dos dados para locação e cobrança (LGPD)</label>
     </div>
     <div class="f"><label>Equipamentos</label><div id="items"></div><button type="button" class="btn sm" id="addItem">+ item</button></div>
     <div class="row">
@@ -460,6 +534,11 @@
       <div class="f"><label for="fFrete">Frete (R$)</label><input id="fFrete" type="number" min="0" step="0.01" value="0"></div>
       <div class="f"><label for="fCaucao">Caução (R$)</label><input id="fCaucao" type="number" min="0" step="0.01" value="0"><small class="hint">devolvida na entrega, se sem avarias</small></div>
     </div>
+    <div class="row">
+      <div class="f"><label for="fModo">Logística</label><select id="fModo"><option>Retirada no depósito</option><option>Entrega e coleta na obra</option></select></div>
+      <div class="f" id="fMotW" hidden><label for="fMot">Motorista / veículo</label><input id="fMot" maxlength="60"></div>
+    </div>
+    <div class="f" id="fFreteRealW" hidden><label for="fFreteReal">Custo real do frete (R$, uso interno)</label><input id="fFreteReal" type="number" min="0" step="0.01" value="0"><small class="hint">compare com o frete cobrado para saber a margem</small></div>
     <div class="total"><span>Total</span><span id="fTotal">R$ 0,00</span></div>
     <p class="err" id="fErr"></p>
     <div style="display:flex;gap:.5rem;justify-content:flex-end">
@@ -481,10 +560,27 @@
   </form>
 </dialog>
 
+<dialog id="ckDlg">
+  <h3 id="ckTitle" style="margin-bottom:.3rem">Checklist de saída</h3>
+  <p class="hint" style="margin-bottom:1rem">Registre o estado de cada item antes de sair. As fotos ficam com data, hora e usuário.</p>
+  <form id="ckForm">
+    <div id="ckBody"></div>
+    <div class="f"><label for="ckObs">Observações gerais</label><input id="ckObs" maxlength="200"></div>
+    <p class="err" id="ckErr"></p>
+    <div style="display:flex;gap:.5rem;justify-content:flex-end">
+      <button type="button" class="btn" id="ckCancel">Fazer depois</button>
+      <button type="submit" class="btn p">Salvar checklist</button>
+    </div>
+  </form>
+</dialog>
+
 <dialog id="retDlg">
   <h3 style="margin-bottom:1rem">Receber equipamento</h3>
   <form id="retForm">
     <div class="info" id="retInfo"></div>
+    <h4 class="sub">Checklist de devolução</h4>
+    <p class="hint" id="retChkNote"></p>
+    <div id="retChk"></div>
     <div class="row">
       <div class="f"><label for="rData">Data da devolução</label><input id="rData" type="date"></div>
       <div class="f"><label for="rCond">Condição</label><select id="rCond"><option>Sem avarias</option><option>Com avarias</option><option>Peças faltando</option></select></div>
@@ -598,17 +694,32 @@
     ],
     cli:[], con:[], seq:1, cseq:1, draft:[], useq:2,
     forn:[], compras:[], cot:[], fseq:1, bseq:1, qseq:1, eseq:7, fTab:"forn", finTab:"fin", ocup:60,
+    orc:[], oseq:1, manut:[], mseq:1, seg:[], sseq:1, log:[], priv:{dpo:"", dpoMail:"", guarda:5}, formMode:"loc", formFrom:null,
     users:[{id:1,nome:"Administrador",user:"admin",role:"admin",
       salt:"94999927fd0f54362d6bad23408fbd9c",hash:"93fc271cdbf9aec9ca1f347b3f4de99be3ad7ab53414a69393c36a75d54eea52"}]
   };
-  S.eq.forEach(e => { e.fragil = false; e.vol = null; e.vida = 60; });
+  S.eq.forEach(e => { e.fragil = false; e.vol = null; e.vida = 60; e.inspInt = 90; e.ultInsp = null; e.repos = null; });
   const eqById = id => S.eq.find(e => e.id == id);
   const cliById = id => S.cli.find(c => c.id == id);
   const conById = id => S.con.find(c => c.id == id);
   const rented = eqId => S.con.filter(c => c.status === "ativo").reduce((a, c) => a + c.itens.filter(i => i.eq == eqId).reduce((s, i) => s + i.qtd, 0), 0);
-  const avail = e => e.estoque - rented(e.id);
+  const nextDay = d => iso(new Date(new Date(d).getTime() + day));
+  const addDays = (d, n) => iso(new Date(new Date(d).getTime() + n * day));
+  const occupies = c => c.status === "reserva" || c.status === "ativo";
+  const occEnd = c => c.status === "ativo" && c.fim <= today() ? nextDay(today()) : c.fim;
+  const usedOn = (eqId, d, except) => S.con.filter(c => occupies(c) && c.id !== except && c.ini <= d && d < occEnd(c)).reduce((a, c) => a + c.itens.filter(i => i.eq == eqId).reduce((s, i) => s + i.qtd, 0), 0);
+  const manutOn = (eqId, d) => S.manut.filter(m => m.eq === eqId && m.tipo === "Manutenção" && !m.fim && (!m.prev || m.prev >= d)).reduce((a, m) => a + m.qtd, 0);
+  const freeOn = (e, d, except) => e.estoque - manutOn(e.id, d) - usedOn(e.id, d, except);
+  const avail = e => Math.max(0, freeOn(e, today()));
+  function availPer(e, ini, fim, except){ let m = Infinity; for (let d = ini; d < fim; d = nextDay(d)) m = Math.min(m, freeOn(e, d, except)); return m === Infinity ? avail(e) : Math.max(0, m); }
   const late = c => c.status === "ativo" && c.fim < today();
-  const overdue = c => !c.pago && c.fim < today();
+  const overdue = c => !c.pago && c.status !== "cancelada" && c.fim < today();
+  const aReceber = () => S.con.filter(c => !c.pago && c.status !== "cancelada");
+  const reposOf = e => e.repos || (S.compras.filter(k => k.eq === e.id).slice(-1)[0] || {}).unit || 0;
+  const nextInsp = e => e.ultInsp ? addDays(e.ultInsp, e.inspInt) : null;
+  function audit(acao, alvo){ S.log.push({t:new Date().toISOString(), user:S.me ? S.me.user : "—", acao, alvo:alvo || ""}); }
+  let cfmFn = null;
+  function askConfirm(msg, fn, label){ $("cfmMsg").textContent = msg; $("cfmYes").textContent = label || "Confirmar"; cfmFn = fn; $("cfmDlg").showModal(); }
   const itensTxt = c => c.itens.map(i => i.qtd + "× " + esc(eqById(i.eq).nome)).join(", ");
   const diasAtraso = c => Math.max(0, Math.floor((new Date(c.dev ? c.dev.data : today()) - new Date(c.fim)) / day));
   const fantasia = () => S.emp.fantasia || "Pinheiro Locações";
@@ -625,14 +736,14 @@
     const ks = S.compras.filter(k => k.eq === e.id);
     const inv = ks.reduce((a, k) => a + custoCompra(k), 0);
     const depr = ks.reduce((a, k) => a + Math.min(custoCompra(k), custoCompra(k) / e.vida * months(k.data)), 0);
-    const rec = S.con.reduce((a, c) => a + c.itens.filter(i => i.eq === e.id).reduce((s, i) => s + i.pu * i.qtd, 0), 0);
+    const rec = S.con.filter(c => c.status === "ativo" || c.status === "devolvido").reduce((a, c) => a + c.itens.filter(i => i.eq === e.id).reduce((s, i) => s + i.pu * i.qtd, 0), 0);
     const mo = ks.length ? Math.max(1, months(ks.map(k => k.data).sort()[0])) : 0;
     return {ks, inv, depr, rec, atual:inv - depr, ret:inv ? rec / inv : null, payback:inv && rec ? inv / (rec / mo) : null};
   }
   const RISK = {novo:["Sem histórico","y"], baixo:["Baixo","g"], medio:["Médio","y"], alto:["Alto","r"]};
   const REC = {novo:"Cliente novo: registre a consulta de crédito e considere exigir caução.", baixo:"Bom histórico: pode alugar sem caução.", medio:"Pontos de atenção no histórico: sugerido exigir caução.", alto:"Alto risco: exigir caução e aprovação do administrador."};
   function riskOf(cl){
-    const cons = S.con.filter(c => c.cli === cl.id), notes = []; let score = 100;
+    const cons = S.con.filter(c => c.cli === cl.id && c.status !== "cancelada" && c.status !== "reserva"), notes = []; let score = 100;
     cons.forEach(c => {
       if (c.dev && c.dev.data > c.fim){ score -= 15; notes.push("devolução atrasada #" + c.id); }
       if (late(c)){ score -= 15; notes.push("locação atrasada #" + c.id); }
@@ -732,7 +843,7 @@
   /* ---- documentos com os dados da empresa ---- */
   function empHead(){
     const e = S.emp, j = (a, sep) => a.filter(Boolean).map(esc).join(sep);
-    const l1 = j([e.razao, e.cnpj && "CNPJ " + MASK.doc(e.cnpj), e.ie && "IE " + e.ie], " · ");
+    const l1 = j([e.razao, e.cnpj && "CNPJ " + MASK.doc(e.cnpj), e.ie && "IE " + e.ie, e.im && "IM " + e.im], " · ");
     const l2 = j([e.rua && e.rua + (e.num ? ", " + e.num : ""), e.bairro, e.cidade && e.cidade + (e.uf ? "/" + e.uf : ""), e.cep && "CEP " + MASK.cep(e.cep)], " — ");
     const l3 = j([e.tel && MASK.phone(e.tel), e.mail], " · ");
     const warn = e.razao && e.cnpj ? "" : '<div class="warn noprint">Dados da empresa incompletos. Preencha em Configurações para saírem no documento.</div>';
@@ -743,23 +854,59 @@
   }
   const itemsTable = c => '<table><thead><tr><th>Equipamento</th><th>Qtd</th><th>Valor unit.</th><th>Subtotal</th></tr></thead><tbody>' +
     c.itens.map(i => `<tr><td>${esc(eqById(i.eq).nome)}</td><td>${i.qtd}</td><td>${BRL(i.pu)}</td><td>${BRL(i.pu * i.qtd)}</td></tr>`).join("") + "</tbody></table>";
+  const chkTable = (items, ref) => '<table><thead><tr><th>Equipamento</th>' + (ref ? "<th>Na saída</th>" : "") + `<th>${ref ? "Na devolução" : "Estado"}</th><th>Observação</th></tr></thead><tbody>` +
+    items.map((it, i) => { const r = ref && ref[i]; return `<tr><td>${it.qtd}× ${esc(eqById(it.eq).nome)}</td>${ref ? `<td>${r ? esc(r.cond) : "—"}</td>` : ""}<td>${esc(it.cond)}${r && rankC(it.cond) > rankC(r.cond) ? " <b>(piorou)</b>" : ""}</td><td>${esc(it.obs || "—")}${it.perdida ? " · perdidas: " + it.perdida : ""}</td></tr>` +
+      ((it.fotos.length || (r && r.fotos.length)) ? `<tr><td colspan="${ref ? 4 : 3}" class="fotos">${r && r.fotos.length ? "<small>Saída:</small> " + r.fotos.map(f => `<img src="${f}" alt="foto da saída">`).join("") : ""}${it.fotos.length ? "<small>" + (ref ? "Devolução:" : "Fotos:") + "</small> " + it.fotos.map(f => `<img src="${f}" alt="foto">`).join("") : ""}</td></tr>` : ""); }).join("") + "</tbody></table>";
   const sign = () => `<div class="sign"><div>Cliente</div><div>${esc(S.emp.resp || fantasia())}</div></div>`;
+  const orcById = id => S.orc.find(o => o.id == id);
+  const orcCli = o => o.cli ? cliById(o.cli) : o.pros;
   function docHtml(kind, c){
+    if (kind === "orc"){ const p = orcCli(c);
+      return empHead() + `<p style="text-align:right;font-size:.78rem">Emitido em ${fmt(today())}</p><h3>ORÇAMENTO Nº ${c.id}</h3><p><b>${esc(p.nome)}</b>${p.tel ? " · " + esc(MASK.phone(p.tel)) : ""}</p>${itemsTable(c)}<p>Período: ${c.per} dia(s), início previsto em ${fmt(c.ini)}.<br>Frete: ${BRL(c.frete)}<br>${c.caucao ? `Caução: ${BRL(c.caucao)}<br>` : ""}<b>Total: ${BRL(c.total)}</b></p><p style="font-size:.78rem">Válido até ${fmt(c.validade)}. Valores sujeitos à disponibilidade dos equipamentos na data.</p>`; }
     const cl = cliById(c.cli), head = empHead() + `<p style="text-align:right;font-size:.78rem">Emitido em ${fmt(today())}</p>`;
     if (kind === "locacao") return head + `<h3>COMPROVANTE DE LOCAÇÃO Nº ${c.id}</h3>${cliBlock(cl)}${itemsTable(c)}<p>Período: ${c.per} dia(s), de ${fmt(c.ini)} a ${fmt(c.fim)}.<br>Frete: ${BRL(c.frete)}<br>${c.caucao ? `Caução: ${BRL(c.caucao)} (devolvida na entrega dos equipamentos, se em bom estado)<br>` : ""}<b>Total: ${BRL(c.total)}</b></p><p style="font-size:.78rem">O cliente declara ter recebido os equipamentos acima e se compromete a devolvê-los na data indicada e no mesmo estado.</p>${sign()}`;
     if (kind === "recibo"){ const p = c.pgto; return head + `<h3>RECIBO DE PAGAMENTO Nº ${c.id}</h3><p>Recebemos de <b>${esc(cl.nome)}</b> (${esc(MASK.doc(cl.doc))}) a importância de <b>${BRL(p.total)}</b>, referente à locação nº ${c.id} (${itensTxt(c)}), paga em ${fmt(p.data)} via ${esc(p.forma)}.</p><table><tbody><tr><td>Valor acertado</td><td>${BRL(c.total)}</td></tr><tr><td>Acréscimos</td><td>${BRL(p.acr)}</td></tr><tr><td>Multa e juros por atraso</td><td>${BRL(p.multa)}</td></tr><tr><td>Desconto</td><td>− ${BRL(p.desc)}</td></tr><tr><td><b>Total recebido</b></td><td><b>${BRL(p.total)}</b></td></tr></tbody></table><div class="sign"><div>Assinatura do cliente</div><div>${esc(S.emp.resp || fantasia())}</div></div>`; }
-    const d = c.dev; return head + `<h3>TERMO DE DEVOLUÇÃO Nº ${c.id}</h3>${cliBlock(cl)}${itemsTable(c)}<p>Devolvido em <b>${fmt(d.data)}</b> (previsto: ${fmt(c.fim)}).${c.caucao ? `<br>Caução recebida na locação: <b>${BRL(c.caucao)}</b>` : ""}<br>Condição: <b>${esc(d.cond)}</b>${d.avaria ? "<br>Cobrança por avaria/reposição: <b>" + BRL(d.avaria) + "</b>" : ""}${d.obs ? "<br>Observações: " + esc(d.obs) : ""}</p>${sign()}`;
+    if (kind === "chk"){ const k = c.chkSaida; return head + `<h3>CHECKLIST DE SAÍDA Nº ${c.id}</h3>${cliBlock(cl)}<p>Registrado em ${dtm(k.em)} por ${esc(k.por)}.</p>${chkTable(k.itens)}${k.obs ? `<p>Observações: ${esc(k.obs)}</p>` : ""}${sign()}`; }
+    const d = c.dev; return head + `<h3>TERMO DE DEVOLUÇÃO Nº ${c.id}</h3>${cliBlock(cl)}${itemsTable(c)}<p>Devolvido em <b>${fmt(d.data)}</b> (previsto: ${fmt(c.fim)}).${c.caucao ? `<br>Caução recebida na locação: <b>${BRL(c.caucao)}</b>` : ""}<br>Condição: <b>${esc(d.cond)}</b>${d.avaria ? "<br>Cobrança por avaria/reposição: <b>" + BRL(d.avaria) + "</b>" : ""}${d.obs ? "<br>Observações: " + esc(d.obs) : ""}</p>${d.chk ? `<h4>Checklist de devolução (${dtm(d.chk.em)}, ${esc(d.chk.por)})</h4>${chkTable(d.chk.itens, c.chkSaida ? c.chkSaida.itens : null)}` : ""}${sign()}`;
   }
-  function showDoc(kind, id){ $("docBody").innerHTML = docHtml(kind, conById(id)); if (!$("docDlg").open) $("docDlg").showModal(); }
+  function showDoc(kind, id){ $("docBody").innerHTML = docHtml(kind, kind === "orc" ? orcById(id) : conById(id)); audit("Emitiu documento", kind + " #" + id); if (!$("docDlg").open) $("docDlg").showModal(); }
+
+  function alertas(){
+    const a = [], t = today(), adm = S.me && S.me.role === "admin";
+    if (adm && !S.seg.some(s => s.tipo === "Responsabilidade civil" && s.ini <= t && s.fim >= t)) a.push(["r", "Sem seguro de responsabilidade civil vigente", "config"]);
+    S.seg.forEach(s => { const d = Math.round((new Date(s.fim) - new Date(t)) / day); if (d >= 0 && d <= 30) a.push(["y", "Apólice " + s.seguradora + " vence em " + d + " dia(s)", "config"]); });
+    const semInsp = S.eq.filter(e => e.estoque && (!e.ultInsp || nextInsp(e) < t));
+    if (semInsp.length) a.push(["y", "Inspeção pendente ou vencida: " + semInsp.map(e => e.nome).join(", "), "equip"]);
+    S.manut.filter(m => m.tipo === "Manutenção" && !m.fim && m.prev && m.prev < t).forEach(m => a.push(["y", "Manutenção atrasada: " + eqById(m.eq).nome, "equip"]));
+    S.con.filter(c => c.status === "reserva" && c.ini <= t).forEach(c => a.push(["y", "Reserva para hoje sem saída confirmada: #" + c.id, "locacoes"]));
+    S.con.filter(c => c.status === "ativo" && !c.chkSaida).forEach(c => a.push(["y", "Locação #" + c.id + " sem checklist de saída", "locacoes"]));
+    S.orc.filter(o => o.status === "aberto" && o.validade <= addDays(t, 1)).forEach(o => a.push(["y", "Orçamento #" + o.id + (o.validade < t ? " vencido" : " vence em breve"), "orc"]));
+    return a;
+  }
+  function alertsHtml(){
+    const a = alertas(); if (!a.length) return "";
+    return `<div class="card" style="margin-bottom:1.2rem"><div class="head"><h3>Atenção</h3><p>${a.length} ponto(s) que pedem ação</p></div>${a.map(x => `<div class="alrt"><span class="pill ${x[0]}">${x[0] === "r" ? "urgente" : "atenção"}</span><span>${esc(x[1])}</span><button class="btn sm" data-goto="${x[2]}">Abrir</button></div>`).join("")}</div>`;
+  }
+  function ocupacao(e, dias){
+    const end = nextDay(today()), start = addDays(today(), -dias + 1); let du = 0, rec = 0;
+    S.con.forEach(c => {
+      if (c.status !== "ativo" && c.status !== "devolvido") return;
+      const it = c.itens.filter(i => i.eq === e.id); if (!it.length) return;
+      const a = c.ini > start ? c.ini : start, rawEnd = c.dev ? c.dev.data : c.status === "ativo" ? end : c.fim, b = rawEnd < end ? rawEnd : end;
+      const n = Math.max(0, Math.round((new Date(b) - new Date(a)) / day)); if (!n) return;
+      du += n * it.reduce((s, i) => s + i.qtd, 0); rec += it.reduce((s, i) => s + i.pu * i.qtd, 0) * n / c.per;
+    });
+    const cap = e.estoque * dias; return {du, rec, pct:cap ? du / cap : 0};
+  }
 
   /* ---- telas ---- */
   const V = {
     painel(){
-      const receber = S.con.filter(c => !c.pago).reduce((a, c) => a + c.total, 0), mes = today().slice(0, 7);
+      const receber = aReceber().reduce((a, c) => a + c.total, 0), mes = today().slice(0, 7);
       const recebido = S.con.filter(c => c.pago && c.pgto.data.slice(0, 7) === mes).reduce((a, c) => a + c.pgto.total, 0);
       const k = [["Locações ativas", ativas().length, ""], ["A receber", BRL(receber), ""], ["Recebido no mês", BRL(recebido), ""], ["Cobranças vencidas", S.con.filter(overdue).length, "warn"], ["Equipamentos na rua", S.eq.reduce((a, e) => a + rented(e.id), 0), ""]];
       const prox = ativas().filter(c => c.fim <= iso(new Date(Date.now() + 3 * day)));
-      return `<div class="quick"><button class="btn p big" id="qEq">Receber equipamento</button><button class="btn p big" id="qPay">Receber pagamento</button></div>` +
+      return `<div class="quick"><button class="btn p big" id="qEq">Receber equipamento</button><button class="btn p big" id="qPay">Receber pagamento</button></div>` + alertsHtml() +
       `<div class="kpis">${k.map(x => `<div class="card kpi ${x[2]}"><span>${x[0]}</span><b>${x[1]}</b></div>`).join("")}</div>` +
       `<div class="grid2"><div class="card"><div class="head"><h3>Disponibilidade agora</h3><p>estoque menos o que está alugado</p></div>` +
       S.eq.map(e => { const a = avail(e), pct = e.estoque ? Math.max(0, a / e.estoque * 100) : 0; return `<div class="avail"><span>${esc(e.nome)}</span><div class="bar"><i style="width:${pct}%"></i></div><b>${a} / ${e.estoque}</b></div>`; }).join("") + '<div style="height:.8rem"></div></div>' +
@@ -770,28 +917,68 @@
     locacoes(){
       return '<div class="card"><div class="wrap"><table><thead><tr><th>Nº</th><th>Cliente</th><th>Itens</th><th>Devolução</th><th>Total</th><th>Status</th><th></th></tr></thead><tbody>' +
       (S.con.length ? S.con.slice().reverse().map(c => {
-        const st = c.status === "devolvido" ? '<span class="pill g">Devolvido</span>' : late(c) ? '<span class="pill r">Atrasado</span>' : '<span class="pill y">Em locação</span>';
-        return `<tr><td>#${c.id}</td><td>${esc(cliById(c.cli).nome)}</td><td>${itensTxt(c)}</td><td><span>${fmt(c.fim)} <span style="color:var(--muted);font-size:.75rem">· ${c.per} dias</span></span></td><td>${BRL(c.total)}</td><td>${st}</td><td class="acts-c"><div class="acts"><button class="btn sm" data-doc="locacao:${c.id}">Comprovante</button>${c.status === "ativo" ? `<button class="btn sm" data-ret="${c.id}">Receber equipamento</button>` : `<button class="btn sm" data-doc="dev:${c.id}">Termo</button>`}</div></td></tr>`; }).join("")
+        const st = c.status === "devolvido" ? '<span class="pill g">Devolvido</span>' : c.status === "cancelada" ? '<span class="pill r">Cancelada</span>' : c.status === "reserva" ? `<span class="pill y">Reservada · ${fmt(c.ini)}</span>` : late(c) ? '<span class="pill r">Atrasado</span>' : '<span class="pill y">Em locação</span>' + (c.chkSaida ? "" : ' <span class="pill r">sem checklist</span>');
+        return `<tr><td>#${c.id}</td><td>${esc(cliById(c.cli).nome)}</td><td>${itensTxt(c)}</td><td><span>${fmt(c.fim)} <span style="color:var(--muted);font-size:.75rem">· ${c.per} dias</span></span></td><td>${BRL(c.total)}</td><td>${st}</td><td class="acts-c"><div class="acts"><button class="btn sm" data-doc="locacao:${c.id}">Comprovante</button>${c.status === "reserva" ? `<button class="btn sm" data-saida="${c.id}">Confirmar saída</button><button class="btn sm bad" data-cancel="${c.id}">Cancelar</button>` : c.status === "cancelada" ? "" :
+        (c.chkSaida ? `<button class="btn sm" data-doc="chk:${c.id}">Checklist</button>` : `<button class="btn sm" data-chk="${c.id}">Checklist de saída</button>`) + (c.status === "ativo" ? `<button class="btn sm" data-ret="${c.id}">Receber equipamento</button>` : `<button class="btn sm" data-doc="dev:${c.id}">Termo</button>`)}</div></td></tr>`; }).join("")
         : '<tr><td class="none" colspan="7">Nenhuma locação ainda</td></tr>') + '</tbody></table></div></div>';
     },
     clientes(){
       return '<div class="card"><div class="wrap"><table><thead><tr><th>Nome</th><th>WhatsApp</th><th>Documento</th><th>Endereço da obra</th><th>Mapa</th><th>Locações</th><th>Consentimento</th><th>Risco</th><th></th></tr></thead><tbody>' +
-      (S.cli.length ? S.cli.map(c => `<tr><td>${esc(c.nome)}</td><td>${esc(MASK.phone(c.tel))}</td><td>•••.${esc(dg(c.doc).slice(-3))}</td><td>${esc(c.end + " — " + c.bairro + ", " + c.cidade + "/" + c.uf)}</td><td>${c.lat != null ? '<span class="pill g">' + esc(c.prec) + "</span>" : '<span class="pill y">sem posição</span>'}</td><td>${S.con.filter(x => x.cli === c.id).length}</td><td><span class="pill g">LGPD ${fmt(c.lgpd)}</span></td><td>${riskPill(riskOf(c))}</td><td class="acts-c"><div class="acts"><button class="btn sm" data-risk="${c.id}">Análise de risco</button></div></td></tr>`).join("")
+      (S.cli.length ? S.cli.map(c => `<tr><td>${esc(c.nome)}</td><td>${esc(MASK.phone(c.tel))}</td><td>•••.${esc(dg(c.doc).slice(-3))}</td><td>${esc(c.end + " — " + c.bairro + ", " + c.cidade + "/" + c.uf)}</td><td>${c.lat != null ? '<span class="pill g">' + esc(c.prec) + "</span>" : '<span class="pill y">sem posição</span>'}</td><td>${S.con.filter(x => x.cli === c.id).length}</td><td><span class="pill g">LGPD ${fmt(c.lgpd)}</span></td><td>${riskPill(riskOf(c))}</td><td class="acts-c"><div class="acts"><button class="btn sm" data-risk="${c.id}">Análise de risco</button>${S.me.role === "admin" ? `<button class="btn sm" data-exp="${c.id}">Exportar dados</button>${c.anon ? '<span class="pill y">anonimizado</span>' : `<button class="btn sm bad" data-anon="${c.id}">Anonimizar</button>`}` : ""}</div></td></tr>`).join("")
         : '<tr><td class="none" colspan="9">Nenhum cliente ainda</td></tr>') + '</tbody></table></div><p class="note">Documento aparece mascarado na tela. No sistema real: criptografado no banco, com registro de quem acessou.</p></div>';
     },
     equip(){
       const rows = S.eq.map(e => ({e, s:eqStats(e)})).filter(r => r.s.inv);
       return V.equipTable() + '<div style="height:1.2rem"></div><div class="card"><div class="head"><h3>Retorno do investimento</h3><p>calculado com as compras registradas e a receita das locações</p></div><div class="wrap"><table><thead><tr><th>Equipamento</th><th>Investido</th><th>Receita acumulada</th><th>Retorno</th><th>Payback est.</th><th>Depreciação</th><th>Valor atual</th></tr></thead><tbody>' +
       (rows.length ? rows.map(({e, s}) => `<tr><td>${esc(e.nome)}${e.fragil ? ' <span class="pill y">frágil</span>' : ""}</td><td>${BRL(s.inv)}</td><td>${BRL(s.rec)}</td><td>${s.ret == null ? "—" : Math.round(s.ret * 100) + "%"}</td><td>${s.payback ? dec(s.payback, 1) + " meses" : "—"}</td><td>${BRL(s.depr)}</td><td>${BRL(s.atual)}</td></tr>`).join("") : '<tr><td class="none" colspan="7">Registre a compra dos equipamentos para ver o retorno</td></tr>') +
-      '</tbody></table></div><p class="note">Retorno = receita acumulada ÷ investido (100% = já se pagou). Depreciação linear pela vida útil informada.</p></div>';
+      '</tbody></table></div><p class="note">Retorno = receita acumulada ÷ investido (100% = já se pagou). Depreciação linear pela vida útil informada.</p></div>' +
+      '<div style="height:1.2rem"></div>' + V.ocup() + '<div style="height:1.2rem"></div>' + V.manutCard();
+    },
+    ocup(){
+      const rows = S.eq.filter(e => e.estoque).map(e => ({e, o:ocupacao(e, 30)}));
+      return '<div class="card"><div class="head"><h3>Ocupação nos últimos 30 dias</h3><p>quanto do estoque ficou alugado; abaixo de 20% o equipamento está ocioso, acima de 80% pode faltar</p></div><div class="wrap"><table><thead><tr><th>Equipamento</th><th>Dias-unidade alugados</th><th>Ocupação</th><th>Receita no período</th><th>Situação</th></tr></thead><tbody>' +
+      rows.map(({e, o}) => `<tr><td>${esc(e.nome)}</td><td>${o.du}</td><td><div style="display:flex;align-items:center;gap:.5rem"><div class="bar" style="min-width:60px"><i style="width:${Math.min(100, o.pct * 100)}%"></i></div>${Math.round(o.pct * 100)}%</div></td><td>${BRL(o.rec)}</td><td>${o.pct < .2 ? '<span class="pill y">ocioso</span>' : o.pct >= .8 ? '<span class="pill r">alta demanda</span>' : '<span class="pill g">normal</span>'}</td></tr>`).join("") + '</tbody></table></div></div>';
+    },
+    manutCard(){
+      const t = today(), hist = S.manut.slice().sort((a, b) => b.data < a.data ? -1 : 1);
+      return '<div class="card"><div class="head"><h3>Manutenção, inspeção e baixas</h3><p>equipamento em manutenção não entra na disponibilidade</p></div><div class="wrap"><table><thead><tr><th>Equipamento</th><th>Em manutenção</th><th>Última inspeção</th><th>Próxima inspeção</th><th></th></tr></thead><tbody>' +
+      S.eq.map(e => { const n = nextInsp(e), man = S.manut.filter(m => m.eq === e.id && m.tipo === "Manutenção" && !m.fim).reduce((a, m) => a + m.qtd, 0);
+        return `<tr><td>${esc(e.nome)}</td><td>${man || "—"}</td><td>${e.ultInsp ? fmt(e.ultInsp) : '<span class="pill y">nunca</span>'}</td><td>${n ? fmt(n) + (n < t ? ' <span class="pill r">vencida</span>' : "") : "—"}</td><td class="acts-c"><div class="acts"><button class="btn sm" data-mn="manut:${e.id}">Manutenção</button><button class="btn sm" data-mn="insp:${e.id}">Inspeção</button><button class="btn sm bad" data-mn="baixa:${e.id}">Dar baixa</button></div></td></tr>`; }).join("") +
+      '</tbody></table></div><h4 class="sub" style="padding:0 1.1rem">Histórico</h4><div class="wrap"><table><thead><tr><th>Data</th><th>Equipamento</th><th>Tipo</th><th>Qtd</th><th>Detalhe</th><th>Valor</th><th>Situação</th></tr></thead><tbody>' +
+      (hist.length ? hist.map(m => `<tr><td>${fmt(m.data)}</td><td>${esc(eqById(m.eq).nome)}</td><td>${m.tipo}</td><td>${m.qtd || "—"}</td><td>${esc(m.motivo || m.resultado || m.obs || "—")}</td><td>${m.custo || m.valor ? BRL(m.custo || m.valor) : "—"}</td><td>${m.tipo === "Manutenção" ? (m.fim ? "Concluída em " + fmt(m.fim) : `<button class="btn sm" data-mnfim="${m.id}">Concluir</button>`) : "—"}</td></tr>`).join("") : '<tr><td class="none" colspan="7">Nenhum registro ainda</td></tr>') + '</tbody></table></div></div>';
+    },
+    agenda(){
+      const t = today(), days = Array.from({length:14}, (_, i) => addDays(t, i)), mes = t.slice(0, 7), ev = [];
+      S.con.filter(occupies).forEach(c => { const ent = c.modo === "Entrega e coleta na obra"; if (c.status === "reserva") ev.push({d:c.ini, t:ent ? "Entrega" : "Retirada", c}); ev.push({d:c.fim, t:ent ? "Coleta" : "Devolução prevista", c}); });
+      const row = x => { const cl = cliById(x.c.cli); return `<div class="agd"><span class="pill ${x.t === "Entrega" || x.t === "Retirada" ? "g" : "y"}">${x.t}</span><span>#${x.c.id} · ${esc(cl.nome)} · ${itensTxt(x.c)}${x.c.modo === "Entrega e coleta na obra" ? " · " + esc(cl.end + ", " + cl.bairro) : ""}${x.c.mot ? " · " + esc(x.c.mot) : ""}</span></div>`; };
+      const wd = d => new Date(d + "T12:00:00").toLocaleDateString("pt-BR", {weekday:"short"});
+      const late14 = ev.filter(x => x.d < t && x.c.status === "ativo"), week = days.map(d => [d, ev.filter(x => x.d === d)]).filter(x => x[1].length);
+      const logi = S.con.filter(c => c.status !== "cancelada" && c.modo === "Entrega e coleta na obra" && c.ini.slice(0, 7) === mes);
+      const cob = logi.reduce((a, c) => a + c.frete, 0), real = logi.reduce((a, c) => a + (c.freteReal || 0), 0);
+      return `<div class="card"><div class="head"><h3>Entregas, coletas e devoluções</h3><p>próximos 14 dias</p></div>` +
+        (late14.length ? `<div class="agd" style="background:var(--surface-2)"><b>Em atraso</b></div>${late14.map(row).join("")}` : "") +
+        week.map(([d, l]) => `<div class="agd" style="background:var(--surface-2)"><b>${fmt(d)}</b><span>${wd(d)}${d === t ? " · hoje" : ""}</span></div>${l.map(row).join("")}`).join("") +
+        (!late14.length && !week.length ? '<div class="empty">Nada agendado nos próximos 14 dias</div>' : "") + `</div><div style="height:1.2rem"></div>` +
+        `<div class="card"><div class="head"><h3>Disponibilidade por dia</h3><p>unidades livres (estoque menos alugado, reservado e em manutenção)</p></div><div class="wrap keep"><table><thead><tr><th>Equipamento</th>${days.map(d => `<th>${fmt(d).slice(0, 5)}</th>`).join("")}</tr></thead><tbody>` +
+        S.eq.map(e => `<tr><td>${esc(e.nome)}</td>${days.map(d => { const n = freeOn(e, d); return `<td class="${n <= 0 ? "zero" : ""}">${n}</td>`; }).join("")}</tr>`).join("") + `</tbody></table></div></div><div style="height:1.2rem"></div>` +
+        `<div class="card"><div class="head"><h3>Frete do mês: cobrado × custo real</h3><p>${logi.length ? `cobrado ${BRL(cob)} · custo ${BRL(real)} · margem ${BRL(cob - real)}` : "nenhuma entrega registrada neste mês"}</p></div>` +
+        (logi.length ? '<div class="wrap"><table><thead><tr><th>Locação</th><th>Cliente</th><th>Cobrado</th><th>Custo real</th><th>Margem</th></tr></thead><tbody>' + logi.map(c => `<tr><td>#${c.id}</td><td>${esc(cliById(c.cli).nome)}</td><td>${BRL(c.frete)}</td><td>${BRL(c.freteReal || 0)}</td><td>${BRL(c.frete - (c.freteReal || 0))}</td></tr>`).join("") + '</tbody></table></div>' : "") + "</div>";
+    },
+    orc(){
+      return '<div class="card"><div class="wrap"><table><thead><tr><th>Nº</th><th>Cliente</th><th>Itens</th><th>Período</th><th>Total</th><th>Validade</th><th>Status</th><th></th></tr></thead><tbody>' +
+      (S.orc.length ? S.orc.slice().reverse().map(o => { const p = orcCli(o), venc = o.status === "aberto" && o.validade < today();
+        const st = o.status === "aprovado" ? '<span class="pill g">Virou locação</span>' : o.status === "recusado" ? '<span class="pill r">Recusado</span>' : venc ? '<span class="pill r">Vencido</span>' : '<span class="pill y">Aberto</span>';
+        const wa = p.tel ? `<a class="btn sm" target="_blank" rel="noopener" href="${orcWa(o, p)}">WhatsApp</a>` : "";
+        return `<tr><td>#${o.id}</td><td>${esc(p.nome)}${o.cli ? "" : ' <span class="pill y">prospecto</span>'}</td><td>${o.itens.map(i => i.qtd + "× " + esc(eqById(i.eq).nome)).join(", ")}</td><td>${o.per} dias · ${fmt(o.ini)}</td><td>${BRL(o.total)}</td><td>${fmt(o.validade)}</td><td>${st}</td><td class="acts-c"><div class="acts"><button class="btn sm" data-doc="orc:${o.id}">Documento</button>${wa}${o.status === "aberto" ? `<button class="btn sm" data-conv="${o.id}">Converter em locação</button><button class="btn sm bad" data-recus="${o.id}">Recusar</button>` : ""}</div></td></tr>`; }).join("")
+        : '<tr><td class="none" colspan="8">Nenhum orçamento ainda</td></tr>') + '</tbody></table></div><p class="note">Ao converter, o sistema confere a disponibilidade da data e leva os dados para a locação.</p></div>';
     },
     equipTable(){
-      return '<div class="card"><div class="head"><h3>Catálogo e tabela de preços</h3><p>preço por unidade (R$) em cada período — edite direto na tabela</p></div><div class="wrap"><table><thead><tr><th>Equipamento</th><th>Estoque total</th><th>Disponível</th><th>1 dia</th><th>7 dias</th><th>15 dias</th><th>30 dias</th></tr></thead><tbody>' +
+      return '<div class="card"><div class="head"><h3>Catálogo e tabela de preços</h3><p>preço por unidade (R$) em cada período — edite direto na tabela</p></div><div class="wrap"><table><thead><tr><th>Equipamento</th><th>Estoque total</th><th>Disponível</th><th>1 dia</th><th>7 dias</th><th>15 dias</th><th>30 dias</th><th>Reposição</th></tr></thead><tbody>' +
       S.eq.map(e => `<tr><td>${esc(e.nome)}</td><td><input class="price" type="number" min="0" data-e="${e.id}" data-k="estoque" value="${e.estoque}"></td><td>${avail(e)}</td>` +
-        [1, 7, 15, 30].map(p => `<td><input class="price" type="number" min="0" step="0.01" data-e="${e.id}" data-k="${p}" value="${e.p[p] == null ? "" : e.p[p]}" placeholder="—"></td>`).join("") + "</tr>").join("") + '</tbody></table></div></div>';
+        [1, 7, 15, 30].map(p => `<td><input class="price" type="number" min="0" step="0.01" data-e="${e.id}" data-k="${p}" value="${e.p[p] == null ? "" : e.p[p]}" placeholder="—"></td>`).join("") + `<td><input class="price" type="number" min="0" step="0.01" data-e="${e.id}" data-k="repos" value="${e.repos == null ? "" : e.repos}" placeholder="${reposOf(e) ? reposOf(e) : "—"}"></td></tr>`).join("") + '</tbody></table></div><p class="note">Reposição = valor cobrado por unidade perdida. Se vazio, usa o custo da última compra.</p></div>';
     },
     cobrar(){
-      const l = S.con.filter(c => !c.pago), paid = S.con.filter(c => c.pago).sort((a, b) => b.pgto.data < a.pgto.data ? -1 : 1);
+      const l = aReceber(), paid = S.con.filter(c => c.pago).sort((a, b) => b.pgto.data < a.pgto.data ? -1 : 1);
       return '<div class="card"><div class="wrap"><table><thead><tr><th>Nº</th><th>Cliente</th><th>Valor</th><th>Vencimento</th><th>Situação</th><th>Ações</th></tr></thead><tbody>' +
       (l.length ? l.map(c => { const cl = cliById(c.cli);
         return `<tr><td>#${c.id}</td><td>${esc(cl.nome)}</td><td>${BRL(c.total)}</td><td>${fmt(c.fim)}</td><td>${overdue(c) ? '<span class="pill r">Vencida</span>' : '<span class="pill y">A vencer</span>'}</td><td class="acts-c"><div class="acts"><a class="btn sm" target="_blank" rel="noopener" href="${waLink(c, cl)}">WhatsApp</a><a class="btn sm" href="${mailLink(c, cl)}">E-mail</a><button class="btn sm" data-paid="${c.id}">Registrar pagamento</button></div></td></tr>`; }).join("")
@@ -827,7 +1014,7 @@
     fin(){
       const box = (t, items) => `<div class="card"><div class="head"><h3>${t} <span class="pill y">em preparação</span></h3><p>estrutura planejada; ainda não implementada</p></div><ul class="plan">${items.map(i => "<li>" + i + "</li>").join("")}</ul></div>`;
       const fin = box("Visão financeira", ["Receita por período, equipamento e cliente", "Despesas: compras, fretes, juros e financiamentos (dados já coletados em Compras)", "Contas a pagar (parcelas de compras) e a receber (locações em aberto)", "Fluxo de caixa e projeção dos próximos meses", "Inadimplência e multas cobradas", "Margem e retorno por equipamento (usa o payback já calculado)", "Resumo para a contabilidade (exportação)"]);
-      const nf = box("Venda com nota fiscal", ["Venda de equipamento usado ou de sucata com emissão de nota", "Dados fiscais do cliente (CPF/CNPJ, inscrição, endereço) — já coletados no cadastro", "Item vendido sai do estoque e registra baixa contábil pelo valor depreciado", "Emissão da nota por integração com um emissor (NF-e / NFS-e), conforme o município e o regime tributário", "Guarda do XML e do PDF da nota junto à venda", "Nota de locação (serviço): definir com a contabilidade se será emitida"]);
+      const nf = box("Venda com nota fiscal", ["Venda de equipamento usado ou de sucata com emissão de nota", "Dados fiscais do cliente (CPF/CNPJ, inscrição, endereço) — já coletados no cadastro", "Item vendido sai do estoque e registra baixa contábil pelo valor depreciado", "Emissão da nota por integração com um emissor (NF-e / NFS-e), conforme o município e o regime tributário", "Guarda do XML e do PDF da nota junto à venda", "Locação de bem móvel: em regra o ISS não incide (Súmula Vinculante 31 do STF); a contabilidade define o documento fiscal da locação, conforme o regime tributário cadastrado em Configurações"]);
       return `<div class="card"><div class="tabs" style="padding-top:1rem">${[["fin","Financeiro"], ["nf","Venda com nota fiscal"]].map(t => `<button class="tab${S.finTab === t[0] ? " on" : ""}" data-fn="${t[0]}">${t[1]}</button>`).join("")}</div></div><div style="height:1rem"></div>` + (S.finTab === "fin" ? fin : nf);
     },
     config(){
@@ -839,6 +1026,8 @@
         <div class="f s3"><label for="eCnpj">CNPJ</label><input id="eCnpj" data-mask="doc" maxlength="18" inputmode="numeric" placeholder="00.000.000/0000-00" value="${esc(MASK.doc(e.cnpj || ""))}"></div>
         <div class="f s3"><label for="eIe">Inscrição estadual</label><input id="eIe" maxlength="20" placeholder="ou Isento" value="${v("ie")}"></div>
         <div class="f s3"><label for="eResp">Responsável</label><input id="eResp" maxlength="80" value="${v("resp")}"></div>
+        <div class="f s3"><label for="eIm">Inscrição municipal</label><input id="eIm" maxlength="20" value="${v("im")}"></div>
+        <div class="f s3"><label for="eRegime">Regime tributário</label><select id="eRegime">${["Não informado", "MEI", "Simples Nacional", "Lucro presumido", "Lucro real"].map(r => `<option${e.regime === r ? " selected" : ""}>${r}</option>`).join("")}</select></div>
         <div class="f s3"><label for="eTel">Telefone / WhatsApp</label><input id="eTel" data-mask="phone" maxlength="15" inputmode="numeric" placeholder="(85) 99999-9999" value="${esc(MASK.phone(e.tel || ""))}"></div>
         <div class="f s3"><label for="eMail">E-mail</label><input id="eMail" type="email" maxlength="80" value="${v("mail")}"></div>
         <div class="f s2"><label for="eCep">CEP</label><input id="eCep" data-mask="cep" maxlength="9" inputmode="numeric" placeholder="00000-000" value="${esc(MASK.cep(e.cep || ""))}"><small class="hint" id="eCepMsg"></small></div>
@@ -854,10 +1043,26 @@
       `</tbody></table></div><h3 style="font-size:.9rem;padding:1rem 1.3rem .5rem">Novo usuário</h3>
       <form id="userForm" class="adduser"><div class="f"><label for="uNome">Nome</label><input id="uNome" maxlength="60"></div><div class="f"><label for="uUser">Usuário</label><input id="uUser" maxlength="20" autocomplete="off"></div><div class="f"><label for="uRole">Papel</label><select id="uRole"><option value="operador">Operador</option><option value="admin">Administrador</option></select></div><button class="btn p" style="margin-bottom:.8rem">Criar</button></form>
       <p id="uMsg" class="err" style="padding:0 1.3rem"></p>` +
-      (S.cred ? `<div class="cred">Usuário <b>${esc(S.cred.user)}</b> criado. Senha temporária: <code>${esc(S.cred.pass)}</code><br>Copie agora e envie com segurança; ela não aparece de novo. No primeiro acesso a pessoa define a própria senha.</div>` : "") + "</div></div>";
+      (S.cred ? `<div class="cred">Usuário <b>${esc(S.cred.user)}</b> criado. Senha temporária: <code>${esc(S.cred.pass)}</code><br>Copie agora e envie com segurança; ela não aparece de novo. No primeiro acesso a pessoa define a própria senha.</div>` : "") + "</div></div>" + configExtra();
     }
   };
-  const TITLES = {painel:["Painel","visão da operação hoje"], locacoes:["Locações","abertas e encerradas"], clientes:["Clientes","dados protegidos conforme a LGPD"], equip:["Equipamentos","estoque, preços e retorno do investimento"], forn:["Fornecedores","compras, cotações e comparativo de preços"], cobrar:["Cobranças","o que ainda não foi pago"], fin:["Financeiro","em preparação"], config:["Configurações","empresa e usuários"]};
+  function configExtra(){
+    const t = today(), g = S.priv.guarda;
+    const seg = `<div class="card"><div class="head"><h3>Seguros e responsabilidade civil</h3><p>acidente com equipamento alugado é risco do locador; registre as apólices para receber alertas de vencimento</p></div><div class="wrap"><table><thead><tr><th>Seguradora</th><th>Tipo</th><th>Apólice</th><th>Vigência</th><th>Valor segurado</th><th>Prêmio</th><th>Situação</th><th></th></tr></thead><tbody>` +
+      (S.seg.length ? S.seg.map(s => { const d = Math.round((new Date(s.fim) - new Date(t)) / day), sit = s.fim < t ? '<span class="pill r">Vencida</span>' : s.ini > t ? '<span class="pill y">Futura</span>' : d <= 30 ? `<span class="pill y">Vence em ${d} dia(s)</span>` : '<span class="pill g">Vigente</span>';
+        return `<tr><td>${esc(s.seguradora)}</td><td>${esc(s.tipo)}</td><td>${esc(s.num || "—")}</td><td>${fmt(s.ini)} a ${fmt(s.fim)}</td><td>${BRL(s.valor)}</td><td>${BRL(s.premio)}</td><td>${sit}</td><td class="acts-c"><div class="acts"><button class="btn sm bad" data-segrm="${s.id}">Remover</button></div></td></tr>`; }).join("") : '<tr><td class="none" colspan="8">Nenhuma apólice cadastrada</td></tr>') +
+      '</tbody></table></div><div style="padding:.3rem 1.1rem 1.1rem"><button class="btn p" id="btnSeg">Nova apólice</button></div></div>';
+    const eleg = S.cli.filter(c => !c.anon && !S.con.some(x => x.cli === c.id && (x.status === "ativo" || x.status === "reserva" || (!x.pago && x.status !== "cancelada"))) && S.con.filter(x => x.cli === c.id).every(x => x.fim < addDays(t, -365 * g)));
+    const priv = `<div class="card"><div class="head"><h3>Privacidade (LGPD)</h3><p>responsável, prazo de guarda e direitos dos titulares</p></div>
+      <form id="privForm" class="sec"><div class="f s3"><label for="pvDpo">Encarregado (DPO)</label><input id="pvDpo" maxlength="80" value="${esc(S.priv.dpo)}"></div><div class="f s3"><label for="pvMail">E-mail do encarregado</label><input id="pvMail" type="email" maxlength="80" value="${esc(S.priv.dpoMail)}"></div><div class="f s2"><label for="pvGuarda">Guarda dos dados (anos)</label><input id="pvGuarda" type="number" min="1" max="20" value="${g}"></div><div class="s6"><p class="err" id="pvMsg"></p><button class="btn p">Salvar</button></div></form>
+      <ul class="plan"><li>Finalidade: locação, cobrança e proteção do patrimônio.</li><li>Base legal: execução do contrato; consulta de crédito só com autorização registrada.</li><li>Direitos do titular: acesso e portabilidade (Exportar dados) e eliminação (Anonimizar), na tela Clientes.</li><li>Dados fiscais e financeiros seguem o prazo legal, mesmo após a anonimização.</li><li>Todo acesso sensível fica na trilha de auditoria; senhas só como hash.</li><li>Backup diário e criptografia em repouso: no sistema real, com o banco de dados.</li></ul>
+      <p class="note">${eleg.length ? "Clientes sem movimento há mais de " + g + " ano(s), elegíveis à anonimização: " + esc(eleg.map(c => c.nome).join(", ")) : "Nenhum cliente elegível à anonimização pelo prazo de guarda."}</p></div>`;
+    const aud = `<div class="card"><div class="head"><h3>Trilha de auditoria</h3><p>últimos ${Math.min(100, S.log.length)} eventos; quem fez o quê e quando</p></div><div class="wrap"><table><thead><tr><th>Data e hora</th><th>Usuário</th><th>Ação</th><th>Alvo</th></tr></thead><tbody>` +
+      (S.log.length ? S.log.slice(-100).reverse().map(l => `<tr><td>${dtm(l.t)}</td><td>${esc(l.user)}</td><td>${esc(l.acao)}</td><td>${esc(l.alvo)}</td></tr>`).join("") : '<tr><td class="none" colspan="4">Nenhum evento ainda</td></tr>') + "</tbody></table></div></div>";
+    return '<div style="height:1.2rem"></div>' + seg + '<div style="height:1.2rem"></div>' + priv + '<div style="height:1.2rem"></div>' + aud;
+  }
+  const orcWa = (o, p) => "https://wa.me/55" + dg(p.tel) + "?text=" + encodeURIComponent(`Olá, ${p.nome}! Segue o orçamento nº ${o.id} da ${fantasia()}: ${o.itens.map(i => i.qtd + "× " + eqById(i.eq).nome).join(", ")}, ${o.per} dia(s) a partir de ${fmt(o.ini)}. Total: ${BRL(o.total)}. Válido até ${fmt(o.validade)}.`);
+  const TITLES = {painel:["Painel","visão da operação hoje"], agenda:["Agenda","entregas, coletas e disponibilidade por dia"], orc:["Orçamentos","propostas antes de fechar a locação"], locacoes:["Locações","abertas e encerradas"], clientes:["Clientes","dados protegidos conforme a LGPD"], equip:["Equipamentos","estoque, preços e retorno do investimento"], forn:["Fornecedores","compras, cotações e comparativo de preços"], cobrar:["Cobranças","o que ainda não foi pago"], fin:["Financeiro","em preparação"], config:["Configurações","empresa, usuários, seguros e privacidade"]};
 
   function waLink(c, cl){
     const msg = `Olá, ${cl.nome}! Aqui é da ${fantasia()}. A locação #${c.id} (${BRL(c.total)}) venceu em ${fmt(c.fim)}. Podemos combinar o pagamento/devolução?${S.emp.tel ? " Contato: " + MASK.phone(S.emp.tel) + "." : ""} Obrigado!`;
@@ -874,15 +1079,17 @@
       locacoes:'<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/>',
       clientes:'<circle cx="9" cy="8" r="3.5"/><path d="M2 20c0-3.5 3-6 7-6s7 2.5 7 6M17 5a3 3 0 010 6M22 20c0-2.500-1.500-4.500-4-5.300"/>',
       equip:'<path d="M21 8l-9-5-9 5v8l9 5 9-5zM3 8l9 5 9-5M12 13v8"/>',
+      agenda:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+      orc:'<path d="M14 3H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V9zM14 3v6h6M8 13h8M8 17h5"/>',
       forn:'<path d="M2 6h11v10H2zM13 9h4l3 3v4h-7z"/><circle cx="6" cy="18" r="1.8"/><circle cx="17" cy="18" r="1.8"/>',
       fin:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
       cobrar:'<circle cx="12" cy="12" r="9"/><path d="M14.500 9.500c-.5-1-1.500-1.500-2.500-1.500-1.500 0-2.500.8-2.500 2s1 1.700 2.500 2 2.500.8 2.500 2-1 2-2.500 2c-1.100 0-2-.6-2.500-1.500M12 6v2M12 16v2"/>',
       config:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.900 4.900l2.100 2.100M17 17l2.100 2.100M4.900 19.100L7 17M17 7l2.100-2.100"/>'
     };
-    const list = [["painel","Painel","Painel"], ["locacoes","Locações","Locações"], ["clientes","Clientes","Clientes"], ["equip","Equipamentos","Equip."], ["forn","Fornecedores","Fornec."], ["cobrar","Cobranças","Cobrar"], ["fin","Financeiro","Financ."]];
+    const list = [["painel","Painel","Painel"], ["agenda","Agenda","Agenda"], ["orc","Orçamentos","Orçam."], ["locacoes","Locações","Locações"], ["clientes","Clientes","Clientes"], ["equip","Equipamentos","Equip."], ["forn","Fornecedores","Fornec."], ["cobrar","Cobranças","Cobrar"], ["fin","Financeiro","Financ."]];
     if (S.me.role === "admin") list.push(["config","Configurações","Config."]);
     $("nav").innerHTML = list.map(n => `<button class="nav${S.page === n[0] ? " on" : ""}" data-p="${n[0]}" aria-label="${n[1]}"><svg viewBox="0 0 24 24">${IC[n[0]]}</svg><span class="lg">${n[1]}</span><span class="sh">${n[2]}</span>${n[0] === "cobrar" && od ? `<span class="badge">${od}</span>` : ""}</button>`).join("");
-    $$(".nav").forEach(b => b.onclick = () => { S.page = b.dataset.p; S.cred = null; render(); scrollTo(0, 0); });
+    $$(".nav").forEach(b => b.onclick = () => { S.page = b.dataset.p; S.cred = null; if (S.page === "clientes") audit("Visualizou a lista de clientes"); render(); scrollTo(0, 0); });
     $("who").innerHTML = `<b>${esc(S.me.nome)}</b> (${esc(S.me.user)})<br><button id="chgPw">Alterar senha</button> · <button id="logout">Sair</button>`;
     $("chgPw").onclick = () => openPw(false);
     $("logout").onclick = logout;
@@ -900,7 +1107,7 @@
     if (S.map){ S.map.remove(); S.map = null; }
     document.body.dataset.page = S.page;
     nav(); $("title").textContent = TITLES[S.page][0]; $("sub").textContent = TITLES[S.page][1];
-    const act = S.page === "equip" ? ["Novo equipamento", openBuy] : S.page === "forn" ? (S.fTab === "forn" ? ["Novo fornecedor", openForn] : S.fTab === "compras" ? ["Registrar compra", openBuy] : ["Nova cotação", openCot]) : ["Nova locação", openForm];
+    const act = S.page === "orc" ? ["Novo orçamento", () => openForm("orc")] : S.page === "equip" ? ["Novo equipamento", openBuy] : S.page === "forn" ? (S.fTab === "forn" ? ["Novo fornecedor", openForn] : S.fTab === "compras" ? ["Registrar compra", openBuy] : ["Nova cotação", openCot]) : ["Nova locação", () => openForm("loc")];
     $("newC").querySelector(".lbl").textContent = " " + act[0]; $("newC").setAttribute("aria-label", act[0]); $("newC").onclick = act[1];
     $("view").innerHTML = V[S.page]();
     labelTables();
@@ -914,12 +1121,22 @@
       if (S.leaflet) drawMap();
     }
     $$("[data-ret]").forEach(b => b.onclick = () => openRet(+b.dataset.ret));
+    $$("[data-chk]").forEach(b => b.onclick = () => openChk(+b.dataset.chk));
+    $$("[data-goto]").forEach(b => b.onclick = () => { S.page = b.dataset.goto; render(); scrollTo(0, 0); });
+    $$("[data-saida]").forEach(b => b.onclick = () => { const c = conById(+b.dataset.saida); c.status = "ativo"; audit("Confirmou a saída", "locação #" + c.id); render(); openChk(c.id); });
+    $$("[data-cancel]").forEach(b => b.onclick = () => askConfirm("Cancelar a reserva #" + b.dataset.cancel + "? Os equipamentos voltam a ficar disponíveis.", () => { const c = conById(+b.dataset.cancel); c.status = "cancelada"; audit("Cancelou a reserva", "locação #" + c.id); render(); }, "Cancelar reserva"));
+    $$("[data-conv]").forEach(b => b.onclick = () => openForm("loc", orcById(+b.dataset.conv)));
+    $$("[data-recus]").forEach(b => b.onclick = () => { orcById(+b.dataset.recus).status = "recusado"; audit("Recusou orçamento", "#" + b.dataset.recus); render(); });
+    $$("[data-mn]").forEach(b => { const [m, id] = b.dataset.mn.split(":"); b.onclick = () => openMn(m, +id); });
+    $$("[data-mnfim]").forEach(b => b.onclick = () => { const m = S.manut.find(x => x.id === +b.dataset.mnfim); m.fim = today(); audit("Concluiu manutenção", eqById(m.eq).nome); render(); });
+    $$("[data-exp]").forEach(b => b.onclick = () => exportCli(+b.dataset.exp));
+    $$("[data-anon]").forEach(b => b.onclick = () => askConfirm("Anonimizar este cliente? Nome, documento, telefone, e-mail e endereço serão apagados. As locações e os valores continuam registrados pelo prazo legal. Não dá para desfazer.", () => anonCli(+b.dataset.anon), "Anonimizar"));
     $$("[data-paid]").forEach(b => b.onclick = () => openPay(+b.dataset.paid));
     $$("[data-doc]").forEach(b => { const [k, id] = b.dataset.doc.split(":"); b.onclick = () => showDoc(k, +id); });
     $$("[data-geo]").forEach(b => b.onclick = async () => { b.disabled = true; b.textContent = "Localizando…"; await geocode(cliById(+b.dataset.geo)); render(); });
     $$("input[data-e]").forEach(i => i.onchange = () => {
       const e = eqById(i.dataset.e), v = i.value === "" ? null : Math.max(0, parseFloat(i.value));
-      if (i.dataset.k === "estoque") e.estoque = v || 0; else e.p[i.dataset.k] = v; render();
+      if (i.dataset.k === "estoque") e.estoque = v || 0; else if (i.dataset.k === "repos") e.repos = v; else e.p[i.dataset.k] = v; render();
     });
   }
 
@@ -931,8 +1148,8 @@
       const g = id => $(id).value.trim(), cnpj = dg(g("eCnpj")), tel = dg(g("eTel")), mail = g("eMail");
       const e = cnpj && !cnpjOk(cnpj) ? "CNPJ inválido. Confira os números." : tel && !phoneOk(tel) ? "Telefone inválido. Use DDD + número." : mail && !mailOk(mail) ? "E-mail inválido." : dg(g("eCep")) && dg(g("eCep")).length !== 8 ? "CEP incompleto." : "";
       if (e){ $("eMsg").className = "err"; $("eMsg").textContent = e; return; }
-      S.emp = {razao:g("eRazao"), fantasia:g("eFant"), cnpj, ie:g("eIe"), resp:g("eResp"), tel, mail, cep:dg(g("eCep")), num:g("eNum"), rua:g("eRua"), bairro:g("eBairro"), cidade:g("eCidade"), uf:$("eUf").value};
-      $("eMsg").className = "ok"; $("eMsg").textContent = "Dados salvos. Já aparecem nos documentos.";
+      S.emp = {razao:g("eRazao"), fantasia:g("eFant"), cnpj, ie:g("eIe"), im:g("eIm"), regime:$("eRegime").value, resp:g("eResp"), tel, mail, cep:dg(g("eCep")), num:g("eNum"), rua:g("eRua"), bairro:g("eBairro"), cidade:g("eCidade"), uf:$("eUf").value};
+      audit("Atualizou os dados da empresa"); $("eMsg").className = "ok"; $("eMsg").textContent = "Dados salvos. Já aparecem nos documentos.";
     };
     $("userForm").onsubmit = async ev => {
       ev.preventDefault();
@@ -941,9 +1158,17 @@
       if (e){ $("uMsg").textContent = e; return; }
       const pass = tempPass(), salt = newSalt();
       S.users.push({id:S.useq++, nome, user:u, role:$("uRole").value, salt, hash:await hashPw(pass, salt), must:true});
-      S.cred = {user:u, pass}; render();
+      S.cred = {user:u, pass}; audit("Criou usuário", u); render();
     };
-    $$("[data-rm]").forEach(b => b.onclick = () => { S.users = S.users.filter(u => u.id != b.dataset.rm); render(); });
+    $$("[data-rm]").forEach(b => b.onclick = () => { audit("Removeu usuário", (S.users.find(u => u.id == b.dataset.rm) || {}).user); S.users = S.users.filter(u => u.id != b.dataset.rm); render(); });
+    $("privForm").onsubmit = ev => {
+      ev.preventDefault();
+      const mail = $("pvMail").value.trim(), gd = parseInt($("pvGuarda").value, 10), e = mail && !mailOk(mail) ? "E-mail inválido." : !(gd >= 1 && gd <= 20) ? "Prazo entre 1 e 20 anos." : "";
+      if (e){ $("pvMsg").className = "err"; $("pvMsg").textContent = e; return; }
+      S.priv = {dpo:$("pvDpo").value.trim(), dpoMail:mail, guarda:gd}; audit("Atualizou as configurações de privacidade"); render(); $("pvMsg").className = "ok"; $("pvMsg").textContent = "Salvo.";
+    };
+    $("btnSeg").onclick = openSeg;
+    $$("[data-segrm]").forEach(b => b.onclick = () => askConfirm("Remover esta apólice?", () => { S.seg = S.seg.filter(s => s.id !== +b.dataset.segrm); audit("Removeu apólice", "#" + b.dataset.segrm); render(); }, "Remover"));
   }
 
   /* ---- login / senha ---- */
@@ -956,11 +1181,12 @@
     try { ok = (await hashPw($("lPass").value, u ? u.salt : "x")) === (u && u.hash); }
     catch(e){ m.textContent = "Este navegador não permite o login seguro. Abra por localhost ou https."; return; }
     if (!ok){ if (++S.fails >= 5){ S.lockUntil = Date.now() + 30000; S.fails = 0; } m.textContent = "Usuário ou senha incorretos."; return; }
-    S.fails = 0; S.me = u; m.textContent = ""; $("lPass").value = "";
+    S.fails = 0; S.me = u; m.textContent = ""; $("lPass").value = ""; audit("Entrou no sistema");
     $("login").hidden = true; $("shell").hidden = false; S.page = "painel"; render();
     if (u.must) openPw(true);
   };
   function logout(){
+    audit("Saiu do sistema");
     $$("dialog").forEach(d => d.open && d.close());
     if (S.map){ S.map.remove(); S.map = null; }
     S.me = null; S.cred = null; $("shell").hidden = true; $("login").hidden = false; $("lUser").value = ""; $("lUser").focus();
@@ -978,36 +1204,46 @@
     if (await hashPw($("pwOld").value, S.me.salt) !== S.me.hash){ m.textContent = "Senha atual incorreta."; return; }
     const e = pwErr(n) || (n !== $("pwNew2").value ? "A confirmação não confere." : "");
     if (e){ m.textContent = e; return; }
-    S.me.salt = newSalt(); S.me.hash = await hashPw(n, S.me.salt); S.me.must = false; S.forcePw = false;
+    S.me.salt = newSalt(); S.me.hash = await hashPw(n, S.me.salt); S.me.must = false; S.forcePw = false; audit("Alterou a senha");
     $("pwDlg").close();
   };
 
   /* ---- locação ---- */
+  const periodOf = () => { const per = parseInt($("fPer").value, 10), ini = $("fIni").value || today(); return {per, ini, fim:addDays(ini, per)}; };
   function calc(){
-    const per = $("fPer").value; let tot = 0, err = "";
+    const {per, ini, fim} = periodOf(); let tot = 0, err = "", warn = "";
     S.draft.forEach(it => {
-      const e = eqById(it.eq), q = parseInt(it.qtd, 10) || 0, pr = e.p[per];
-      if (q > avail(e)) err = "Só há " + avail(e) + " " + e.nome + " disponível.";
-      else if (pr == null && !err) err = e.nome + " não tem preço para " + per + " dia(s). Defina em Equipamentos.";
+      const e = eqById(it.eq), q = parseInt(it.qtd, 10) || 0, pr = e.p[per], a = availPer(e, ini, fim);
+      if (q > a){ const m = "Só há " + a + " " + e.nome + " disponível de " + fmt(ini) + " a " + fmt(fim) + "."; if (S.formMode === "loc") err = m; else warn = m; }
+      if (pr == null && !err) err = e.nome + " não tem preço para " + per + " dia(s). Defina em Equipamentos.";
       tot += (pr || 0) * q;
     });
     tot += parseFloat($("fFrete").value) || 0;
-    $("fTotal").textContent = BRL(tot); $("fErr").textContent = err; return {tot, err};
+    $("fTotal").textContent = BRL(tot); $("fErr").textContent = err || (warn ? "Atenção: " + warn : ""); return {tot, err};
   }
   function drawItems(){
-    $("items").innerHTML = S.draft.map((it, i) => `<div class="item"><select data-i="${i}" data-f="eq">${S.eq.map(e => `<option value="${e.id}"${e.id == it.eq ? " selected" : ""}>${esc(e.nome)} (${avail(e)} disp.)</option>`).join("")}</select><input type="number" min="1" data-i="${i}" data-f="qtd" value="${it.qtd}"><button type="button" class="btn sm bad" data-x="${i}">✕</button></div>`).join("");
+    $("items").innerHTML = S.draft.map((it, i) => `<div class="item"><select data-i="${i}" data-f="eq">${S.eq.map(e => `<option value="${e.id}"${e.id == it.eq ? " selected" : ""}>${esc(e.nome)} (${availPer(e, periodOf().ini, periodOf().fim)} disp.)</option>`).join("")}</select><input type="number" min="1" data-i="${i}" data-f="qtd" value="${it.qtd}"><button type="button" class="btn sm bad" data-x="${i}">✕</button></div>`).join("");
     $$("[data-f]", $("items")).forEach(el => el.onchange = el.oninput = () => { S.draft[el.dataset.i][el.dataset.f] = el.value; calc(); });
     $$("[data-x]", $("items")).forEach(b => b.onclick = () => { S.draft.splice(b.dataset.x, 1); drawItems(); });
     calc();
   }
-  function openForm(){
-    S.draft = [{eq:S.eq[0].id, qtd:1}];
-    $("fCli").innerHTML = '<option value="new">+ Novo cliente</option>' + S.cli.map(c => `<option value="${c.id}">${esc(c.nome)}</option>`).join("");
-    $("fIni").value = today(); $("fFrete").value = 0; $("fSave").disabled = false;
+  const syncModo = () => { const e = $("fModo").value === "Entrega e coleta na obra"; $("fMotW").hidden = !e; $("fFreteRealW").hidden = !e; };
+  $("fModo").onchange = syncModo;
+  function openForm(mode, from){
+    const orc = mode === "orc"; S.formMode = orc ? "orc" : "loc"; S.formFrom = from || null;
+    $("formTitle").textContent = orc ? "Novo orçamento" : from ? "Nova locação (do orçamento #" + from.id + ")" : "Nova locação";
+    $("fSave").textContent = orc ? "Salvar orçamento" : "Fechar locação";
+    $$(".onlyloc").forEach(el => el.hidden = orc);
+    S.draft = from ? from.itens.map(i => ({eq:i.eq, qtd:i.qtd})) : [{eq:S.eq[0].id, qtd:1}];
+    $("fCli").innerHTML = `<option value="new">${orc ? "+ Prospecto (nome e telefone)" : "+ Novo cliente"}</option>` + S.cli.filter(c => !c.anon).map(c => `<option value="${c.id}">${esc(c.nome)}</option>`).join("");
+    $("fPer").value = from ? String(from.per) : "7";
+    $("fIni").value = from && from.ini >= today() ? from.ini : today(); $("fIni").min = orc ? "" : today();
+    $("fFrete").value = from ? from.frete : 0; $("fCaucao").value = from ? from.caucao : 0; $("fSave").disabled = false;
     ["cNome","cTel","cDoc","cNasc","cMail","cCep","cNum","cRua","cBairro","cCidade","cUf"].forEach(i => $(i).value = ""); $("cLgpd").checked = false; $("cepMsg").textContent = "";
-    $("fCaucao").value = 0; $("newCli").hidden = false; updateRisk(); drawItems(); $("dlg").showModal();
+    $("fModo").selectedIndex = 0; $("fMot").value = ""; $("fFreteReal").value = 0; syncModo();
+    if (from){ if (from.cli) $("fCli").value = String(from.cli); else { $("cNome").value = from.pros.nome; $("cTel").value = MASK.phone(from.pros.tel); } }
+    $("newCli").hidden = $("fCli").value !== "new"; updateRisk(); drawItems(); $("dlg").showModal();
   }
-  $("newC").onclick = openForm;
   function updateRisk(){
     const v = $("fCli").value, box = $("riskBox");
     box.hidden = false;
@@ -1018,13 +1254,19 @@
   }
   $("fCli").onchange = () => { $("newCli").hidden = $("fCli").value !== "new"; updateRisk(); };
   $("addItem").onclick = () => { S.draft.push({eq:S.eq[0].id, qtd:1}); drawItems(); };
-  $("fPer").onchange = $("fFrete").oninput = calc;
+  $("fPer").onchange = $("fIni").onchange = () => drawItems();
+  $("fFrete").oninput = calc;
   $("fCancel").onclick = () => $("dlg").close();
   $("form").onsubmit = async ev => {
     ev.preventDefault();
     const r = calc(); if (r.err || !S.draft.length || r.tot <= 0){ if (!r.err) $("fErr").textContent = "Adicione ao menos um item com preço."; return; }
-    let cid = $("fCli").value;
-    if (cid === "new"){
+    const orc = S.formMode === "orc";
+    let cid = $("fCli").value, pros = null;
+    if (cid === "new" && orc){
+      const nome = $("cNome").value.trim(), tel = dg($("cTel").value), e = nome.length < 3 ? "Informe o nome." : !phoneOk(tel) ? "WhatsApp inválido. Use DDD + número, ex.: (85) 99999-9999." : "";
+      if (e){ $("fErr").textContent = e; return; }
+      pros = {nome, tel}; cid = null;
+    } else if (cid === "new"){
       const nome = $("cNome").value.trim(), tel = dg($("cTel").value), doc = dg($("cDoc").value), cep = dg($("cCep").value), mail = $("cMail").value.trim(),
         rua = $("cRua").value.trim(), num = $("cNum").value.trim(), bairro = $("cBairro").value.trim(), cidade = $("cCidade").value.trim(), uf = $("cUf").value;
       const e = nome.length < 3 ? "Informe o nome completo." : !phoneOk(tel) ? "WhatsApp inválido. Use DDD + número, ex.: (85) 99999-9999." : !docOk(doc) ? "CPF/CNPJ inválido. Confira os números." :
@@ -1035,17 +1277,25 @@
       const c = {id:S.cseq++, nome, tel, doc, mail, nasc:$("cNasc").value, cep, rua, num, end:rua + ", " + num, bairro, cidade, uf, lgpd:today(), lat:null, lng:null, prec:null};
       $("fSave").disabled = true; $("fErr").textContent = "Localizando o endereço no mapa…";
       await geocode(c);
-      S.cli.push(c); cid = c.id;
+      S.cli.push(c); cid = c.id; audit("Cadastrou cliente", "#" + c.id);
     } else {
       cid = parseInt(cid, 10);
-      if (riskOf(cliById(cid)).nivel === "alto"){
+      if (!orc && riskOf(cliById(cid)).nivel === "alto"){
         if (S.me.role !== "admin"){ $("fErr").textContent = "Cliente de alto risco: peça a aprovação de um administrador."; return; }
         if (!$("fAprova").checked){ $("fErr").textContent = "Marque a aprovação do administrador para alugar a cliente de alto risco."; return; }
       }
     }
-    const per = parseInt($("fPer").value, 10), ini = $("fIni").value || today();
-    S.con.push({id:S.seq++, cli:cid, itens:S.draft.map(i => ({eq:parseInt(i.eq, 10), qtd:parseInt(i.qtd, 10), pu:eqById(i.eq).p[per]})), per, ini, fim:iso(new Date(new Date(ini).getTime() + per * day)), frete:parseFloat($("fFrete").value) || 0, caucao:Math.max(0, parseFloat($("fCaucao").value) || 0), total:r.tot, status:"ativo", pago:false});
-    $("fSave").disabled = false; $("dlg").close(); S.page = "locacoes"; render();
+    const {per, ini, fim} = periodOf(), itens = S.draft.map(i => ({eq:parseInt(i.eq, 10), qtd:parseInt(i.qtd, 10), pu:eqById(i.eq).p[per]}));
+    const frete = parseFloat($("fFrete").value) || 0, caucao = Math.max(0, parseFloat($("fCaucao").value) || 0);
+    if (orc){
+      S.orc.push({id:S.oseq++, cli:cid, pros, itens, per, ini, frete, caucao, total:r.tot, criado:today(), validade:addDays(today(), 7), status:"aberto"});
+      audit("Criou orçamento", "#" + (S.oseq - 1)); $("fSave").disabled = false; $("dlg").close(); S.page = "orc"; render(); return;
+    }
+    const ent = $("fModo").value === "Entrega e coleta na obra", reserva = ini > today();
+    const loc = {id:S.seq++, cli:cid, itens, per, ini, fim, frete, caucao, total:r.tot, status:reserva ? "reserva" : "ativo", pago:false, modo:$("fModo").value, mot:ent ? $("fMot").value.trim() : "", freteReal:ent ? Math.max(0, parseFloat($("fFreteReal").value) || 0) : 0, orc:S.formFrom ? S.formFrom.id : null};
+    S.con.push(loc); if (S.formFrom){ S.formFrom.status = "aprovado"; S.formFrom.loc = loc.id; }
+    audit(reserva ? "Criou reserva" : "Fechou locação", "#" + loc.id);
+    $("fSave").disabled = false; $("dlg").close(); S.page = "locacoes"; render(); if (!reserva) openChk(loc.id);
   };
   attachMasks(document);
   bindCep({cep:"cCep", msg:"cepMsg", rua:"cRua", bairro:"cBairro", cidade:"cCidade", uf:"cUf", num:"cNum"});
@@ -1056,7 +1306,7 @@
   function openBuy(){
     $("bEq").innerHTML = '<option value="new">+ Novo tipo de equipamento</option>' + S.eq.map(e => `<option value="${e.id}">${esc(e.nome)} (mais unidades)</option>`).join("");
     fornOptions($("bForn"), '<option value="">Selecione…</option>');
-    ["bNome", "bVol", "bUnit", "bNF", "bObs", "bFornNome"].forEach(i => $(i).value = "");
+    ["bNome", "bVol", "bUnit", "bNF", "bObs", "bFornNome", "bRepos"].forEach(i => $(i).value = "");
     $("bVida").value = 60; $("bQtd").value = 1; $("bFrete").value = 0; $("bJuros").value = 0; $("bParc").value = 1; $("bGar").value = 0; $("bData").value = today(); $("bData").max = today(); $("bDocs").value = ""; $("bFragil").checked = false;
     $("bNovo").hidden = false; $("bFornNovo").hidden = true; $("bErr").textContent = ""; buyTotal(); $("buyDlg").showModal();
   }
@@ -1072,7 +1322,7 @@
       fv === "new" && fn.length < 2 ? "Informe o nome do novo fornecedor." : !(qtd >= 1) ? "Quantidade inválida." : !(unit > 0) ? "Informe o custo unitário." : !data || data > today() ? "Data da compra inválida." : "";
     if (e){ $("bErr").textContent = e; return; }
     let eq;
-    if (isNew){ eq = {id:S.eseq++, nome, estoque:0, p:{1:null, 7:null, 15:null, 30:null}, fragil:$("bFragil").checked, vol:parseFloat($("bVol").value) || null, vida:Math.max(1, parseInt($("bVida").value, 10) || 60)}; S.eq.push(eq); }
+    if (isNew){ eq = {id:S.eseq++, nome, estoque:0, p:{1:null, 7:null, 15:null, 30:null}, fragil:$("bFragil").checked, repos:parseFloat($("bRepos").value) || null, inspInt:90, ultInsp:null, vol:parseFloat($("bVol").value) || null, vida:Math.max(1, parseInt($("bVida").value, 10) || 60)}; S.eq.push(eq); }
     else eq = eqById($("bEq").value);
     if (fv === "new"){ const f = {id:S.fseq++, nome:fn, nota:3}; S.forn.push(f); fv = f.id; } else fv = +fv;
     eq.estoque += qtd;
@@ -1114,7 +1364,7 @@
   /* ---- análise de risco do cliente ---- */
   let riskCli = null;
   function openRisk(id){
-    riskCli = cliById(id); const r = riskOf(riskCli);
+    riskCli = cliById(id); const r = riskOf(riskCli); audit("Abriu a análise de risco", "cliente #" + id);
     $("riskInfo").innerHTML = `<b>${esc(riskCli.nome)}</b><br>Risco: ${riskPill(r)} · nota interna ${r.semHist ? "—" : r.score + "/100"}<br>${esc(REC[r.nivel])}${r.notes.length ? `<br><span class="hint">${esc(r.notes.join("; "))}</span>` : ""}`;
     $("riskList").innerHTML = (riskCli.consultas || []).slice().reverse().map(k => { const velha = (new Date(today()) - new Date(k.data)) / day > 90;
       return `<div class="avail"><span style="width:auto;flex:1">${esc(k.fonte)} · ${fmt(k.data)}${k.valor ? " · " + BRL(k.valor) : ""}${velha ? " (desatualizada)" : ""}<br><span class="hint">${esc(k.obs || "")} registrado por ${esc(k.por)}</span></span><span class="pill ${k.res === "Sem restrições" ? "g" : "r"}">${esc(k.res)}</span></div>`; }).join("") || '<div class="empty">Nenhuma consulta registrada</div>';
@@ -1128,14 +1378,66 @@
     const e = !$("rkOk").checked ? "Registre a autorização do cliente para a consulta (LGPD)." : !dt || dt > today() ? "Data da consulta inválida." : "";
     if (e){ $("rkErr").textContent = e; return; }
     (riskCli.consultas = riskCli.consultas || []).push({fonte:$("rkFonte").value, res:$("rkRes").value, valor:$("rkRes").value === "Com restrições" ? valor : 0, data:dt, obs:$("rkObs").value.trim(), por:S.me.user});
+    audit("Registrou consulta de risco", riskCli.nome + " · " + $("rkFonte").value);
     const id = riskCli.id; render(); openRisk(id);
   };
+
+  /* ---- manutenção, inspeção e baixa ---- */
+  let mnMode = null, mnEq = null;
+  function openMn(mode, eqId){
+    mnMode = mode; mnEq = eqById(eqId);
+    $("mnTitle").textContent = (mode === "manut" ? "Enviar para manutenção" : mode === "insp" ? "Registrar inspeção" : "Dar baixa") + " · " + mnEq.nome;
+    $("mnSub").textContent = mode === "manut" ? "As unidades saem da disponibilidade até a conclusão." : mode === "insp" ? "A próxima inspeção é calculada pelo intervalo informado." : "A baixa reduz o estoque de forma definitiva.";
+    $("mnQtdW").hidden = mode === "insp"; $("mnPrevW").hidden = mode !== "manut"; $("mnMotW").hidden = mode !== "baixa"; $("mnResW").hidden = mode !== "insp"; $("mnCustoW").hidden = mode === "insp";
+    $("mnCustoL").textContent = mode === "baixa" ? "Valor recebido, se vendido (R$)" : "Custo (R$)";
+    $("mnQtd").value = 1; $("mnData").value = today(); $("mnData").max = today(); $("mnPrev").value = ""; $("mnCusto").value = 0; $("mnObs").value = ""; $("mnInt").value = mnEq.inspInt; $("mnRes").selectedIndex = 0; $("mnErr").textContent = "";
+    $("mnDlg").showModal();
+  }
+  $("mnCancel").onclick = () => $("mnDlg").close();
+  $("mnForm").onsubmit = ev => {
+    ev.preventDefault();
+    const qtd = parseInt($("mnQtd").value, 10), data = $("mnData").value, e = mnEq;
+    const err = !data || data > today() ? "Data inválida." : mnMode !== "insp" && !(qtd >= 1) ? "Quantidade inválida." : mnMode !== "insp" && qtd > avail(e) ? "Só há " + avail(e) + " unidade(s) disponível(is) agora." : mnMode === "manut" && $("mnPrev").value && $("mnPrev").value < data ? "A previsão de retorno não pode ser antes da data." : "";
+    if (err){ $("mnErr").textContent = err; return; }
+    const base = {id:S.mseq++, eq:e.id, data, obs:$("mnObs").value.trim(), por:S.me.user}, custo = num("mnCusto");
+    if (mnMode === "manut") S.manut.push({...base, tipo:"Manutenção", qtd, prev:$("mnPrev").value || null, fim:null, custo});
+    else if (mnMode === "baixa"){ e.estoque -= qtd; S.manut.push({...base, tipo:"Baixa", qtd, motivo:$("mnMot").value, valor:custo}); }
+    else { e.ultInsp = data; e.inspInt = Math.max(7, parseInt($("mnInt").value, 10) || 90); S.manut.push({...base, tipo:"Inspeção", qtd:0, resultado:$("mnRes").value.startsWith("Reprovado") ? "Reprovado" : "Aprovado"}); }
+    audit(mnMode === "manut" ? "Enviou para manutenção" : mnMode === "baixa" ? "Deu baixa" : "Registrou inspeção", e.nome);
+    $("mnDlg").close(); render();
+  };
+
+  /* ---- seguros, confirmação, direitos do titular ---- */
+  function openSeg(){ ["sgSeg", "sgNum", "sgVal", "sgPre"].forEach(i => $(i).value = ""); $("sgIni").value = today(); $("sgFim").value = addDays(today(), 365); $("sgDoc").value = ""; $("sgTipo").selectedIndex = 0; $("sgErr").textContent = ""; $("segDlg").showModal(); }
+  $("sgCancel").onclick = () => $("segDlg").close();
+  $("segForm").onsubmit = ev => {
+    ev.preventDefault();
+    const seguradora = $("sgSeg").value.trim(), ini = $("sgIni").value, fim = $("sgFim").value;
+    const e = seguradora.length < 2 ? "Informe a seguradora." : !ini || !fim || fim <= ini ? "Vigência inválida: o fim precisa ser depois do início." : "";
+    if (e){ $("sgErr").textContent = e; return; }
+    S.seg.push({id:S.sseq++, seguradora, tipo:$("sgTipo").value, num:$("sgNum").value.trim(), ini, fim, valor:num("sgVal"), premio:num("sgPre"), docs:Array.from($("sgDoc").files).map(f => f.name)});
+    audit("Cadastrou apólice", seguradora); $("segDlg").close(); render();
+  };
+  $("cfmNo").onclick = () => $("cfmDlg").close();
+  $("cfmYes").onclick = () => { $("cfmDlg").close(); if (cfmFn) cfmFn(); };
+  const stripFotos = k => k && {...k, itens:k.itens.map(i => ({...i, fotos:i.fotos.length + " foto(s)"}))};
+  function exportCli(id){
+    const locs = S.con.filter(x => x.cli === id).map(x => ({...x, chkSaida:stripFotos(x.chkSaida), dev:x.dev && {...x.dev, chk:stripFotos(x.dev.chk)}}));
+    const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([JSON.stringify({gerado:new Date().toISOString(), cliente:cliById(id), locacoes:locs}, null, 2)], {type:"application/json"}));
+    a.download = "dados-titular-" + id + ".json"; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    audit("Exportou dados do titular", "cliente #" + id);
+  }
+  function anonCli(id){
+    if (S.con.some(x => x.cli === id && (x.status === "ativo" || x.status === "reserva" || (!x.pago && x.status !== "cancelada")))){ askConfirm("Não dá para anonimizar agora: há locação em aberto ou valor a receber deste cliente.", null, "Entendi"); return; }
+    Object.assign(cliById(id), {nome:"Cliente anonimizado #" + id, tel:"", doc:"", mail:"", nasc:"", cep:"", rua:"", num:"", end:"—", bairro:"—", cidade:"—", uf:"", lat:null, lng:null, prec:null, consultas:[], anon:true});
+    audit("Anonimizou cliente", "#" + id); render();
+  }
 
   /* ---- receber equipamento / pagamento ---- */
   let pickMode = null, cur = null;
   function openPick(mode){
     pickMode = mode;
-    const l = mode === "eq" ? ativas() : S.con.filter(c => !c.pago);
+    const l = mode === "eq" ? ativas() : aReceber();
     $("pickTitle").textContent = mode === "eq" ? "Receber equipamento" : "Receber pagamento";
     $("pickSel").innerHTML = l.length ? l.map(c => `<option value="${c.id}">#${c.id} · ${esc(cliById(c.cli).nome)} · ${BRL(c.total)} · vence ${fmt(c.fim)}</option>`).join("") : "<option>Nenhuma locação disponível</option>";
     $("pickSel").disabled = $("pickOk").disabled = !l.length;
@@ -1144,10 +1446,63 @@
   $("pickCancel").onclick = () => $("pickDlg").close();
   $("pickForm").onsubmit = ev => { ev.preventDefault(); const id = +$("pickSel").value; $("pickDlg").close(); pickMode === "eq" ? openRet(id) : openPay(id); };
 
+  /* ---- checklist com fotos (saída e devolução) ---- */
+  const CONDS = ["Bom", "Desgaste normal", "Avariado", "Faltando peças"], rankC = c => CONDS.indexOf(c);
+  const dtm = s => new Date(s).toLocaleString("pt-BR", {dateStyle:"short", timeStyle:"short"});
+  function readPhoto(file){
+    return new Promise((res, rej) => {
+      const fr = new FileReader(), img = new Image();
+      fr.onerror = rej; img.onerror = rej;
+      fr.onload = () => { img.src = fr.result; };
+      img.onload = () => { const s = Math.min(1, 1280 / Math.max(img.width, img.height)), cv = document.createElement("canvas"); cv.width = Math.round(img.width * s); cv.height = Math.round(img.height * s); cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height); res(cv.toDataURL("image/jpeg", .72)); };
+      fr.readAsDataURL(file);
+    });
+  }
+  const newChk = c => c.itens.map(i => ({eq:i.eq, qtd:i.qtd, cond:"Bom", obs:"", fotos:[], perdida:0}));
+  function chkErr(items){ const i = items.find(x => rankC(x.cond) >= 2 && !x.fotos.length); return i ? "Anexe ao menos uma foto de " + eqById(i.eq).nome + " (estado: " + i.cond.toLowerCase() + ")." : ""; }
+  function mountChk(el, items, ref, onChange){
+    el.innerHTML = items.map((it, i) => {
+      const r = ref && ref[i];
+      return `<div class="ckit"><div class="ckh"><b>${it.qtd}× ${esc(eqById(it.eq).nome)}</b>${r ? `<span class="hint">na saída: ${esc(r.cond)} · ${r.fotos.length} foto(s)</span>` : ""}${r && rankC(it.cond) > rankC(r.cond) ? '<span class="pill r">piorou</span>' : ""}</div>
+        <div class="row"><div class="f"><label>Estado</label><select data-ck="cond" data-i="${i}">${CONDS.map(c => `<option${c === it.cond ? " selected" : ""}>${c}</option>`).join("")}</select></div>
+        <div class="f"><label>Observação</label><input data-ck="obs" data-i="${i}" maxlength="120" value="${esc(it.obs)}"></div></div>
+        ${it.cond === "Faltando peças" ? `<div class="f"><label>Unidades perdidas (de ${it.qtd})</label><input type="number" min="0" max="${it.qtd}" step="1" data-ck="perd" data-i="${i}" value="${it.perdida || 0}"><small class="hint">entram como baixa no estoque e são cobradas pelo valor de reposição</small></div>` : ""}
+        <div class="ph">${it.fotos.map((f, j) => `<div class="th"><img src="${f}" alt="Foto ${j + 1}"><button type="button" data-ck="rm" data-i="${i}" data-j="${j}" aria-label="Remover foto">×</button></div>`).join("")}${it.fotos.length < 6 ? `<label class="addph">+ Foto<input type="file" accept="image/*" capture="environment" multiple hidden data-ck="file" data-i="${i}"></label>` : ""}</div></div>`;
+    }).join("");
+    $$("[data-ck]", el).forEach(x => {
+      const i = +x.dataset.i, k = x.dataset.ck;
+      if (k === "cond") x.onchange = () => { items[i].cond = x.value; if (x.value !== "Faltando peças") items[i].perdida = 0; if (onChange) onChange(); mountChk(el, items, ref, onChange); };
+      else if (k === "obs") x.oninput = () => { items[i].obs = x.value; };
+      else if (k === "perd") x.oninput = () => { items[i].perdida = Math.min(items[i].qtd, Math.max(0, parseInt(x.value, 10) || 0)); if (onChange) onChange(); };
+      else if (k === "rm") x.onclick = () => { items[i].fotos.splice(+x.dataset.j, 1); mountChk(el, items, ref, onChange); };
+      else x.onchange = async () => { for (const f of Array.from(x.files).slice(0, 6 - items[i].fotos.length)){ try { items[i].fotos.push(await readPhoto(f)); } catch(e){} } mountChk(el, items, ref, onChange); };
+    });
+  }
+  let ckC = null, ckItems = [], ckDev = [];
+  function openChk(id){
+    ckC = conById(id); ckItems = newChk(ckC);
+    $("ckTitle").textContent = "Checklist de saída · locação #" + id; $("ckObs").value = ""; $("ckErr").textContent = "";
+    mountChk($("ckBody"), ckItems, null); $("ckDlg").showModal();
+  }
+  $("ckCancel").onclick = () => $("ckDlg").close();
+  $("ckForm").onsubmit = ev => {
+    ev.preventDefault();
+    const e = chkErr(ckItems); if (e){ $("ckErr").textContent = e; return; }
+    ckC.chkSaida = {em:new Date().toISOString(), por:S.me.user, itens:ckItems, obs:$("ckObs").value.trim()};
+    $("ckDlg").close(); render();
+  };
+
+  function syncCond(){
+    const w = Math.max(...ckDev.map(x => rankC(x.cond))); $("rCond").value = w >= 3 ? "Peças faltando" : w === 2 ? "Com avarias" : "Sem avarias";
+    const rep = ckDev.reduce((a, x) => a + (x.perdida || 0) * reposOf(eqById(x.eq)), 0); if (rep > 0) $("rAvaria").value = rep.toFixed(2);
+  }
   function openRet(id){
-    cur = conById(id); const cl = cliById(cur.cli), d = diasAtraso(cur);
-    $("retInfo").innerHTML = `<b>Locação #${cur.id}</b> · ${esc(cl.nome)}<br>${itensTxt(cur)}<br>${fmt(cur.ini)} a ${fmt(cur.fim)}${d ? ` · <span style="color:var(--bad)">${d} dia(s) de atraso</span>` : ""}`;
+    cur = conById(id); const cl = cliById(cur.cli), d = diasAtraso(cur), ref = cur.chkSaida ? cur.chkSaida.itens : null;
+    $("retInfo").innerHTML = `<b>Locação #${cur.id}</b> · ${esc(cl.nome)}<br>${itensTxt(cur)}<br>${fmt(cur.ini)} a ${fmt(cur.fim)}${d ? ` · <span style="color:var(--bad)">${d} dia(s) de atraso</span>` : ""}${cur.caucao ? `<br>Caução recebida: ${BRL(cur.caucao)}` : ""}`;
     $("rData").value = today(); $("rData").max = today(); $("rData").min = cur.ini; $("rCond").selectedIndex = 0; $("rAvaria").value = 0; $("rObs").value = ""; $("rErr").textContent = "";
+    ckDev = newChk(cur);
+    $("retChkNote").textContent = ref ? "Compare com o estado da saída. As fotos ficam com data, hora e usuário." : "Esta locação não tem checklist de saída; não há base de comparação. Registre o estado agora.";
+    mountChk($("retChk"), ckDev, ref, syncCond); syncCond();
     $("retDlg").showModal();
   }
   $("rCancel").onclick = () => $("retDlg").close();
@@ -1155,7 +1510,10 @@
     ev.preventDefault();
     const dt = $("rData").value, av = Math.max(0, parseFloat($("rAvaria").value) || 0);
     if (!dt || dt < cur.ini || dt > today()){ $("rErr").textContent = "Data inválida: use entre o início da locação e hoje."; return; }
-    cur.status = "devolvido"; cur.dev = {data:dt, cond:$("rCond").value, avaria:av, obs:$("rObs").value.trim()};
+    const ce = chkErr(ckDev); if (ce){ $("rErr").textContent = ce; return; }
+    cur.status = "devolvido"; cur.dev = {data:dt, cond:$("rCond").value, avaria:av, obs:$("rObs").value.trim(), chk:{em:new Date().toISOString(), por:S.me.user, itens:ckDev}};
+    ckDev.filter(x => x.perdida > 0).forEach(x => { const e = eqById(x.eq); e.estoque = Math.max(0, e.estoque - x.perdida); S.manut.push({id:S.mseq++, eq:e.id, tipo:"Baixa", motivo:"Perda em locação #" + cur.id, qtd:x.perdida, valor:0, data:dt, obs:"", por:S.me.user}); });
+    audit("Recebeu equipamento", "locação #" + cur.id);
     $("retDlg").close(); render(); showDoc("dev", cur.id);
   };
 
@@ -1180,6 +1538,7 @@
     ev.preventDefault();
     const t = payTotal(); if ($("pErr").textContent || !$("pData").value) return;
     cur.pago = true; cur.pgto = {acr:num("pAcr"), multa:num("pMulta"), desc:num("pDesc"), forma:$("pForma").value, data:$("pData").value, total:t};
+    audit("Registrou pagamento", "locação #" + cur.id + " · " + BRL(t));
     $("payDlg").close(); render(); showDoc("recibo", cur.id);
   };
 
