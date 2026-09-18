@@ -478,6 +478,106 @@
   </form>
 </dialog>
 
+<dialog id="vdDlg">
+  <h3 style="margin-bottom:1rem">Nova venda de equipamento</h3>
+  <form id="vdForm">
+    <div class="f"><label for="vbCli">Comprador</label><select id="vbCli"></select></div>
+    <div id="vbNovo">
+      <div class="row">
+        <div class="f"><label for="vbNome">Nome / razão social</label><input id="vbNome" maxlength="80" autocomplete="off"></div>
+        <div class="f"><label for="vbTel">WhatsApp</label><input id="vbTel" data-mask="phone" maxlength="15" inputmode="numeric" placeholder="(85) 99999-9999"></div>
+      </div>
+      <div class="row">
+        <div class="f"><label for="vbDoc">CPF ou CNPJ</label><input id="vbDoc" data-mask="doc" maxlength="18" inputmode="numeric" placeholder="000.000.000-00"></div>
+        <div class="f"><label for="vbMail">E-mail (para enviar a nota)</label><input id="vbMail" type="email" maxlength="80"></div>
+      </div>
+      <div class="row">
+        <div class="f"><label for="vbCep">CEP</label><input id="vbCep" data-mask="cep" maxlength="9" inputmode="numeric" placeholder="00000-000"><small class="hint" id="vbCepMsg"></small></div>
+        <div class="f"><label for="vbNum">Número</label><input id="vbNum" maxlength="10"></div>
+      </div>
+      <div class="f"><label for="vbRua">Rua</label><input id="vbRua" maxlength="80"></div>
+      <div class="r3">
+        <div class="f"><label for="vbBairro">Bairro</label><input id="vbBairro" maxlength="60"></div>
+        <div class="f"><label for="vbCidade">Cidade</label><input id="vbCidade" maxlength="60"></div>
+        <div class="f"><label for="vbUf">UF</label><input id="vbUf" data-mask="uf" maxlength="2"></div>
+      </div>
+      <label class="chk"><input type="checkbox" id="vbLgpd"> O comprador autorizou o uso dos dados para a venda e a nota fiscal (LGPD)</label>
+    </div>
+    <h4 class="sub">Itens vendidos</h4>
+    <div id="vdItens"></div><button type="button" class="btn sm" id="vdAdd">+ item</button>
+    <div class="row" style="margin-top:.8rem">
+      <div class="f"><label for="vdData">Data da venda</label><input id="vdData" type="date"></div>
+      <div class="f"><label for="vdPag">Forma de pagamento</label><select id="vdPag"><option>Pix</option><option>Dinheiro</option><option>Cartão</option><option>Transferência</option><option>Boleto</option></select></div>
+    </div>
+    <div class="row">
+      <div class="f"><label for="vdNat">Natureza da operação</label><select id="vdNat"><option>Venda de ativo imobilizado</option><option>Venda de sucata</option><option>Outra</option></select></div>
+      <div class="f"><label for="vdDesc">Desconto (R$)</label><input id="vdDesc" type="number" min="0" step="0.01" value="0"></div>
+    </div>
+    <div class="total"><span>Total da venda</span><span id="vdTotal">R$ 0,00</span></div>
+    <p class="hint">NCM, CFOP e CST/CSOSN podem ser completados depois, em "Dados fiscais".</p>
+    <p class="err" id="vdErr"></p>
+    <div style="display:flex;gap:.5rem;justify-content:flex-end">
+      <button type="button" class="btn" id="vdCancel">Cancelar</button>
+      <button type="submit" class="btn p" id="vdSave">Salvar venda</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="fisDlg">
+  <h3 id="fsTitle" style="margin-bottom:.3rem">Dados fiscais</h3>
+  <p class="hint" style="margin-bottom:1rem">Preencha com a contabilidade. Os códigos sugeridos precisam ser confirmados para o seu regime tributário.</p>
+  <form id="fisForm">
+    <div id="fsBody"></div>
+    <div class="row">
+      <div class="f"><label for="fsNat">Natureza da operação</label><select id="fsNat"><option>Venda de ativo imobilizado</option><option>Venda de sucata</option><option>Outra</option></select></div>
+      <div class="f"><label for="fsCfop">CFOP</label><input id="fsCfop" data-mask="digits4" maxlength="4" inputmode="numeric"><small class="hint" id="fsCfopHint"></small></div>
+    </div>
+    <div class="f"><label for="fsCsosn">CST / CSOSN</label><input id="fsCsosn" maxlength="4" inputmode="numeric"><small class="hint">definido pelo regime tributário da empresa</small></div>
+    <div class="f"><label for="fsInfo">Informações complementares</label><input id="fsInfo" maxlength="200"></div>
+    <p class="err" id="fsErr"></p>
+    <div style="display:flex;gap:.5rem;justify-content:flex-end">
+      <button type="button" class="btn" id="fsCancel">Cancelar</button>
+      <button type="submit" class="btn p">Salvar</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="nfDlg">
+  <h3 id="nfTitle" style="margin-bottom:.3rem">Registrar nota emitida</h3>
+  <p class="hint" style="margin-bottom:1rem">Emita a nota no sistema da contabilidade ou no portal da SEFAZ e registre aqui os dados dela. A chave de acesso é conferida.</p>
+  <form id="nfForm">
+    <div class="row">
+      <div class="f"><label for="nfNum">Número</label><input id="nfNum" maxlength="9" inputmode="numeric"></div>
+      <div class="f"><label for="nfSerie">Série</label><input id="nfSerie" maxlength="3" inputmode="numeric" value="1"></div>
+    </div>
+    <div class="f"><label for="nfChave">Chave de acesso (44 números)</label><input id="nfChave" data-mask="chave" maxlength="54" inputmode="numeric" placeholder="0000 0000 0000 …"></div>
+    <div class="f"><label for="nfData">Data de emissão</label><input id="nfData" type="date"></div>
+    <div class="row">
+      <div class="f"><label for="nfXml">XML da nota</label><input id="nfXml" type="file" accept=".xml"></div>
+      <div class="f"><label for="nfPdf">PDF (DANFE)</label><input id="nfPdf" type="file" accept=".pdf"></div>
+    </div>
+    <p class="hint">Nesta demonstração só os nomes dos arquivos são guardados.</p>
+    <p class="err" id="nfErr"></p>
+    <div style="display:flex;gap:.5rem;justify-content:flex-end">
+      <button type="button" class="btn" id="nfCancel">Cancelar</button>
+      <button type="submit" class="btn p">Registrar nota</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="nfcDlg">
+  <h3 style="margin-bottom:.3rem">Cancelar nota fiscal</h3>
+  <p class="hint" style="margin-bottom:1rem">O cancelamento também precisa ser feito no emissor ou na SEFAZ, dentro do prazo. Aqui ele registra a justificativa e devolve o item ao estoque.</p>
+  <form id="nfcForm">
+    <div class="f"><label for="nfcJust">Justificativa (mínimo 15 caracteres)</label><textarea id="nfcJust" rows="3" maxlength="255"></textarea></div>
+    <p class="err" id="nfcErr"></p>
+    <div style="display:flex;gap:.5rem;justify-content:flex-end">
+      <button type="button" class="btn" id="nfcCancel">Voltar</button>
+      <button type="submit" class="btn p">Cancelar nota</button>
+    </div>
+  </form>
+</dialog>
+
 <dialog id="despDlg">
   <h3 style="margin-bottom:1rem">Nova despesa</h3>
   <form id="despForm">
@@ -684,13 +784,16 @@
       return d.replace(/^(\d{2})(\d{1,3})/,"$1.$2").replace(/^(\d{2}\.\d{3})(\d{1,3})/,"$1.$2").replace(/^(\d{2}\.\d{3}\.\d{3})(\d{1,4})/,"$1/$2").replace(/^(\d{2}\.\d{3}\.\d{3}\/\d{4})(\d{1,2})/,"$1-$2");},
     date:function(v){return dg(v).slice(0,8).replace(/^(\d{2})(\d{1,2})/,"$1/$2").replace(/^(\d{2}\/\d{2})(\d{1,4})/,"$1/$2");},
     cep:function(v){var d=dg(v).slice(0,8);return d.length>5?d.slice(0,5)+"-"+d.slice(5):d;},
-    uf:function(v){return String(v).toUpperCase().replace(/[^A-Z]/g,"").slice(0,2);}
+    uf:function(v){return String(v).toUpperCase().replace(/[^A-Z]/g,"").slice(0,2);},
+    chave:function(v){return dg(v).slice(0,44).replace(/(\d{4})(?=\d)/g,"$1 ");},
+    digits4:function(v){return dg(v).slice(0,4);}
   };
   function cpfOk(d){if(d.length!==11||/^(\d)\1+$/.test(d))return false;for(var t=9;t<11;t++){var s=0;for(var i=0;i<t;i++)s+=d[i]*(t+1-i);if((s*10)%11%10!=d[t])return false;}return true;}
   function cnpjOk(d){if(d.length!==14||/^(\d)\1+$/.test(d))return false;var w=[5,4,3,2,9,8,7,6,5,4,3,2];for(var t=12;t<14;t++){var ww=t===12?w:[6].concat(w),s=0;for(var i=0;i<t;i++)s+=d[i]*ww[i];var r=s%11;r=r<2?0:11-r;if(r!=d[t])return false;}return true;}
   var docOk = function(d){return d.length===11?cpfOk(d):d.length===14?cnpjOk(d):false;};
   var phoneOk = function(d){return d.length===11?/^[1-9][1-9]9/.test(d):d.length===10?/^[1-9][1-9][2-5]/.test(d):false;};
   function dateOk(s){if(!s)return true;var m=/^(\d{2})\/(\d{2})\/(\d{4})$/.exec(s);if(!m)return false;var d=+m[1],mo=+m[2],y=+m[3],x=new Date(y,mo-1,d);return y>=1900&&x<=new Date()&&x.getFullYear()===y&&x.getMonth()===mo-1&&x.getDate()===d;}
+  function chaveOk(c){c=dg(c);if(c.length!==44)return false;var w=[2,3,4,5,6,7,8,9],s=0;for(var i=42,j=0;i>=0;i--,j++)s+=+c[i]*w[j%8];var r=s%11;return (r<2?0:11-r)===+c[43];}
   /*/V*/
 
   const mailOk = m => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(m);
@@ -717,7 +820,7 @@
     ],
     cli:[], con:[], seq:1, cseq:1, draft:[], useq:2,
     forn:[], compras:[], cot:[], fseq:1, bseq:1, qseq:1, eseq:7, fTab:"forn", finTab:"fin", ocup:60,
-    desp:[], dseq:1, finMonth:today().slice(0, 7),
+    desp:[], dseq:1, finMonth:today().slice(0, 7), vendas:[], vseq:1, vDraft:[],
     orc:[], oseq:1, manut:[], mseq:1, seg:[], sseq:1, log:[], priv:{dpo:"", dpoMail:"", guarda:5}, formMode:"loc", formFrom:null,
     users:[{id:1,nome:"Administrador",user:"admin",role:"admin",
       salt:"94999927fd0f54362d6bad23408fbd9c",hash:"93fc271cdbf9aec9ca1f347b3f4de99be3ad7ab53414a69393c36a75d54eea52"}]
@@ -885,6 +988,13 @@
   const orcById = id => S.orc.find(o => o.id == id);
   const orcCli = o => o.cli ? cliById(o.cli) : o.pros;
   function docHtml(kind, c){
+    if (kind === "venda"){ const cl = cliById(c.cli), miss = vendaMiss(c), n = c.nota;
+      return empHead() + `<p style="text-align:right;font-size:.78rem">Emitido em ${fmt(today())}</p><h3>ESPELHO DE VENDA Nº ${c.id}</h3><p style="font-size:.78rem;text-align:center">Documento auxiliar para conferência. Não substitui a nota fiscal.</p>${cliBlock(cl)}` +
+        `<table><thead><tr><th>Equipamento</th><th>NCM</th><th>Qtd</th><th>Valor unit.</th><th>Subtotal</th></tr></thead><tbody>${c.itens.map(i => `<tr><td>${esc(eqById(i.eq).nome)}</td><td>${esc(i.ncm || "—")}</td><td>${i.qtd}</td><td>${BRL(i.pu)}</td><td>${BRL(i.pu * i.qtd)}</td></tr>`).join("")}</tbody></table>` +
+        `<p>Data da venda: ${fmt(c.data)} · Pagamento: ${esc(c.pag)}<br>${c.desc ? `Desconto: ${BRL(c.desc)}<br>` : ""}<b>Total: ${BRL(c.total)}</b></p><h4>Dados fiscais</h4><p>Natureza: ${esc(c.nat)} · CFOP: ${esc(c.cfop || "—")} · CST/CSOSN: ${esc(c.csosn || "—")}${c.info ? "<br>" + esc(c.info) : ""}</p>` +
+        (n ? `<p><b>Nota fiscal nº ${esc(n.numero)}, série ${esc(n.serie)}</b>, emitida em ${fmt(n.emissao)}.<br>Chave de acesso: ${esc(MASK.chave(n.chave))}${n.cancel ? `<br><b>NOTA CANCELADA</b> em ${dtm(n.cancel.em)}: ${esc(n.cancel.just)}` : ""}</p>` : `<p>Nota fiscal ainda não emitida.</p>`) +
+        (!n && miss.length && S.emp.usaNf ? `<div class="warn noprint">Faltam dados para emitir: ${esc(miss.join("; "))}.</div>` : "");
+    }
     if (kind === "orc"){ const p = orcCli(c);
       return empHead() + `<p style="text-align:right;font-size:.78rem">Emitido em ${fmt(today())}</p><h3>ORÇAMENTO Nº ${c.id}</h3><p><b>${esc(p.nome)}</b>${p.tel ? " · " + esc(MASK.phone(p.tel)) : ""}</p>${itemsTable(c)}<p>Período: ${c.per} dia(s), início previsto em ${fmt(c.ini)}.<br>Frete: ${BRL(c.frete)}<br>${c.caucao ? `Caução: ${BRL(c.caucao)}<br>` : ""}<b>Total: ${BRL(c.total)}</b></p><p style="font-size:.78rem">Válido até ${fmt(c.validade)}. Valores sujeitos à disponibilidade dos equipamentos na data.</p>`; }
     const cl = cliById(c.cli), head = empHead() + `<p style="text-align:right;font-size:.78rem">Emitido em ${fmt(today())}</p>`;
@@ -893,7 +1003,7 @@
     if (kind === "chk"){ const k = c.chkSaida; return head + `<h3>CHECKLIST DE SAÍDA Nº ${c.id}</h3>${cliBlock(cl)}<p>Registrado em ${dtm(k.em)} por ${esc(k.por)}.</p>${chkTable(k.itens)}${k.obs ? `<p>Observações: ${esc(k.obs)}</p>` : ""}${sign()}`; }
     const d = c.dev; return head + `<h3>TERMO DE DEVOLUÇÃO Nº ${c.id}</h3>${cliBlock(cl)}${itemsTable(c)}<p>Devolvido em <b>${fmt(d.data)}</b> (previsto: ${fmt(c.fim)}).${c.caucao ? `<br>Caução recebida na locação: <b>${BRL(c.caucao)}</b>` : ""}<br>Condição: <b>${esc(d.cond)}</b>${d.avaria ? "<br>Cobrança por avaria/reposição: <b>" + BRL(d.avaria) + "</b>" : ""}${d.obs ? "<br>Observações: " + esc(d.obs) : ""}</p>${d.chk ? `<h4>Checklist de devolução (${dtm(d.chk.em)}, ${esc(d.chk.por)})</h4>${chkTable(d.chk.itens, c.chkSaida ? c.chkSaida.itens : null)}` : ""}${sign()}`;
   }
-  function showDoc(kind, id){ $("docBody").innerHTML = docHtml(kind, kind === "orc" ? orcById(id) : conById(id)); audit("Emitiu documento", kind + " #" + id); if (!$("docDlg").open) $("docDlg").showModal(); }
+  function showDoc(kind, id){ $("docBody").innerHTML = docHtml(kind, kind === "orc" ? orcById(id) : kind === "venda" ? vendaById(id) : conById(id)); audit("Emitiu documento", kind + " #" + id); if (!$("docDlg").open) $("docDlg").showModal(); }
 
   function alertas(){
     const a = [], t = today(), adm = S.me && S.me.role === "admin";
@@ -904,6 +1014,7 @@
     S.manut.filter(m => m.tipo === "Manutenção" && !m.fim && m.prev && m.prev < t).forEach(m => a.push(["y", "Manutenção atrasada: " + eqById(m.eq).nome, "equip"]));
     S.con.filter(c => c.status === "reserva" && c.ini <= t).forEach(c => a.push(["y", "Reserva para hoje sem saída confirmada: #" + c.id, "locacoes"]));
     S.con.filter(c => c.status === "ativo" && !c.chkSaida).forEach(c => a.push(["y", "Locação #" + c.id + " sem checklist de saída", "locacoes"]));
+    if (S.emp.usaNf) S.vendas.filter(v => v.status !== "cancelada" && !v.nota).forEach(v => a.push(["y", "Venda #" + v.id + " sem nota fiscal emitida", "fin:nf"]));
     S.orc.filter(o => o.status === "aberto" && o.validade <= addDays(t, 1)).forEach(o => a.push(["y", "Orçamento #" + o.id + (o.validade < t ? " vencido" : " vence em breve"), "orc"]));
     return a;
   }
@@ -942,6 +1053,7 @@
     S.con.filter(c => c.status !== "cancelada" && c.freteReal).forEach(c => L.push({d:c.ini, t:"S", cat:"Frete (custo)", desc:"Locação #" + c.id, v:c.freteReal}));
     S.seg.filter(s => s.premio).forEach(s => L.push({d:s.ini, t:"S", cat:"Seguros", desc:s.seguradora + " · " + s.tipo, v:s.premio}));
     S.desp.forEach(x => L.push({d:x.data, t:"S", cat:x.cat, desc:x.desc, v:x.valor, id:x.id}));
+    S.vendas.filter(v => v.status !== "cancelada").forEach(v => L.push({d:v.data, t:"E", cat:"Venda de equipamento", desc:"Venda #" + v.id + " · " + cliById(v.cli).nome, v:v.total}));
     return L.sort((a, b) => b.d < a.d ? -1 : b.d > a.d ? 1 : 0);
   }
   function barsSvg(ms){
@@ -990,6 +1102,68 @@
     const csv = "﻿" + rows.map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(";")).join("\r\n");
     const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], {type:"text/csv;charset=utf-8"})); a.download = "extrato-" + M + ".csv"; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
     audit("Exportou extrato financeiro", M);
+  }
+
+  /* ---- venda com nota fiscal ---- */
+  const vendaById = id => S.vendas.find(v => v.id == id);
+  const cfopSug = (nat, cl) => { const inter = !!(cl && cl.uf && S.emp.uf && cl.uf !== S.emp.uf); return nat === "Venda de ativo imobilizado" ? (inter ? "6551" : "5551") : (inter ? "6949" : "5949"); };
+  function vendaMiss(v){
+    const cl = cliById(v.cli), m = [];
+    if (!S.emp.razao || !S.emp.cnpj || !S.emp.cidade || !S.emp.uf) m.push("dados da empresa (razão social, CNPJ, cidade e UF)");
+    if (!cl || cl.anon || !docOk(dg(cl.doc))) m.push("CPF/CNPJ do comprador");
+    if (cl && (!cl.rua || !cl.num || !cl.bairro || !cl.cidade || !cl.uf || dg(cl.cep).length !== 8)) m.push("endereço do comprador");
+    v.itens.forEach(i => { if (!/^\d{8}$/.test(i.ncm || "")) m.push("NCM de " + eqById(i.eq).nome); });
+    if (!/^\d{4}$/.test(v.cfop || "")) m.push("CFOP");
+    if (!(v.csosn || "").trim()) m.push("CST/CSOSN");
+    return m;
+  }
+  const vSit = v => v.status === "cancelada" ? ["r", "Cancelada"] : v.nota ? ["g", "Nota emitida"] : !S.emp.usaNf ? ["", "Sem nota (opcional)"] : vendaMiss(v).length ? ["y", "Faltam dados fiscais"] : ["y", "Pronta para emitir"];
+  const vSub = v => sum(v.itens, i => i.pu * i.qtd);
+  function vendasView(){
+    const M = S.finMonth, ok = S.vendas.filter(v => v.status !== "cancelada"), doMes = ok.filter(v => ym(v.data) === M);
+    const kp = [["Vendas no mês", BRL(sum(doMes, v => v.total)) + `<small> · ${doMes.length}</small>`]].concat(S.emp.usaNf ? [["Sem nota emitida", String(ok.filter(v => !v.nota).length)], ["Notas emitidas no mês", String(ok.filter(v => v.nota && ym(v.nota.emissao) === M).length)]] : []);
+    const emissor = S.emp.emissor && S.emp.emissor !== "Registro manual" ? S.emp.emissor : "";
+    return `<div class="card" style="margin-bottom:1.2rem"><div class="fmnav"><button class="btn icon" data-fm="-1" aria-label="Mês anterior">‹</button><b>${monthName(M).replace(/^./, c => c.toUpperCase())}</b><button class="btn icon" data-fm="1" aria-label="Próximo mês">›</button><button class="btn sm" data-fm="0">Mês atual</button></div></div>` +
+      `<div class="kpis k6">${kp.map(x => `<div class="card kpi"><span>${x[0]}</span><b>${x[1]}</b></div>`).join("")}</div>` +
+      `<div class="card"><div class="head"><h3>Vendas de equipamento</h3><p>${!S.emp.usaNf ? "Nota fiscal desativada por enquanto: a venda, o estoque e o caixa funcionam normalmente sem ela. Ative em Configurações quando for emitir." : emissor ? "Emissor configurado: " + esc(emissor) + ". A emissão automática ainda depende de contrato e integração; por ora registre a nota emitida." : "Emita a nota no sistema da contabilidade ou na SEFAZ e registre aqui o número e a chave de acesso."}</p></div><div class="wrap"><table><thead><tr><th>Nº</th><th>Data</th><th>Comprador</th><th>Itens</th><th>Total</th><th>Resultado</th><th>Situação fiscal</th><th></th></tr></thead><tbody>` +
+      (S.vendas.length ? S.vendas.slice().reverse().map(v => { const cl = cliById(v.cli), s = vSit(v), res = v.contabil == null ? "—" : BRL(v.total - v.contabil);
+        const acts = `<button class="btn sm" data-vespelho="${v.id}">Espelho</button>` + (v.status === "cancelada" ? "" : v.nota ? `<button class="btn sm bad" data-vcancnota="${v.id}">Cancelar nota</button>` : `<button class="btn sm" data-vfis="${v.id}">Dados fiscais</button><button class="btn sm" data-vnota="${v.id}">Registrar nota</button><button class="btn sm bad" data-vcanc="${v.id}">Cancelar venda</button>`);
+        return `<tr><td>#${v.id}</td><td>${fmt(v.data)}</td><td>${esc(cl.nome)}</td><td>${v.itens.map(i => i.qtd + "× " + esc(eqById(i.eq).nome)).join(", ")}</td><td>${BRL(v.total)}</td><td>${res}</td><td><span class="pill ${s[0]}">${s[1]}</span>${v.nota ? `<br><span class="hint">nº ${esc(v.nota.numero)} · série ${esc(v.nota.serie)}</span>` : ""}</td><td class="acts-c"><div class="acts">${acts}</div></td></tr>`; }).join("")
+        : '<tr><td class="none" colspan="8">Nenhuma venda registrada ainda</td></tr>') +
+      '</tbody></table></div><p class="note">Resultado = valor da venda menos o valor contábil estimado do equipamento (compra menos depreciação). Códigos fiscais devem ser confirmados com a contabilidade.</p></div>';
+  }
+  function openVenda(){
+    S.vDraft = [{eq:S.eq[0].id, qtd:1, pu:""}];
+    $("vbCli").innerHTML = '<option value="new">+ Novo comprador</option>' + S.cli.filter(c => !c.anon).map(c => `<option value="${c.id}">${esc(c.nome)}</option>`).join("");
+    ["vbNome", "vbTel", "vbDoc", "vbMail", "vbCep", "vbNum", "vbRua", "vbBairro", "vbCidade", "vbUf"].forEach(i => $(i).value = ""); $("vbLgpd").checked = false; $("vbCepMsg").textContent = "";
+    $("vbNovo").hidden = false; $("vdData").value = today(); $("vdData").max = today(); $("vdDesc").value = 0; $("vdNat").selectedIndex = 0; $("vdErr").textContent = ""; $("vdSave").disabled = false;
+    drawVItens(); $("vdDlg").showModal();
+  }
+  function vdCalc(){ const sub = sum(S.vDraft, i => (parseFloat(i.pu) || 0) * (parseInt(i.qtd, 10) || 0)), t = sub - num("vdDesc"); $("vdTotal").textContent = BRL(t); return {sub, t}; }
+  function drawVItens(){
+    $("vdItens").innerHTML = S.vDraft.map((it, i) => `<div class="item" style="grid-template-columns:1fr 70px 96px 32px"><select data-vf="eq" data-vi="${i}">${S.eq.map(e => `<option value="${e.id}"${e.id == it.eq ? " selected" : ""}>${esc(e.nome)} (${avail(e)} disp.)</option>`).join("")}</select><input type="number" min="1" step="1" data-vf="qtd" data-vi="${i}" value="${it.qtd}" aria-label="Quantidade"><input type="number" min="0" step="0.01" data-vf="pu" data-vi="${i}" value="${it.pu}" placeholder="R$ un." aria-label="Preço unitário"><button type="button" class="btn sm bad" data-vx="${i}">✕</button></div>`).join("");
+    $$("[data-vf]", $("vdItens")).forEach(el => el.onchange = el.oninput = () => { S.vDraft[el.dataset.vi][el.dataset.vf] = el.value; vdCalc(); });
+    $$("[data-vx]", $("vdItens")).forEach(b => b.onclick = () => { S.vDraft.splice(+b.dataset.vx, 1); drawVItens(); });
+    vdCalc();
+  }
+  let fisV = null, nfV = null;
+  function openFis(id){
+    fisV = vendaById(id); const cl = cliById(fisV.cli);
+    $("fsTitle").textContent = "Dados fiscais · venda #" + id;
+    $("fsBody").innerHTML = fisV.itens.map((it, i) => `<div class="f"><label for="fsN${i}">NCM · ${it.qtd}× ${esc(eqById(it.eq).nome)}</label><input id="fsN${i}" data-ncm="${i}" maxlength="8" inputmode="numeric" value="${esc(it.ncm || eqById(it.eq).ncm || "")}" placeholder="8 números"></div>`).join("");
+    $("fsNat").value = fisV.nat; $("fsCfop").value = fisV.cfop || cfopSug(fisV.nat, cl); $("fsCsosn").value = fisV.csosn || ""; $("fsInfo").value = fisV.info || ""; $("fsErr").textContent = "";
+    $("fsCfopHint").textContent = "sugestão para " + (cl && cl.uf && S.emp.uf && cl.uf !== S.emp.uf ? "operação interestadual" : "operação dentro do estado") + ": " + cfopSug($("fsNat").value, cl);
+    $("fisDlg").showModal();
+  }
+  function openNota(id){
+    nfV = vendaById(id); ["nfNum", "nfChave"].forEach(i => $(i).value = ""); $("nfSerie").value = "1"; $("nfData").value = today(); $("nfData").max = today(); $("nfXml").value = ""; $("nfPdf").value = ""; $("nfErr").textContent = "";
+    $("nfTitle").textContent = "Registrar nota emitida · venda #" + id; $("nfDlg").showModal();
+  }
+  function openNfc(id){ nfV = vendaById(id); $("nfcJust").value = ""; $("nfcErr").textContent = ""; $("nfcDlg").showModal(); }
+  function cancelVenda(id, just){
+    const v = vendaById(id); v.itens.forEach(i => { eqById(i.eq).estoque += i.qtd; }); S.manut = S.manut.filter(m => !(v.baixaIds || []).includes(m.id));
+    v.status = "cancelada"; if (v.nota && just) v.nota.cancel = {em:new Date().toISOString(), just, por:S.me.user};
+    audit(v.nota ? "Cancelou nota fiscal" : "Cancelou venda", "venda #" + id); render();
   }
 
   /* ---- telas ---- */
@@ -1108,7 +1282,7 @@
       const box = (t, items) => `<div class="card"><div class="head"><h3>${t} <span class="pill y">em preparação</span></h3><p>estrutura planejada; ainda não implementada</p></div><ul class="plan">${items.map(i => "<li>" + i + "</li>").join("")}</ul></div>`;
       const fin = box("Visão financeira", ["Receita por período, equipamento e cliente", "Despesas: compras, fretes, juros e financiamentos (dados já coletados em Compras)", "Contas a pagar (parcelas de compras) e a receber (locações em aberto)", "Fluxo de caixa e projeção dos próximos meses", "Inadimplência e multas cobradas", "Margem e retorno por equipamento (usa o payback já calculado)", "Resumo para a contabilidade (exportação)"]);
       const nf = box("Venda com nota fiscal", ["Venda de equipamento usado ou de sucata com emissão de nota", "Dados fiscais do cliente (CPF/CNPJ, inscrição, endereço) — já coletados no cadastro", "Item vendido sai do estoque e registra baixa contábil pelo valor depreciado", "Emissão da nota por integração com um emissor (NF-e / NFS-e), conforme o município e o regime tributário", "Guarda do XML e do PDF da nota junto à venda", "Locação de bem móvel: em regra o ISS não incide (Súmula Vinculante 31 do STF); a contabilidade define o documento fiscal da locação, conforme o regime tributário cadastrado em Configurações"]);
-      return `<div class="card"><div class="tabs" style="padding-top:1rem">${[["fin","Financeiro"], ["nf","Venda com nota fiscal"]].map(t => `<button class="tab${S.finTab === t[0] ? " on" : ""}" data-fn="${t[0]}">${t[1]}</button>`).join("")}</div></div><div style="height:1rem"></div>` + (S.finTab === "fin" ? finDash() : nf);
+      return `<div class="card"><div class="tabs" style="padding-top:1rem">${[["fin","Financeiro"], ["nf","Venda com nota fiscal"]].map(t => `<button class="tab${S.finTab === t[0] ? " on" : ""}" data-fn="${t[0]}">${t[1]}</button>`).join("")}</div></div><div style="height:1rem"></div>` + (S.finTab === "fin" ? finDash() : vendasView());
     },
     config(){
       const e = S.emp, v = k => esc(e[k] || ""), admins = S.users.filter(u => u.role === "admin").length;
@@ -1120,6 +1294,7 @@
         <div class="f s3"><label for="eIe">Inscrição estadual</label><input id="eIe" maxlength="20" placeholder="ou Isento" value="${v("ie")}"></div>
         <div class="f s3"><label for="eResp">Responsável</label><input id="eResp" maxlength="80" value="${v("resp")}"></div>
         <div class="f s3"><label for="eIm">Inscrição municipal</label><input id="eIm" maxlength="20" value="${v("im")}"></div>
+        <div class="f s3"><label for="eEmissor">Emissor de notas fiscais</label><select id="eEmissor">${["Registro manual", "Focus NFe", "eNotas", "PlugNotas", "Outro"].map(r => `<option${e.emissor === r ? " selected" : ""}>${r}</option>`).join("")}</select></div>
         <div class="f s3"><label for="eRegime">Regime tributário</label><select id="eRegime">${["Não informado", "MEI", "Simples Nacional", "Lucro presumido", "Lucro real"].map(r => `<option${e.regime === r ? " selected" : ""}>${r}</option>`).join("")}</select></div>
         <div class="f s3"><label for="eTel">Telefone / WhatsApp</label><input id="eTel" data-mask="phone" maxlength="15" inputmode="numeric" placeholder="(85) 99999-9999" value="${esc(MASK.phone(e.tel || ""))}"></div>
         <div class="f s3"><label for="eMail">E-mail</label><input id="eMail" type="email" maxlength="80" value="${v("mail")}"></div>
@@ -1129,6 +1304,7 @@
         <div class="f s3"><label for="eBairro">Bairro</label><input id="eBairro" maxlength="60" value="${v("bairro")}"></div>
         <div class="f s2"><label for="eCidade">Cidade</label><input id="eCidade" maxlength="60" value="${v("cidade")}"></div>
         <div class="f s1"><label for="eUf">UF</label><input id="eUf" data-mask="uf" maxlength="2" value="${v("uf")}"></div>
+        <label class="chk s6"><input type="checkbox" id="eUsaNf"${e.usaNf ? " checked" : ""}> Emitir nota fiscal nas vendas (deixe desmarcado por enquanto)</label>
         <div class="s6"><p class="err" id="eMsg"></p><button class="btn p">Salvar dados da empresa</button></div>
       </form></div>
       <div class="card"><div class="head"><h3>Usuários</h3><p>administrador vê tudo; operador não acessa Configurações</p></div><div class="wrap"><table style="min-width:0"><thead><tr><th>Nome</th><th>Usuário</th><th>Papel</th><th></th></tr></thead><tbody>` +
@@ -1200,7 +1376,7 @@
     if (S.map){ S.map.remove(); S.map = null; }
     document.body.dataset.page = S.page;
     nav(); $("title").textContent = TITLES[S.page][0]; $("sub").textContent = TITLES[S.page][1];
-    const act = S.page === "fin" && S.finTab === "fin" ? ["Nova despesa", openDesp] : S.page === "orc" ? ["Novo orçamento", () => openForm("orc")] : S.page === "equip" ? ["Novo equipamento", openBuy] : S.page === "forn" ? (S.fTab === "forn" ? ["Novo fornecedor", openForn] : S.fTab === "compras" ? ["Registrar compra", openBuy] : ["Nova cotação", openCot]) : ["Nova locação", () => openForm("loc")];
+    const act = S.page === "fin" ? (S.finTab === "fin" ? ["Nova despesa", openDesp] : ["Nova venda", openVenda]) : S.page === "orc" ? ["Novo orçamento", () => openForm("orc")] : S.page === "equip" ? ["Novo equipamento", openBuy] : S.page === "forn" ? (S.fTab === "forn" ? ["Novo fornecedor", openForn] : S.fTab === "compras" ? ["Registrar compra", openBuy] : ["Nova cotação", openCot]) : ["Nova locação", () => openForm("loc")];
     $("newC").querySelector(".lbl").textContent = " " + act[0]; $("newC").setAttribute("aria-label", act[0]); $("newC").onclick = act[1];
     $("view").innerHTML = V[S.page]();
     labelTables();
@@ -1219,7 +1395,12 @@
     $$("[data-pgparc]").forEach(b => b.onclick = () => { const [kid, i] = b.dataset.pgparc.split(":").map(Number), k = S.compras.find(x => x.id === kid); (k.pg = k.pg || []).push({i, data:today()}); audit("Pagou parcela de compra", eqById(k.eq).nome + " " + (i + 1) + "/" + k.parc); render(); });
     $$("[data-deldesp]").forEach(b => b.onclick = () => askConfirm("Excluir esta despesa?", () => { S.desp = S.desp.filter(x => x.id !== +b.dataset.deldesp); audit("Excluiu despesa", "#" + b.dataset.deldesp); render(); }, "Excluir"));
     if ($("btnCsv")) $("btnCsv").onclick = exportCsv;
-    $$("[data-goto]").forEach(b => b.onclick = () => { S.page = b.dataset.goto; render(); scrollTo(0, 0); });
+    $$("[data-goto]").forEach(b => b.onclick = () => { const [pg, sub] = b.dataset.goto.split(":"); S.page = pg; if (sub) S.finTab = sub; render(); scrollTo(0, 0); });
+    $$("[data-vespelho]").forEach(b => b.onclick = () => showDoc("venda", +b.dataset.vespelho));
+    $$("[data-vfis]").forEach(b => b.onclick = () => openFis(+b.dataset.vfis));
+    $$("[data-vnota]").forEach(b => b.onclick = () => openNota(+b.dataset.vnota));
+    $$("[data-vcanc]").forEach(b => b.onclick = () => askConfirm("Cancelar esta venda? O equipamento volta ao estoque e o lançamento sai do caixa.", () => cancelVenda(+b.dataset.vcanc), "Cancelar venda"));
+    $$("[data-vcancnota]").forEach(b => b.onclick = () => openNfc(+b.dataset.vcancnota));
     $$("[data-saida]").forEach(b => b.onclick = () => { const c = conById(+b.dataset.saida); c.status = "ativo"; audit("Confirmou a saída", "locação #" + c.id); render(); openChk(c.id); });
     $$("[data-cancel]").forEach(b => b.onclick = () => askConfirm("Cancelar a reserva #" + b.dataset.cancel + "? Os equipamentos voltam a ficar disponíveis.", () => { const c = conById(+b.dataset.cancel); c.status = "cancelada"; audit("Cancelou a reserva", "locação #" + c.id); render(); }, "Cancelar reserva"));
     $$("[data-conv]").forEach(b => b.onclick = () => openForm("loc", orcById(+b.dataset.conv)));
@@ -1245,7 +1426,7 @@
       const g = id => $(id).value.trim(), cnpj = dg(g("eCnpj")), tel = dg(g("eTel")), mail = g("eMail");
       const e = cnpj && !cnpjOk(cnpj) ? "CNPJ inválido. Confira os números." : tel && !phoneOk(tel) ? "Telefone inválido. Use DDD + número." : mail && !mailOk(mail) ? "E-mail inválido." : dg(g("eCep")) && dg(g("eCep")).length !== 8 ? "CEP incompleto." : "";
       if (e){ $("eMsg").className = "err"; $("eMsg").textContent = e; return; }
-      S.emp = {razao:g("eRazao"), fantasia:g("eFant"), cnpj, ie:g("eIe"), im:g("eIm"), regime:$("eRegime").value, resp:g("eResp"), tel, mail, cep:dg(g("eCep")), num:g("eNum"), rua:g("eRua"), bairro:g("eBairro"), cidade:g("eCidade"), uf:$("eUf").value};
+      S.emp = {razao:g("eRazao"), fantasia:g("eFant"), cnpj, ie:g("eIe"), im:g("eIm"), regime:$("eRegime").value, emissor:$("eEmissor").value, usaNf:$("eUsaNf").checked, resp:g("eResp"), tel, mail, cep:dg(g("eCep")), num:g("eNum"), rua:g("eRua"), bairro:g("eBairro"), cidade:g("eCidade"), uf:$("eUf").value};
       audit("Atualizou os dados da empresa"); $("eMsg").className = "ok"; $("eMsg").textContent = "Dados salvos. Já aparecem nos documentos.";
     };
     $("userForm").onsubmit = async ev => {
@@ -1514,6 +1695,60 @@
     if (e){ $("sgErr").textContent = e; return; }
     S.seg.push({id:S.sseq++, seguradora, tipo:$("sgTipo").value, num:$("sgNum").value.trim(), ini, fim, valor:num("sgVal"), premio:num("sgPre"), docs:Array.from($("sgDoc").files).map(f => f.name)});
     audit("Cadastrou apólice", seguradora); $("segDlg").close(); render();
+  };
+  bindCep({cep:"vbCep", msg:"vbCepMsg", rua:"vbRua", bairro:"vbBairro", cidade:"vbCidade", uf:"vbUf", num:"vbNum"});
+  $("vbCli").onchange = () => { $("vbNovo").hidden = $("vbCli").value !== "new"; };
+  $("vdAdd").onclick = () => { S.vDraft.push({eq:S.eq[0].id, qtd:1, pu:""}); drawVItens(); };
+  $("vdDesc").addEventListener("input", vdCalc);
+  $("vdCancel").onclick = () => $("vdDlg").close();
+  $("vdForm").onsubmit = ev => {
+    ev.preventDefault();
+    const d = S.vDraft, {sub, t} = vdCalc(), data = $("vdData").value; let cid = $("vbCli").value, e = "";
+    for (const it of d){ const q = parseInt(it.qtd, 10), p = parseFloat(it.pu), eq = eqById(it.eq); if (!(q >= 1)) e = "Quantidade inválida."; else if (q > avail(eq)) e = "Só há " + avail(eq) + " " + eq.nome + " disponível."; else if (!(p > 0)) e = "Informe o preço de " + eq.nome + "."; if (e) break; }
+    if (!e && !d.length) e = "Adicione ao menos um item.";
+    if (!e && (!data || data > today())) e = "Data da venda inválida.";
+    if (!e && (t < 0 || num("vdDesc") > sub)) e = "O desconto não pode ser maior que o valor dos itens.";
+    let cl;
+    if (!e && cid === "new"){
+      const nome = $("vbNome").value.trim(), tel = dg($("vbTel").value), doc = dg($("vbDoc").value), mail = $("vbMail").value.trim(), cep = dg($("vbCep").value), rua = $("vbRua").value.trim(), num_ = $("vbNum").value.trim(), bairro = $("vbBairro").value.trim(), cidade = $("vbCidade").value.trim(), uf = $("vbUf").value;
+      e = nome.length < 3 ? "Informe o nome do comprador." : !phoneOk(tel) ? "WhatsApp inválido. Use DDD + número." : !docOk(doc) ? "CPF/CNPJ inválido. Confira os números." : mail && !mailOk(mail) ? "E-mail inválido." : cep.length !== 8 ? "Informe o CEP (8 números)." : !rua || !num_ || !bairro || !cidade || uf.length !== 2 ? "Complete rua, número, bairro, cidade e UF." :
+        S.cli.some(x => x.doc === doc) ? "Já existe cliente com esse CPF/CNPJ. Selecione-o na lista." : !$("vbLgpd").checked ? "Registre a autorização do comprador (LGPD)." : "";
+      if (!e){ cl = {id:S.cseq++, nome, tel, doc, mail, nasc:"", cep, rua, num:num_, end:rua + ", " + num_, bairro, cidade, uf, lgpd:today(), lat:null, lng:null, prec:null}; S.cli.push(cl); audit("Cadastrou cliente", "#" + cl.id); }
+    } else if (!e) cl = cliById(+cid);
+    if (e){ $("vdErr").textContent = e; return; }
+    let contab = 0;
+    const itens = d.map(it => { const eq = eqById(it.eq), q = parseInt(it.qtd, 10), st = eqStats(eq); contab = contab == null || !st.inv ? null : contab + st.atual / Math.max(1, eq.estoque) * q; return {eq:eq.id, qtd:q, pu:parseFloat(it.pu), ncm:eq.ncm || ""}; });
+    const nat = $("vdNat").value, v = {id:S.vseq++, cli:cl.id, itens, data, pag:$("vdPag").value, desc:num("vdDesc"), total:t, nat, cfop:cfopSug(nat, cl), csosn:"", info:"", status:"aberta", nota:null, contabil:contab, baixaIds:[], por:S.me.user};
+    itens.forEach(i => { eqById(i.eq).estoque -= i.qtd; const m = {id:S.mseq++, eq:i.eq, tipo:"Baixa", motivo:"Venda #" + v.id, qtd:i.qtd, valor:0, data, obs:"", por:S.me.user}; S.manut.push(m); v.baixaIds.push(m.id); });
+    S.vendas.push(v); audit("Registrou venda", "#" + v.id + " · " + BRL(t)); S.finMonth = ym(data); $("vdDlg").close(); render();
+  };
+  $("fsNat").onchange = () => { $("fsCfopHint").textContent = "sugestão: " + cfopSug($("fsNat").value, cliById(fisV.cli)); };
+  $("fsCancel").onclick = () => $("fisDlg").close();
+  $("fisForm").onsubmit = ev => {
+    ev.preventDefault();
+    const ncms = $$("[data-ncm]", $("fsBody")).map(x => dg(x.value)), cfop = dg($("fsCfop").value);
+    const e = ncms.some(n => n && n.length !== 8) ? "O NCM tem 8 números." : cfop && cfop.length !== 4 ? "O CFOP tem 4 números." : "";
+    if (e){ $("fsErr").textContent = e; return; }
+    fisV.itens.forEach((it, i) => { it.ncm = ncms[i]; if (ncms[i]) eqById(it.eq).ncm = ncms[i]; });
+    fisV.nat = $("fsNat").value; fisV.cfop = cfop; fisV.csosn = $("fsCsosn").value.trim(); fisV.info = $("fsInfo").value.trim();
+    audit("Atualizou dados fiscais", "venda #" + fisV.id); $("fisDlg").close(); render();
+  };
+  $("nfCancel").onclick = () => $("nfDlg").close();
+  $("nfForm").onsubmit = ev => {
+    ev.preventDefault();
+    const numero = dg($("nfNum").value), serie = dg($("nfSerie").value), chave = dg($("nfChave").value), data = $("nfData").value;
+    const e = !numero ? "Informe o número da nota." : !serie ? "Informe a série." : !chaveOk(chave) ? "Chave de acesso inválida. Confira os 44 números." : chave.slice(20, 22) !== "55" ? "A chave não é de uma NF-e (modelo 55)." :
+      chave.slice(25, 34) !== numero.padStart(9, "0") ? "O número da nota não confere com a chave." : chave.slice(22, 25) !== serie.padStart(3, "0") ? "A série não confere com a chave." :
+      S.emp.cnpj && chave.slice(6, 20) !== S.emp.cnpj ? "O CNPJ dentro da chave é diferente do CNPJ da empresa." : S.vendas.some(v => v.nota && v.nota.chave === chave) ? "Essa chave já foi registrada em outra venda." : !data || data > today() ? "Data de emissão inválida." : "";
+    if (e){ $("nfErr").textContent = e; return; }
+    nfV.nota = {numero:String(+numero), serie:String(+serie), chave, emissao:data, xml:($("nfXml").files[0] || {}).name || "", pdf:($("nfPdf").files[0] || {}).name || ""}; nfV.status = "emitida";
+    audit("Registrou nota fiscal", "venda #" + nfV.id + " · nº " + nfV.nota.numero); $("nfDlg").close(); render();
+  };
+  $("nfcCancel").onclick = () => $("nfcDlg").close();
+  $("nfcForm").onsubmit = ev => {
+    ev.preventDefault(); const j = $("nfcJust").value.trim();
+    if (j.length < 15){ $("nfcErr").textContent = "A justificativa precisa ter pelo menos 15 caracteres."; return; }
+    $("nfcDlg").close(); cancelVenda(nfV.id, j);
   };
   $("dsCancel").onclick = () => $("despDlg").close();
   $("despForm").onsubmit = ev => {
