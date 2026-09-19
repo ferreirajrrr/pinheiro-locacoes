@@ -1058,7 +1058,7 @@
   }
   function barsSvg(ms){
     const W = 600, H = 230, pad = 30, top = 22, base = H - 28, max = Math.max(1, ...ms.flatMap(x => [x.e, x.s])), bw = (W - pad * 2) / ms.length, h = v => (base - top) * v / max;
-    return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto" role="img" aria-label="Entradas e saídas dos últimos meses"><line x1="${pad}" y1="${base}" x2="${W - pad}" y2="${base}" style="stroke:var(--line)"/>` +
+    return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;stroke:none" role="img" aria-label="Entradas e saídas dos últimos meses"><line x1="${pad}" y1="${base}" x2="${W - pad}" y2="${base}" style="stroke:var(--line)"/>` +
       ms.map((x, i) => { const x0 = pad + i * bw + bw * .16, w = bw * .3, lab = x.m.slice(5) + "/" + x.m.slice(2, 4);
         return `<rect x="${x0}" y="${base - h(x.e)}" width="${w}" height="${Math.max(1, h(x.e))}" rx="3" style="fill:var(--brand)"/><rect x="${x0 + w + 3}" y="${base - h(x.s)}" width="${w}" height="${Math.max(1, h(x.s))}" rx="3" style="fill:var(--bad)"/>` +
           `<text x="${x0 + w}" y="${base - Math.max(h(x.e), h(x.s)) - 5}" text-anchor="middle" style="fill:var(--muted);font-size:11px">${x.e || x.s ? compact(Math.max(x.e, x.s)) : ""}</text><text x="${x0 + w}" y="${H - 8}" text-anchor="middle" style="fill:var(--muted);font-size:12px">${lab}</text>`; }).join("") + "</svg>";
@@ -1909,7 +1909,7 @@
     S.fseq = 4;
     const buy = (id, eq, forn, ago, qtd, unit, frete, juros, parc, nf, gar) => { const k = {id, eq, forn, data:d(-ago), qtd, unit, frete, juros, parc, pg:[], nf, docs:[], garantia:gar, obs:""}; for (let i = 0; i < parc; i++) if (parc === 1 || addMonths(k.data, i + 1) <= T) k.pg.push({i, data:parc === 1 ? k.data : addMonths(k.data, i + 1)}); S.compras.push(k); };
     buy(1, 1, 1, 330, 250, 22, 300, 0, 1, "NF 4521", 12); buy(2, 2, 1, 300, 80, 95, 250, 180, 3, "NF 4533", 12); buy(3, 3, 2, 240, 48, 70, 400, 0, 1, "NF 891", 6);
-    buy(4, 4, 2, 200, 24, 120, 350, 0, 1, "NF 902", 6); buy(5, 5, 3, 150, 3, 1450, 500, 620, 6, "NF 12077", 24); buy(6, 6, 3, 60, 4, 2100, 600, 900, 6, "NF 12310", 24);
+    buy(4, 4, 2, 200, 24, 120, 350, 0, 1, "NF 902", 6); buy(5, 5, 3, 330, 3, 1450, 500, 620, 1, "NF 12077", 24); buy(6, 6, 3, 100, 4, 2100, 600, 900, 3, "NF 12310", 24);
     S.bseq = 7;
     S.cot.push({id:1, eq:"Betoneira 400 L", forn:3, data:d(-5), qtd:2, unit:2250, frete:450, garantia:24, valid:d(20), cond:"12x com juros", obs:""},
       {id:2, eq:"Betoneira 400 L", forn:1, data:d(-3), qtd:2, unit:2050, frete:200, garantia:12, valid:d(15), cond:"Entrada + 3x", obs:"Retirada em Fortaleza"},
@@ -1925,7 +1925,7 @@
     S.cli[4].consultas = [{fonte:"Serasa", res:"Com restrições", valor:1850, data:d(-30), obs:"Pendência com loja de material", por:"admin"}];
     S.cli[1].consultas = [{fonte:"SPC Brasil", res:"Sem restrições", valor:0, data:d(-120), obs:"", por:"admin"}];
     const loc = (cli, itens, per, off, o) => {
-      o = o || {}; const it = itens.map(([eq, qtd]) => ({eq, qtd:eq <= 4 ? qtd * 4 : qtd, pu:eqById(eq).p[per]})), ini = d(off), fim = addDays(ini, per), frete = o.frete || 0;
+      o = o || {}; const it = itens.map(([eq, qtd]) => ({eq, qtd:eq <= 4 ? qtd * 12 : qtd, pu:eqById(eq).p[per]})), ini = d(off), fim = addDays(ini, per), frete = o.frete || 0;
       const total = it.reduce((a, i) => a + i.pu * i.qtd, 0) + frete, st = o.st || "devolvido";
       const c = {id:S.seq++, cli, itens:it, per, ini, fim, frete, caucao:o.caucao || 0, total, status:st, pago:!!o.pg, modo:o.ent ? "Entrega e coleta na obra" : "Cliente retira", mot:o.ent ? "Marcos" : "", freteReal:o.ent ? Math.round(frete * .6) : 0, orc:null};
       if (st !== "reserva" && st !== "cancelada") c.chkSaida = {em:ini + "T08:30:00.000Z", por:"admin", itens:it.map(i => ({eq:i.eq, qtd:i.qtd, cond:"Bom", obs:"", fotos:[], perdida:0})), obs:o.noChk ? "" : "Equipamentos conferidos na saída."};
@@ -1934,15 +1934,24 @@
       if (o.pg){ const p = o.pg; c.pgto = {acr:p.acr || 0, multa:p.multa || 0, desc:p.desc || 0, forma:p.forma || "Pix", data:d(p.off != null ? p.off : off + per), total:total + (p.acr || 0) + (p.multa || 0) - (p.desc || 0)}; }
       S.con.push(c); return c;
     };
+    loc(6, [[1, 25], [3, 4]], 30, -175, {ent:1, frete:120, pg:{off:-146}});
+    loc(4, [[2, 8]], 30, -168, {pg:{off:-140, forma:"Transferência"}});
     loc(1, [[1, 30], [2, 6]], 30, -150, {ent:1, frete:180, pg:{off:-118}});
     loc(4, [[1, 20], [3, 4]], 15, -125, {frete:0, pg:{off:-108, forma:"Transferência"}});
     loc(2, [[2, 2]], 7, -100, {pg:{off:-92, forma:"Dinheiro"}});
+    loc(4, [[1, 25], [2, 6]], 30, -138, {pg:{off:-104}});
+    loc(1, [[3, 8], [4, 3]], 30, -125, {ent:1, frete:140, pg:{off:-96}});
     loc(3, [[5, 1]], 7, -80, {pg:{off:-72}});
+    loc(6, [[1, 22], [2, 5]], 30, -100, {pg:{off:-66}});
+    loc(4, [[1, 30], [3, 5]], 30, -92, {pg:{off:-62, forma:"Transferência"}});
     loc(1, [[1, 40], [4, 2]], 30, -75, {ent:1, frete:220, pg:{off:-44}});
     loc(6, [[3, 3]], 15, -60, {devOff:-42, pg:{off:-42, multa:6.5, forma:"Pix"}});
     loc(4, [[2, 4], [1, 10]], 15, -52, {avaria:60, pg:{off:-36, acr:60}});
     loc(2, [[6, 1]], 7, -34, {pg:{off:-26, forma:"Cartão"}});
     loc(3, [[1, 15]], 15, -30, {pg:{off:-14, desc:10}});
+    loc(4, [[2, 6], [3, 4]], 15, -12, {devOff:-1, pg:{off:-1, forma:"Transferência"}});
+    loc(1, [[1, 20], [4, 3]], 7, -9, {devOff:-2, ent:1, frete:150, pg:{off:-2}});
+    loc(2, [[6, 2]], 7, -8, {devOff:-1, pg:{off:-1, forma:"Cartão"}});
     loc(1, [[1, 30], [2, 8]], 30, -28, {st:"ativo", ent:1, frete:200, caucao:500, pg:{off:-26}});
     loc(4, [[3, 4], [4, 2]], 15, -8, {st:"ativo", caucao:300});
     loc(5, [[2, 3]], 15, -22, {st:"ativo"});
@@ -1951,7 +1960,7 @@
     loc(2, [[1, 8]], 15, -10, {st:"cancelada"});
     S.orc.push({id:1, cli:1, pros:null, itens:[{eq:1, qtd:50, pu:eqById(1).p[30]}], per:30, ini:d(10), frete:150, caucao:0, total:50 * eqById(1).p[30] + 150, criado:d(-2), validade:d(5), status:"aberto"},
       {id:2, cli:null, pros:{nome:"Lucas Andrade", tel:"85977770001"}, itens:[{eq:5, qtd:1, pu:eqById(5).p[7]}], per:7, ini:d(3), frete:0, caucao:0, total:eqById(5).p[7], criado:d(-9), validade:d(-2), status:"aberto"},
-      {id:3, cli:4, pros:null, itens:[{eq:2, qtd:4, pu:eqById(2).p[15]}], per:15, ini:d(-52), frete:0, caucao:0, total:4 * eqById(2).p[15], criado:d(-55), validade:d(-48), status:"aprovado", loc:7});
+      {id:3, cli:4, pros:null, itens:[{eq:2, qtd:4, pu:eqById(2).p[15]}], per:15, ini:d(-52), frete:0, caucao:0, total:4 * eqById(2).p[15], criado:d(-55), validade:d(-48), status:"aprovado", loc:S.con.find(c => c.dev && c.dev.avaria).id});
     S.oseq = 4;
     const mn = (eq, tipo, extra) => S.manut.push({id:S.mseq++, eq, tipo, data:d(extra.off), obs:extra.obs || "", por:"admin", ...extra.f});
     mn(2, "Manutenção", {off:-70, f:{qtd:1, prev:d(-63), fim:d(-63), custo:85}, obs:"Solda de travessa."});
