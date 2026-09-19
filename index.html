@@ -1893,6 +1893,87 @@
   const APP_VERSION = "0.1.0-beta";
   $$(".js-year").forEach(el => el.textContent = new Date().getFullYear());
   $$(".js-ver").forEach(el => el.textContent = "v" + APP_VERSION);
+  /* ---- dados fictícios para demonstração ao cliente (DEMO=false deixa o sistema zerado) ---- */
+  const DEMO = true;
+  function seedDemo(){
+    const T = today(), d = n => addDays(T, n), iso_ = n => d(n) + "T09:00:00.000Z";
+    S.emp = {razao:"Pinheiro Locações de Equipamentos Ltda", fantasia:"Pinheiro Locações", cnpj:"11222333000181", ie:"06.123456-7", im:"", regime:S.emp.regime || "Simples Nacional", emissor:"", usaNf:false, resp:"Carlos Pinheiro", tel:"85987654321", mail:"contato@pinheirolocacoes.example", cep:"61600000", num:"120", rua:"Rua Coronel Correia", bairro:"Centro", cidade:"Caucaia", uf:"CE"};
+    const E = {1:{n:240,ncm:"73084000",u:22,v:60}, 2:{n:80,ncm:"73084000",u:95,v:72}, 3:{n:48,ncm:"73084000",u:70,v:72}, 4:{n:24,ncm:"73084000",u:120,v:60}, 5:{n:3,ncm:"84798999",u:1450,v:48}, 6:{n:4,ncm:"84743100",u:2100,v:60}};
+    S.eq.find(e => e.id === 4).p[1] = 20; Object.assign(eqById(6).p, {1:60, 7:280, 15:450, 30:700});
+    S.eq.forEach(e => { const x = E[e.id]; e.estoque = x.n; e.ncm = x.ncm; e.vida = x.v; e.repos = x.u * 1.1; e.ultInsp = d(-40 - e.id * 7); });
+    eqById(5).fragil = true; eqById(6).vol = 0.6;
+    S.forn.push(
+      {id:1, nome:"Metalúrgica Nordeste Ltda", doc:"12345678000195", tel:"85991110001", mail:"vendas@metalne.example", cidade:"Fortaleza", uf:"CE", prazo:7, cond:"30% entrada + 3x", nota:5, obs:"Boa qualidade, entrega rápida."},
+      {id:2, nome:"AçoForte Equipamentos", doc:"23456789000106", tel:"81992220002", mail:"comercial@acoforte.example", cidade:"Recife", uf:"PE", prazo:15, cond:"À vista com 5% de desconto", nota:4, obs:"Frete por conta do comprador."},
+      {id:3, nome:"Máquinas Brasil Construção", doc:"34567890000117", tel:"11993330003", mail:"pedidos@maqbrasil.example", cidade:"São Paulo", uf:"SP", prazo:20, cond:"Financiamento em até 12x", nota:3, obs:"Preço maior, garantia estendida."});
+    S.fseq = 4;
+    const buy = (id, eq, forn, ago, qtd, unit, frete, juros, parc, nf, gar) => { const k = {id, eq, forn, data:d(-ago), qtd, unit, frete, juros, parc, pg:[], nf, docs:[], garantia:gar, obs:""}; for (let i = 0; i < parc; i++) if (parc === 1 || addMonths(k.data, i + 1) <= T) k.pg.push({i, data:parc === 1 ? k.data : addMonths(k.data, i + 1)}); S.compras.push(k); };
+    buy(1, 1, 1, 330, 250, 22, 300, 0, 1, "NF 4521", 12); buy(2, 2, 1, 300, 80, 95, 250, 180, 3, "NF 4533", 12); buy(3, 3, 2, 240, 48, 70, 400, 0, 1, "NF 891", 6);
+    buy(4, 4, 2, 200, 24, 120, 350, 0, 1, "NF 902", 6); buy(5, 5, 3, 150, 3, 1450, 500, 620, 6, "NF 12077", 24); buy(6, 6, 3, 60, 4, 2100, 600, 900, 6, "NF 12310", 24);
+    S.bseq = 7;
+    S.cot.push({id:1, eq:"Betoneira 400 L", forn:3, data:d(-5), qtd:2, unit:2250, frete:450, garantia:24, valid:d(20), cond:"12x com juros", obs:""},
+      {id:2, eq:"Betoneira 400 L", forn:1, data:d(-3), qtd:2, unit:2050, frete:200, garantia:12, valid:d(15), cond:"Entrada + 3x", obs:"Retirada em Fortaleza"},
+      {id:3, eq:"Escora metálica P3", forn:2, data:d(-2), qtd:40, unit:36, frete:380, garantia:6, valid:d(10), cond:"À vista", obs:""});
+    S.qseq = 4;
+    const cl = (nome, tel, doc, mail, cep, rua, num, bairro, cidade, lat, lng, nasc) => { const c = {id:S.cseq++, nome, tel, doc, mail, nasc:nasc || "", cep, rua, num, end:rua + ", " + num, bairro, cidade, uf:"CE", lgpd:d(-200), lat, lng, prec:"endereço"}; S.cli.push(c); return c; };
+    cl("Construtora Horizonte Ltda", "85988880001", "45678901000123", "obras@horizonte.example", "61600110", "Av. Central", "500", "Centro", "Caucaia", -3.7361, -38.6531);
+    cl("José Almeida", "85988880002", "39053344705", "jose.almeida@example.com", "61609000", "Rua das Flores", "45", "Parque Soledade", "Caucaia", -3.7205, -38.6650, "12/03/1978");
+    cl("Maria das Graças Souza", "85988880003", "52998224725", "", "60831100", "Rua Bela Vista", "230", "Messejana", "Fortaleza", -3.8340, -38.4900, "05/09/1985");
+    cl("Reforma Fácil ME", "85988880004", "56789012000134", "contato@reformafacil.example", "60110000", "Rua Barão do Rio Branco", "1020", "Centro", "Fortaleza", -3.7278, -38.5240);
+    cl("Pedro Henrique Lima", "85988880005", "11144477735", "pedro.lima@example.com", "61658000", "Rua Projetada", "12", "Jurema", "Caucaia", -3.7580, -38.6150, "22/11/1990");
+    cl("Ana Paula Ferreira", "85988880006", "86288366757", "ana.ferreira@example.com", "61627000", "Av. Padre Sabino", "88", "Tabapuá", "Caucaia", -3.6890, -38.7340, "30/01/1982");
+    S.cli[4].consultas = [{fonte:"Serasa", res:"Com restrições", valor:1850, data:d(-30), obs:"Pendência com loja de material", por:"admin"}];
+    S.cli[1].consultas = [{fonte:"SPC Brasil", res:"Sem restrições", valor:0, data:d(-120), obs:"", por:"admin"}];
+    const loc = (cli, itens, per, off, o) => {
+      o = o || {}; const it = itens.map(([eq, qtd]) => ({eq, qtd:eq <= 4 ? qtd * 4 : qtd, pu:eqById(eq).p[per]})), ini = d(off), fim = addDays(ini, per), frete = o.frete || 0;
+      const total = it.reduce((a, i) => a + i.pu * i.qtd, 0) + frete, st = o.st || "devolvido";
+      const c = {id:S.seq++, cli, itens:it, per, ini, fim, frete, caucao:o.caucao || 0, total, status:st, pago:!!o.pg, modo:o.ent ? "Entrega e coleta na obra" : "Cliente retira", mot:o.ent ? "Marcos" : "", freteReal:o.ent ? Math.round(frete * .6) : 0, orc:null};
+      if (st !== "reserva" && st !== "cancelada") c.chkSaida = {em:ini + "T08:30:00.000Z", por:"admin", itens:it.map(i => ({eq:i.eq, qtd:i.qtd, cond:"Bom", obs:"", fotos:[], perdida:0})), obs:o.noChk ? "" : "Equipamentos conferidos na saída."};
+      if (o.noChk) delete c.chkSaida;
+      if (st === "devolvido"){ const dt = o.devOff != null ? d(o.devOff) : fim, av = o.avaria || 0; c.dev = {data:dt, cond:av ? "Com avarias" : "Sem avarias", avaria:av, obs:av ? "Travas amassadas." : "", chk:{em:dt + "T16:00:00.000Z", por:"admin", itens:it.map(i => ({eq:i.eq, qtd:i.qtd, cond:av ? "Avariado" : "Bom", obs:"", fotos:[], perdida:0})) }}; }
+      if (o.pg){ const p = o.pg; c.pgto = {acr:p.acr || 0, multa:p.multa || 0, desc:p.desc || 0, forma:p.forma || "Pix", data:d(p.off != null ? p.off : off + per), total:total + (p.acr || 0) + (p.multa || 0) - (p.desc || 0)}; }
+      S.con.push(c); return c;
+    };
+    loc(1, [[1, 30], [2, 6]], 30, -150, {ent:1, frete:180, pg:{off:-118}});
+    loc(4, [[1, 20], [3, 4]], 15, -125, {frete:0, pg:{off:-108, forma:"Transferência"}});
+    loc(2, [[2, 2]], 7, -100, {pg:{off:-92, forma:"Dinheiro"}});
+    loc(3, [[5, 1]], 7, -80, {pg:{off:-72}});
+    loc(1, [[1, 40], [4, 2]], 30, -75, {ent:1, frete:220, pg:{off:-44}});
+    loc(6, [[3, 3]], 15, -60, {devOff:-42, pg:{off:-42, multa:6.5, forma:"Pix"}});
+    loc(4, [[2, 4], [1, 10]], 15, -52, {avaria:60, pg:{off:-36, acr:60}});
+    loc(2, [[6, 1]], 7, -34, {pg:{off:-26, forma:"Cartão"}});
+    loc(3, [[1, 15]], 15, -30, {pg:{off:-14, desc:10}});
+    loc(1, [[1, 30], [2, 8]], 30, -28, {st:"ativo", ent:1, frete:200, caucao:500, pg:{off:-26}});
+    loc(4, [[3, 4], [4, 2]], 15, -8, {st:"ativo", caucao:300});
+    loc(5, [[2, 3]], 15, -22, {st:"ativo"});
+    loc(6, [[5, 1]], 7, -3, {st:"ativo", noChk:1});
+    loc(3, [[6, 1], [1, 6]], 7, 4, {st:"reserva", ent:1, frete:60});
+    loc(2, [[1, 8]], 15, -10, {st:"cancelada"});
+    S.orc.push({id:1, cli:1, pros:null, itens:[{eq:1, qtd:50, pu:eqById(1).p[30]}], per:30, ini:d(10), frete:150, caucao:0, total:50 * eqById(1).p[30] + 150, criado:d(-2), validade:d(5), status:"aberto"},
+      {id:2, cli:null, pros:{nome:"Lucas Andrade", tel:"85977770001"}, itens:[{eq:5, qtd:1, pu:eqById(5).p[7]}], per:7, ini:d(3), frete:0, caucao:0, total:eqById(5).p[7], criado:d(-9), validade:d(-2), status:"aberto"},
+      {id:3, cli:4, pros:null, itens:[{eq:2, qtd:4, pu:eqById(2).p[15]}], per:15, ini:d(-52), frete:0, caucao:0, total:4 * eqById(2).p[15], criado:d(-55), validade:d(-48), status:"aprovado", loc:7});
+    S.oseq = 4;
+    const mn = (eq, tipo, extra) => S.manut.push({id:S.mseq++, eq, tipo, data:d(extra.off), obs:extra.obs || "", por:"admin", ...extra.f});
+    mn(2, "Manutenção", {off:-70, f:{qtd:1, prev:d(-63), fim:d(-63), custo:85}, obs:"Solda de travessa."});
+    mn(3, "Manutenção", {off:-4, f:{qtd:1, prev:d(3), fim:null, custo:120}, obs:"Troca de rodízios."});
+    mn(5, "Inspeção", {off:-46, f:{qtd:0, resultado:"Aprovado"}});
+    mn(1, "Baixa", {off:-90, f:{qtd:2, motivo:"Perda", valor:0}, obs:"Não devolvidas pelo cliente."});
+    eqById(1).estoque = 240 - 5 - 2;
+    const vm = {id:S.mseq++, eq:1, tipo:"Baixa", motivo:"Venda #1", qtd:5, valor:0, data:d(-18), obs:"", por:"admin"}; S.manut.push(vm);
+    S.vendas.push({id:1, cli:2, itens:[{eq:1, qtd:5, pu:30, ncm:"73084000"}], data:d(-18), pag:"Pix", desc:0, total:150, nat:"Venda de ativo imobilizado", cfop:"5551", csosn:"", info:"", status:"aberta", nota:null, contabil:null, baixaIds:[vm.id], por:"admin"});
+    S.vseq = 2;
+    S.seg.push({id:1, seguradora:"Porto Seguro", tipo:"Equipamentos", num:"AP-778812", ini:d(-100), fim:d(265), valor:120000, premio:2400, docs:["apolice.pdf"]},
+      {id:2, seguradora:"Tokio Marine", tipo:"Responsabilidade civil", num:"RC-334455", ini:d(-345), fim:d(20), valor:300000, premio:1800, docs:[]});
+    S.sseq = 3;
+    [[-150, "Aluguel", "Aluguel do galpão", 1800], [-120, "Aluguel", "Aluguel do galpão", 1800], [-90, "Aluguel", "Aluguel do galpão", 1800], [-60, "Aluguel", "Aluguel do galpão", 1800], [-30, "Aluguel", "Aluguel do galpão", 1800], [-3, "Aluguel", "Aluguel do galpão", 1800],
+      [-145, "Salários e encargos", "Motorista e ajudante", 3200], [-115, "Salários e encargos", "Motorista e ajudante", 3200], [-85, "Salários e encargos", "Motorista e ajudante", 3200], [-55, "Salários e encargos", "Motorista e ajudante", 3200], [-25, "Salários e encargos", "Motorista e ajudante", 3200],
+      [-140, "Combustível", "Abastecimento caminhonete", 650], [-70, "Combustível", "Abastecimento caminhonete", 720], [-20, "Combustível", "Abastecimento caminhonete", 690],
+      [-100, "Energia, água e internet", "Contas do mês", 380], [-40, "Energia, água e internet", "Contas do mês", 410], [-15, "Marketing", "Impulsionamento Instagram", 250], [-50, "Contabilidade", "Honorários", 450], [-20, "Contabilidade", "Honorários", 450], [-35, "Impostos e taxas", "DAS Simples", 520]
+    ].forEach(([o, cat, desc, v]) => S.desp.push({id:S.dseq++, data:d(o), cat, desc, valor:v, por:"admin"}));
+    S.priv = {dpo:"Carlos Pinheiro", dpoMail:"privacidade@pinheirolocacoes.example", guarda:5};
+    S.finMonth = ym(T);
+  }
+  if (DEMO) seedDemo();
   loadMap();
 })();
 </script>
