@@ -2,7 +2,7 @@
 
 Sistema de gestão para locação de equipamentos de construção (andaimes, escoras, plataformas, misturador de tinta, betoneira), feito para a **Pinheiro Locações**, de Caucaia-CE.
 
-> Versão **0.1.0-beta**, um protótipo navegável para validar o fluxo com o cliente. Os dados são fictícios e ficam apenas na aba aberta.
+> Versão **0.7.0-beta** (a atual aparece no rodapé do sistema; clique nela para ver as novidades), um protótipo navegável para validar o fluxo com o cliente. Os dados são fictícios e ficam apenas na aba aberta.
 
 ## Por que este projeto existe
 
@@ -52,6 +52,10 @@ Depois acesse `http://localhost:5180`. O mapa precisa de `http` ou `https`; abri
 ### Dados de demonstração
 
 O sistema abre com dados fictícios para a apresentação. Para começar zerado, troque `const DEMO = true` por `false` no fim do script de `index.html`.
+
+## Versionamento
+
+Cada etapa entregue (commit de funcionalidade) ganha uma versão `0.X.0-beta`, e correções ganham `0.X.Y`. A lista de novidades fica em `CHANGELOG` no fim do script de `index.html` e aparece para o cliente ao clicar na versão no rodapé. Ao commitar, acrescente a entrada nova no topo da lista; a versão do rodapé segue a primeira entrada.
 
 ## Limites atuais
 

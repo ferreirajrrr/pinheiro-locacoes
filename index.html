@@ -139,6 +139,8 @@
   .credit:hover{transform:translateY(-1px); border-color:var(--brand);}
   .credit img{height:18px; width:auto; opacity:.85;} .credit:hover img{opacity:1;}
   .mfoot{padding-bottom:.5rem;}
+  .js-ver{cursor:pointer; text-decoration:underline dotted; text-underline-offset:3px;} .js-ver:hover{color:var(--brand);}
+  .rel{padding:.7rem 0; border-top:1px solid var(--line);} .rel:first-child{border-top:none;} .rel h4{margin:0 0 .3rem; font-size:.95rem;} .rel small{color:var(--muted); font-weight:400;} .rel ul{margin:.3rem 0 0; padding-left:1.1rem; font-size:.85rem; line-height:1.6; color:var(--muted);}
 
   /* documentos */
   #docBody{background:#fff; color:#111; padding:1.1rem; border-radius:8px; font-size:.88rem; line-height:1.5;}
@@ -755,6 +757,14 @@
   </form>
 </dialog>
 
+<dialog id="verDlg">
+  <h3 style="margin-bottom:.3rem">Novidades do sistema</h3>
+  <p class="hint" id="verNow" style="margin-bottom:1rem"></p>
+  <div id="verList"></div>
+  <p class="lgpd">Versão beta: o sistema está em teste e evolui a cada etapa. Os dados de demonstração são fictícios.</p>
+  <div style="display:flex;gap:.5rem;justify-content:flex-end"><button type="button" class="btn p" id="verClose">Fechar</button></div>
+</dialog>
+
 <dialog id="docDlg">
   <div id="docBody"></div>
   <div class="noprint" style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:1rem">
@@ -823,7 +833,8 @@
     desp:[], dseq:1, finMonth:today().slice(0, 7), vendas:[], vseq:1, vDraft:[],
     orc:[], oseq:1, manut:[], mseq:1, seg:[], sseq:1, log:[], priv:{dpo:"", dpoMail:"", guarda:5}, formMode:"loc", formFrom:null,
     users:[{id:1,nome:"Administrador",user:"admin",role:"admin",
-      salt:"94999927fd0f54362d6bad23408fbd9c",hash:"93fc271cdbf9aec9ca1f347b3f4de99be3ad7ab53414a69393c36a75d54eea52"}]
+      salt:"94999927fd0f54362d6bad23408fbd9c",hash:"93fc271cdbf9aec9ca1f347b3f4de99be3ad7ab53414a69393c36a75d54eea52"},
+      {id:0,nome:"Administrador de TI",user:"ti",role:"ti",salt:"7711d49f175bf1cfeed7a859e14b8b5c",hash:"8613b502f3063d8b3c9724518d5fc5f8a9c9bb87760da205cce282365581fa47"}]
   };
   S.eq.forEach(e => { e.fragil = false; e.vol = null; e.vida = 60; e.inspInt = 90; e.ultInsp = null; e.repos = null; });
   const eqById = id => S.eq.find(e => e.id == id);
@@ -844,6 +855,7 @@
   const aReceber = () => S.con.filter(c => !c.pago && c.status !== "cancelada");
   const reposOf = e => e.repos || (S.compras.filter(k => k.eq === e.id).slice(-1)[0] || {}).unit || 0;
   const nextInsp = e => e.ultInsp ? addDays(e.ultInsp, e.inspInt) : null;
+  const isAdm = () => S.me.role === "admin" || S.me.role === "ti", isTi = () => S.me.role === "ti";
   function audit(acao, alvo){ S.log.push({t:new Date().toISOString(), user:S.me ? S.me.user : "—", acao, alvo:alvo || ""}); }
   let cfmFn = null;
   function askConfirm(msg, fn, label){ $("cfmMsg").textContent = msg; $("cfmYes").textContent = label || "Confirmar"; cfmFn = fn; $("cfmDlg").showModal(); }
@@ -1006,7 +1018,7 @@
   function showDoc(kind, id){ $("docBody").innerHTML = docHtml(kind, kind === "orc" ? orcById(id) : kind === "venda" ? vendaById(id) : conById(id)); audit("Emitiu documento", kind + " #" + id); if (!$("docDlg").open) $("docDlg").showModal(); }
 
   function alertas(){
-    const a = [], t = today(), adm = S.me && S.me.role === "admin";
+    const a = [], t = today(), adm = S.me && isAdm();
     if (adm && !S.seg.some(s => s.tipo === "Responsabilidade civil" && s.ini <= t && s.fim >= t)) a.push(["r", "Sem seguro de responsabilidade civil vigente", "config"]);
     S.seg.forEach(s => { const d = Math.round((new Date(s.fim) - new Date(t)) / day); if (d >= 0 && d <= 30) a.push(["y", "Apólice " + s.seguradora + " vence em " + d + " dia(s)", "config"]); });
     const semInsp = S.eq.filter(e => e.estoque && (!e.ultInsp || nextInsp(e) < t));
@@ -1191,7 +1203,7 @@
     },
     clientes(){
       return '<div class="card"><div class="wrap"><table><thead><tr><th>Nome</th><th>WhatsApp</th><th>Documento</th><th>Endereço da obra</th><th>Mapa</th><th>Locações</th><th>Consentimento</th><th>Risco</th><th></th></tr></thead><tbody>' +
-      (S.cli.length ? S.cli.map(c => `<tr><td>${esc(c.nome)}</td><td>${esc(MASK.phone(c.tel))}</td><td>•••.${esc(dg(c.doc).slice(-3))}</td><td>${esc(c.end + " — " + c.bairro + ", " + c.cidade + "/" + c.uf)}</td><td>${c.lat != null ? '<span class="pill g">' + esc(c.prec) + "</span>" : '<span class="pill y">sem posição</span>'}</td><td>${S.con.filter(x => x.cli === c.id).length}</td><td><span class="pill g">LGPD ${fmt(c.lgpd)}</span></td><td>${riskPill(riskOf(c))}</td><td class="acts-c"><div class="acts"><button class="btn sm" data-risk="${c.id}">Análise de risco</button>${S.me.role === "admin" ? `<button class="btn sm" data-exp="${c.id}">Exportar dados</button>${c.anon ? '<span class="pill y">anonimizado</span>' : `<button class="btn sm bad" data-anon="${c.id}">Anonimizar</button>`}` : ""}</div></td></tr>`).join("")
+      (S.cli.length ? S.cli.map(c => `<tr><td>${esc(c.nome)}</td><td>${esc(MASK.phone(c.tel))}</td><td>•••.${esc(dg(c.doc).slice(-3))}</td><td>${esc(c.end + " — " + c.bairro + ", " + c.cidade + "/" + c.uf)}</td><td>${c.lat != null ? '<span class="pill g">' + esc(c.prec) + "</span>" : '<span class="pill y">sem posição</span>'}</td><td>${S.con.filter(x => x.cli === c.id).length}</td><td><span class="pill g">LGPD ${fmt(c.lgpd)}</span></td><td>${riskPill(riskOf(c))}</td><td class="acts-c"><div class="acts"><button class="btn sm" data-risk="${c.id}">Análise de risco</button>${isAdm() ? `<button class="btn sm" data-exp="${c.id}">Exportar dados</button>${c.anon ? '<span class="pill y">anonimizado</span>' : `<button class="btn sm bad" data-anon="${c.id}">Anonimizar</button>`}` : ""}</div></td></tr>`).join("")
         : '<tr><td class="none" colspan="9">Nenhum cliente ainda</td></tr>') + '</tbody></table></div><p class="note">Documento aparece mascarado na tela. No sistema real: criptografado no banco, com registro de quem acessou.</p></div>';
     },
     equip(){
@@ -1284,8 +1296,16 @@
       const nf = box("Venda com nota fiscal", ["Venda de equipamento usado ou de sucata com emissão de nota", "Dados fiscais do cliente (CPF/CNPJ, inscrição, endereço) — já coletados no cadastro", "Item vendido sai do estoque e registra baixa contábil pelo valor depreciado", "Emissão da nota por integração com um emissor (NF-e / NFS-e), conforme o município e o regime tributário", "Guarda do XML e do PDF da nota junto à venda", "Locação de bem móvel: em regra o ISS não incide (Súmula Vinculante 31 do STF); a contabilidade define o documento fiscal da locação, conforme o regime tributário cadastrado em Configurações"]);
       return `<div class="card"><div class="tabs" style="padding-top:1rem">${[["fin","Financeiro"], ["nf","Venda com nota fiscal"]].map(t => `<button class="tab${S.finTab === t[0] ? " on" : ""}" data-fn="${t[0]}">${t[1]}</button>`).join("")}</div></div><div style="height:1rem"></div>` + (S.finTab === "fin" ? finDash() : vendasView());
     },
+    ti(){
+      const us = S.users.filter(u => u.role !== "ti");
+      return `<div class="card"><div class="head"><h3>Usuários do sistema</h3><p>poderes mestre: trocar papel, redefinir senha e remover qualquer usuário. Este perfil de TI não aparece para os demais e não pode ser removido.</p></div><div class="wrap"><table style="min-width:0"><thead><tr><th>Nome</th><th>Usuário</th><th>Papel</th><th></th></tr></thead><tbody>` +
+      us.map(u => `<tr><td>${esc(u.nome)}</td><td>${esc(u.user)}</td><td><select data-trole="${u.id}"><option value="operador"${u.role === "operador" ? " selected" : ""}>Operador</option><option value="admin"${u.role === "admin" ? " selected" : ""}>Administrador</option></select></td><td class="acts-c"><div class="acts"><button class="btn sm" data-treset="${u.id}">Redefinir senha</button><button class="btn sm bad" data-trm="${u.id}">Remover</button></div></td></tr>`).join("") +
+      "</tbody></table></div>" + (S.cred ? `<div class="cred">Usuário <b>${esc(S.cred.user)}</b>: nova senha temporária <code>${esc(S.cred.pass)}</code><br>Copie agora; ela não aparece de novo. No próximo acesso a pessoa define a própria senha.</div>` : "") + "</div><div style=\"height:1.2rem\"></div>" +
+      `<div class="card"><div class="head"><h3>Auditoria completa</h3><p>${S.log.length} evento(s) registrados</p></div><div class="wrap"><table><thead><tr><th>Data e hora</th><th>Usuário</th><th>Ação</th><th>Alvo</th></tr></thead><tbody>` +
+      (S.log.length ? S.log.slice(-500).reverse().map(l => `<tr><td>${dtm(l.t)}</td><td>${esc(l.user)}</td><td>${esc(l.acao)}</td><td>${esc(l.alvo)}</td></tr>`).join("") : '<tr><td class="none" colspan="4">Nenhum evento ainda</td></tr>') + "</tbody></table></div></div>";
+    },
     config(){
-      const e = S.emp, v = k => esc(e[k] || ""), admins = S.users.filter(u => u.role === "admin").length;
+      const e = S.emp, v = k => esc(e[k] || ""), admins = S.users.filter(u => u.role === "admin").length, vis = S.users.filter(u => u.role !== "ti");
       return `<div class="grid2"><div class="card"><div class="head"><h3>Dados da empresa</h3><p>saem no cabeçalho de recibos, comprovantes e termos</p></div>
       <form id="empForm" class="sec">
         <div class="f s6"><label for="eRazao">Razão social</label><input id="eRazao" maxlength="100" value="${v("razao")}"></div>
@@ -1308,7 +1328,7 @@
         <div class="s6"><p class="err" id="eMsg"></p><button class="btn p">Salvar dados da empresa</button></div>
       </form></div>
       <div class="card"><div class="head"><h3>Usuários</h3><p>administrador vê tudo; operador não acessa Configurações</p></div><div class="wrap"><table style="min-width:0"><thead><tr><th>Nome</th><th>Usuário</th><th>Papel</th><th></th></tr></thead><tbody>` +
-      S.users.map(u => `<tr><td>${esc(u.nome)}</td><td>${esc(u.user)}</td><td><span class="pill ${u.role === "admin" ? "g" : "y"}">${u.role === "admin" ? "Administrador" : "Operador"}</span></td><td>${u.id === 1 || u.id === S.me.id || (u.role === "admin" && admins < 2) ? "" : `<button class="btn sm bad" data-rm="${u.id}">Remover</button>`}</td></tr>`).join("") +
+      vis.map(u => `<tr><td>${esc(u.nome)}</td><td>${esc(u.user)}</td><td><span class="pill ${u.role === "admin" ? "g" : "y"}">${u.role === "admin" ? "Administrador" : "Operador"}</span></td><td>${u.id <= 1 || u.id === S.me.id || (u.role === "admin" && admins < 2) ? "" : `<button class="btn sm bad" data-rm="${u.id}">Remover</button>`}</td></tr>`).join("") +
       `</tbody></table></div><h3 style="font-size:.9rem;padding:1rem 1.3rem .5rem">Novo usuário</h3>
       <form id="userForm" class="adduser"><div class="f"><label for="uNome">Nome</label><input id="uNome" maxlength="60"></div><div class="f"><label for="uUser">Usuário</label><input id="uUser" maxlength="20" autocomplete="off"></div><div class="f"><label for="uRole">Papel</label><select id="uRole"><option value="operador">Operador</option><option value="admin">Administrador</option></select></div><button class="btn p" style="margin-bottom:.8rem">Criar</button></form>
       <p id="uMsg" class="err" style="padding:0 1.3rem"></p>` +
@@ -1331,7 +1351,7 @@
     return '<div style="height:1.2rem"></div>' + seg + '<div style="height:1.2rem"></div>' + priv + '<div style="height:1.2rem"></div>' + aud;
   }
   const orcWa = (o, p) => "https://wa.me/55" + dg(p.tel) + "?text=" + encodeURIComponent(`Olá, ${p.nome}! Segue o orçamento nº ${o.id} da ${fantasia()}: ${o.itens.map(i => i.qtd + "× " + eqById(i.eq).nome).join(", ")}, ${o.per} dia(s) a partir de ${fmt(o.ini)}. Total: ${BRL(o.total)}. Válido até ${fmt(o.validade)}.`);
-  const TITLES = {painel:["Painel","visão da operação hoje"], agenda:["Agenda","entregas, coletas e disponibilidade por dia"], orc:["Orçamentos","propostas antes de fechar a locação"], locacoes:["Locações","abertas e encerradas"], clientes:["Clientes","dados protegidos conforme a LGPD"], equip:["Equipamentos","estoque, preços e retorno do investimento"], forn:["Fornecedores","compras, cotações e comparativo de preços"], cobrar:["Cobranças","o que ainda não foi pago"], fin:["Financeiro","caixa, resultado e contas a pagar e receber"], config:["Configurações","empresa, usuários, seguros e privacidade"]};
+  const TITLES = {painel:["Painel","visão da operação hoje"], agenda:["Agenda","entregas, coletas e disponibilidade por dia"], orc:["Orçamentos","propostas antes de fechar a locação"], locacoes:["Locações","abertas e encerradas"], clientes:["Clientes","dados protegidos conforme a LGPD"], equip:["Equipamentos","estoque, preços e retorno do investimento"], forn:["Fornecedores","compras, cotações e comparativo de preços"], cobrar:["Cobranças","o que ainda não foi pago"], fin:["Financeiro","caixa, resultado e contas a pagar e receber"], config:["Configurações","empresa, usuários, seguros e privacidade"], ti:["Administrador","acesso mestre de TI: usuários, senhas e auditoria completa"]};
 
   function waLink(c, cl){
     const msg = `Olá, ${cl.nome}! Aqui é da ${fantasia()}. A locação #${c.id} (${BRL(c.total)}) venceu em ${fmt(c.fim)}. Podemos combinar o pagamento/devolução?${S.emp.tel ? " Contato: " + MASK.phone(S.emp.tel) + "." : ""} Obrigado!`;
@@ -1353,10 +1373,12 @@
       forn:'<path d="M2 6h11v10H2zM13 9h4l3 3v4h-7z"/><circle cx="6" cy="18" r="1.8"/><circle cx="17" cy="18" r="1.8"/>',
       fin:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
       cobrar:'<circle cx="12" cy="12" r="9"/><path d="M14.500 9.500c-.5-1-1.500-1.500-2.500-1.500-1.500 0-2.500.8-2.500 2s1 1.700 2.500 2 2.500.8 2.500 2-1 2-2.500 2c-1.100 0-2-.6-2.500-1.500M12 6v2M12 16v2"/>',
+      ti:'<path d="M12 3l8 3v6c0 5-3.500 8-8 9-4.500-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
       config:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.900 4.900l2.100 2.100M17 17l2.100 2.100M4.900 19.100L7 17M17 7l2.100-2.100"/>'
     };
     const list = [["painel","Painel","Painel"], ["agenda","Agenda","Agenda"], ["orc","Orçamentos","Orçam."], ["locacoes","Locações","Locações"], ["clientes","Clientes","Clientes"], ["equip","Equipamentos","Equip."], ["forn","Fornecedores","Fornec."], ["cobrar","Cobranças","Cobrar"], ["fin","Financeiro","Financ."]];
-    if (S.me.role === "admin") list.push(["config","Configurações","Config."]);
+    if (isAdm()) list.push(["config","Configurações","Config."]);
+    if (isTi()) list.push(["ti","Administrador","Admin"]);
     $("nav").innerHTML = list.map(n => `<button class="nav${S.page === n[0] ? " on" : ""}" data-p="${n[0]}" aria-label="${n[1]}"><svg viewBox="0 0 24 24">${IC[n[0]]}</svg><span class="lg">${n[1]}</span><span class="sh">${n[2]}</span>${n[0] === "cobrar" && od ? `<span class="badge">${od}</span>` : ""}</button>`).join("");
     $$(".nav").forEach(b => b.onclick = () => { S.page = b.dataset.p; S.cred = null; if (S.page === "clientes") audit("Visualizou a lista de clientes"); render(); scrollTo(0, 0); });
     $("who").innerHTML = `<b>${esc(S.me.nome)}</b> (${esc(S.me.user)})<br><button id="chgPw">Alterar senha</button> · <button id="logout">Sair</button>`;
@@ -1372,7 +1394,7 @@
 
   function render(){
     if (!S.me) return;
-    if (S.page === "config" && S.me.role !== "admin") S.page = "painel";
+    if ((S.page === "config" && !isAdm()) || (S.page === "ti" && !isTi())) S.page = "painel";
     if (S.map){ S.map.remove(); S.map = null; }
     document.body.dataset.page = S.page;
     nav(); $("title").textContent = TITLES[S.page][0]; $("sub").textContent = TITLES[S.page][1];
@@ -1385,6 +1407,7 @@
     $$("[data-risk]").forEach(b => b.onclick = () => openRisk(+b.dataset.risk));
     if ($("ocup")) $("ocup").onchange = () => { S.ocup = Math.min(100, Math.max(1, +$("ocup").value || 60)); render(); };
     if (S.page === "config") bindConfig();
+    if (S.page === "ti") bindTi();
     if (S.page === "painel"){
       $("qEq").onclick = () => openPick("eq"); $("qPay").onclick = () => openPick("pay");
       if (S.leaflet) drawMap();
@@ -1418,6 +1441,16 @@
     });
   }
 
+  function bindTi(){
+    const usr = id => S.users.find(u => u.id == id && u.role !== "ti");
+    $$("[data-trole]").forEach(x => x.onchange = () => { const u = usr(x.dataset.trole); if (!u) return; u.role = x.value; audit("TI alterou o papel", u.user + " → " + u.role); render(); });
+    $$("[data-treset]").forEach(b => b.onclick = async () => {
+      const u = usr(b.dataset.treset); if (!u) return;
+      const pass = tempPass(); u.salt = newSalt(); u.hash = await hashPw(pass, u.salt); u.must = true;
+      S.cred = {user:u.user, pass}; audit("TI redefiniu a senha", u.user); render();
+    });
+    $$("[data-trm]").forEach(b => b.onclick = () => { const u = usr(b.dataset.trm); if (u) askConfirm("Remover o usuário " + u.user + "?", () => { S.users = S.users.filter(x => x !== u); audit("TI removeu usuário", u.user); render(); }, "Remover"); });
+  }
   function bindConfig(){
     attachMasks($("view"));
     bindCep({cep:"eCep", msg:"eCepMsg", rua:"eRua", bairro:"eBairro", cidade:"eCidade", uf:"eUf", num:"eNum"});
@@ -1438,7 +1471,7 @@
       S.users.push({id:S.useq++, nome, user:u, role:$("uRole").value, salt, hash:await hashPw(pass, salt), must:true});
       S.cred = {user:u, pass}; audit("Criou usuário", u); render();
     };
-    $$("[data-rm]").forEach(b => b.onclick = () => { audit("Removeu usuário", (S.users.find(u => u.id == b.dataset.rm) || {}).user); S.users = S.users.filter(u => u.id != b.dataset.rm); render(); });
+    $$("[data-rm]").forEach(b => b.onclick = () => { if (b.dataset.rm <= 0) return; audit("Removeu usuário", (S.users.find(u => u.id == b.dataset.rm) || {}).user); S.users = S.users.filter(u => u.id != b.dataset.rm); render(); });
     $("privForm").onsubmit = ev => {
       ev.preventDefault();
       const mail = $("pvMail").value.trim(), gd = parseInt($("pvGuarda").value, 10), e = mail && !mailOk(mail) ? "E-mail inválido." : !(gd >= 1 && gd <= 20) ? "Prazo entre 1 e 20 anos." : "";
@@ -1528,7 +1561,7 @@
     if (v === "new"){ box.textContent = "Cliente novo: depois do cadastro, faça a análise de risco e considere exigir caução."; $("fAprovaW").hidden = true; return; }
     const r = riskOf(cliById(+v));
     box.innerHTML = "Risco: " + riskPill(r) + " · " + esc(REC[r.nivel]);
-    $("fAprovaW").hidden = r.nivel !== "alto" || S.me.role !== "admin"; $("fAprova").checked = false;
+    $("fAprovaW").hidden = r.nivel !== "alto" || !isAdm(); $("fAprova").checked = false;
   }
   $("fCli").onchange = () => { $("newCli").hidden = $("fCli").value !== "new"; updateRisk(); };
   $("addItem").onclick = () => { S.draft.push({eq:S.eq[0].id, qtd:1}); drawItems(); };
@@ -1559,7 +1592,7 @@
     } else {
       cid = parseInt(cid, 10);
       if (!orc && riskOf(cliById(cid)).nivel === "alto"){
-        if (S.me.role !== "admin"){ $("fErr").textContent = "Cliente de alto risco: peça a aprovação de um administrador."; return; }
+        if (!isAdm()){ $("fErr").textContent = "Cliente de alto risco: peça a aprovação de um administrador."; return; }
         if (!$("fAprova").checked){ $("fErr").textContent = "Marque a aprovação do administrador para alugar a cliente de alto risco."; return; }
       }
     }
@@ -1890,9 +1923,28 @@
   $("acctClose").onclick = () => $("acctDlg").close();
   $("chgPw2").onclick = () => { $("acctDlg").close(); openPw(false); };
   $("logout2").onclick = logout;
-  const APP_VERSION = "0.1.0-beta";
+  /* histórico de versões (1 entrada por etapa entregue; a mais nova primeiro). Ao commitar, acrescente aqui e suba APP_VERSION. */
+  const CHANGELOG = [
+    {v:"0.7.0", d:"2026-09-19", t:["Acesso de administrador de TI com senha exclusiva e poderes mestre", "Painel do Administrador: papéis, redefinição de senha, remoção de usuários e auditoria completa", "Perfil de TI oculto e protegido contra remoção"]},
+    {v:"0.6.0", d:"2026-09-19", t:["Histórico de versões: clique na versão no rodapé para ver as novidades"]},
+    {v:"0.5.2", d:"2026-09-18", t:["Gráfico financeiro com números legíveis", "Dados de demonstração com balanço positivo", "Documentação do projeto (README)"]},
+    {v:"0.5.1", d:"2026-09-18", t:["Dados fictícios em todas as seções para apresentação"]},
+    {v:"0.5.0", d:"2026-09-18", t:["Venda de equipamento com dados fiscais e registro da nota fiscal (opcional, desativada por padrão)"]},
+    {v:"0.4.0", d:"2026-09-18", t:["Financeiro: caixa, resultado do mês (DRE), contas a pagar e a receber, despesas e extrato", "Exportação do extrato para a contabilidade"]},
+    {v:"0.3.0", d:"2026-09-18", t:["Reservas e agenda por data, com disponibilidade por dia", "Orçamentos que viram locação", "Manutenção, inspeção e baixa de equipamentos", "Ocupação, logística de entrega, seguros e privacidade (LGPD)"]},
+    {v:"0.2.0", d:"2026-09-18", t:["Análise de risco do cliente e caução", "Novo equipamento com dados da compra", "Fornecedores e cotações com comparativo de preços"]},
+    {v:"0.1.0", d:"2026-09-18", t:["Primeira versão: painel, locações, clientes com mapa, cobranças com recibo e configurações", "Versão para celular, tablet e computador"]}
+  ];
+  const APP_VERSION = CHANGELOG[0].v + "-beta";
   $$(".js-year").forEach(el => el.textContent = new Date().getFullYear());
-  $$(".js-ver").forEach(el => el.textContent = "v" + APP_VERSION);
+  $$(".js-ver").forEach(el => { el.textContent = "v" + APP_VERSION; el.title = "Ver novidades"; el.setAttribute("role", "button"); el.tabIndex = 0; el.onclick = openVer; el.onkeydown = ev => { if (ev.key === "Enter") openVer(); }; });
+  function openVer(){
+    const f = d => d.split("-").reverse().join("/");
+    $("verNow").textContent = "Você está na versão " + APP_VERSION;
+    $("verList").innerHTML = CHANGELOG.map(x => `<div class="rel"><h4>v${x.v}-beta <small>${f(x.d)}</small></h4><ul>${x.t.map(i => "<li>" + esc(i) + "</li>").join("")}</ul></div>`).join("");
+    $("verDlg").showModal();
+  }
+  $("verClose").onclick = () => $("verDlg").close();
   /* ---- dados fictícios para demonstração ao cliente (DEMO=false deixa o sistema zerado) ---- */
   const DEMO = true;
   function seedDemo(){
