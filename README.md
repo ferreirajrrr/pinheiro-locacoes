@@ -2,7 +2,7 @@
 
 Sistema de gestão para locação de equipamentos de construção (andaimes, escoras, plataformas, misturador de tinta, betoneira), feito para a **Pinheiro Locações**, de Caucaia-CE.
 
-> Versão **0.7.0-beta** (a atual aparece no rodapé do sistema; clique nela para ver as novidades), um protótipo navegável para validar o fluxo com o cliente. Os dados são fictícios e ficam apenas na aba aberta.
+> Versão **0.8.0-beta** (a atual aparece no rodapé do sistema; clique nela para ver as novidades), um protótipo navegável para validar o fluxo com o cliente. Os dados são fictícios e ficam apenas na aba aberta.
 
 ## Por que este projeto existe
 

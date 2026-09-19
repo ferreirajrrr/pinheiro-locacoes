@@ -23,6 +23,7 @@
   html{-webkit-text-size-adjust:100%;}
   body{margin:0; background:var(--bg); color:var(--text); font-family:'Roboto',sans-serif; font-size:15px; line-height:1.4;}
   button,input,select,textarea{font-family:inherit; font-size:16px; color:inherit;}
+  select{background:var(--surface-2); border:1px solid var(--line); border-radius:8px; padding:.4rem .5rem;} select option{background:var(--surface); color:var(--text);}
   svg{width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; flex:none;}
 
   .shell{padding:.75rem .75rem calc(5.4rem + env(safe-area-inset-bottom)); min-height:100vh;}
@@ -831,7 +832,7 @@
     cli:[], con:[], seq:1, cseq:1, draft:[], useq:2,
     forn:[], compras:[], cot:[], fseq:1, bseq:1, qseq:1, eseq:7, fTab:"forn", finTab:"fin", ocup:60,
     desp:[], dseq:1, finMonth:today().slice(0, 7), vendas:[], vseq:1, vDraft:[],
-    orc:[], oseq:1, manut:[], mseq:1, seg:[], sseq:1, log:[], priv:{dpo:"", dpoMail:"", guarda:5}, formMode:"loc", formFrom:null,
+    orc:[], oseq:1, manut:[], mseq:1, seg:[], sseq:1, log:[], sec:[], err:[], tiTab:"audit", priv:{dpo:"", dpoMail:"", guarda:5}, formMode:"loc", formFrom:null,
     users:[{id:1,nome:"Administrador",user:"admin",role:"admin",
       salt:"94999927fd0f54362d6bad23408fbd9c",hash:"93fc271cdbf9aec9ca1f347b3f4de99be3ad7ab53414a69393c36a75d54eea52"},
       {id:0,nome:"Administrador de TI",user:"ti",role:"ti",salt:"7711d49f175bf1cfeed7a859e14b8b5c",hash:"8613b502f3063d8b3c9724518d5fc5f8a9c9bb87760da205cce282365581fa47"}]
@@ -856,6 +857,8 @@
   const reposOf = e => e.repos || (S.compras.filter(k => k.eq === e.id).slice(-1)[0] || {}).unit || 0;
   const nextInsp = e => e.ultInsp ? addDays(e.ultInsp, e.inspInt) : null;
   const isAdm = () => S.me.role === "admin" || S.me.role === "ti", isTi = () => S.me.role === "ti";
+  function sec(evento, det){ S.sec.push({t:new Date().toISOString(), evento, det:det || ""}); }
+  addEventListener("error", e => S.err.push({t:new Date().toISOString(), path:location.pathname, msg:e.message || "Erro"}));
   function audit(acao, alvo){ S.log.push({t:new Date().toISOString(), user:S.me ? S.me.user : "—", acao, alvo:alvo || ""}); }
   let cfmFn = null;
   function askConfirm(msg, fn, label){ $("cfmMsg").textContent = msg; $("cfmYes").textContent = label || "Confirmar"; cfmFn = fn; $("cfmDlg").showModal(); }
@@ -1297,12 +1300,16 @@
       return `<div class="card"><div class="tabs" style="padding-top:1rem">${[["fin","Financeiro"], ["nf","Venda com nota fiscal"]].map(t => `<button class="tab${S.finTab === t[0] ? " on" : ""}" data-fn="${t[0]}">${t[1]}</button>`).join("")}</div></div><div style="height:1rem"></div>` + (S.finTab === "fin" ? finDash() : vendasView());
     },
     ti(){
-      const us = S.users.filter(u => u.role !== "ti");
-      return `<div class="card"><div class="head"><h3>Usuários do sistema</h3><p>poderes mestre: trocar papel, redefinir senha e remover qualquer usuário. Este perfil de TI não aparece para os demais e não pode ser removido.</p></div><div class="wrap"><table style="min-width:0"><thead><tr><th>Nome</th><th>Usuário</th><th>Papel</th><th></th></tr></thead><tbody>` +
-      us.map(u => `<tr><td>${esc(u.nome)}</td><td>${esc(u.user)}</td><td><select data-trole="${u.id}"><option value="operador"${u.role === "operador" ? " selected" : ""}>Operador</option><option value="admin"${u.role === "admin" ? " selected" : ""}>Administrador</option></select></td><td class="acts-c"><div class="acts"><button class="btn sm" data-treset="${u.id}">Redefinir senha</button><button class="btn sm bad" data-trm="${u.id}">Remover</button></div></td></tr>`).join("") +
+      const us = S.users, h24 = l => Date.now() - new Date(l.t) < day, n = a => a.filter(h24).length;
+      const kp = [["Usuários online agora", us.filter(u => u.on && u.active !== false).length + "/" + us.length], ["Erros graves (24h)", n(S.err)], ["Eventos de segurança (24h)", n(S.sec)], ["Alterações registradas (24h)", n(S.log)]];
+      const st = u => u.active === false ? ["Inativo", "r"] : u.on ? ["Online", "g"] : ["Offline", "y"];
+      const T = S.tiTab, rows = T === "audit" ? S.log.map(l => [l.t, l.user, l.acao, l.alvo]) : T === "sec" ? S.sec.map(l => [l.t, "—", l.evento, l.det]) : S.err.map(l => [l.t, "—", l.msg, l.path]);
+      return `<div class="kpis">${kp.map(x => `<div class="card kpi"><span>${x[0]}</span><b>${x[1]}</b></div>`).join("")}</div>` +
+      `<div class="card"><div class="head"><h3>Usuários e sessões</h3><p>poderes mestre: papel, senha, ativar/desativar e remover. O perfil de TI não aparece aqui e não pode ser removido.</p></div><div class="wrap"><table style="min-width:0"><thead><tr><th>Nome</th><th>Usuário</th><th>Papel</th><th>Status</th><th>Último acesso</th><th></th></tr></thead><tbody>` +
+      us.filter(u => u.role !== "ti").map(u => `<tr><td>${esc(u.nome)}</td><td>${esc(u.user)}</td><td><select data-trole="${u.id}"><option value="operador"${u.role === "operador" ? " selected" : ""}>Operador</option><option value="admin"${u.role === "admin" ? " selected" : ""}>Administrador</option></select></td><td><span class="pill ${st(u)[1]}">${st(u)[0]}</span></td><td>${u.seen ? dtm(u.seen) : "—"}</td><td class="acts-c"><div class="acts"><button class="btn sm" data-treset="${u.id}">Redefinir senha</button><button class="btn sm" data-tact="${u.id}">${u.active === false ? "Ativar" : "Desativar"}</button><button class="btn sm bad" data-trm="${u.id}">Remover</button></div></td></tr>`).join("") +
       "</tbody></table></div>" + (S.cred ? `<div class="cred">Usuário <b>${esc(S.cred.user)}</b>: nova senha temporária <code>${esc(S.cred.pass)}</code><br>Copie agora; ela não aparece de novo. No próximo acesso a pessoa define a própria senha.</div>` : "") + "</div><div style=\"height:1.2rem\"></div>" +
-      `<div class="card"><div class="head"><h3>Auditoria completa</h3><p>${S.log.length} evento(s) registrados</p></div><div class="wrap"><table><thead><tr><th>Data e hora</th><th>Usuário</th><th>Ação</th><th>Alvo</th></tr></thead><tbody>` +
-      (S.log.length ? S.log.slice(-500).reverse().map(l => `<tr><td>${dtm(l.t)}</td><td>${esc(l.user)}</td><td>${esc(l.acao)}</td><td>${esc(l.alvo)}</td></tr>`).join("") : '<tr><td class="none" colspan="4">Nenhum evento ainda</td></tr>') + "</tbody></table></div></div>";
+      `<div class="card"><div class="head"><h3>Logs do sistema</h3><p>atividades, erros e eventos de segurança</p></div><div class="tabs">${[["audit", "Auditoria"], ["sec", "Segurança"], ["err", "Erros graves"]].map(t => `<button class="tab${T === t[0] ? " on" : ""}" data-tlog="${t[0]}">${t[1]}</button>`).join("")}</div><div class="wrap"><table><thead><tr><th>Data e hora</th><th>Usuário</th><th>${T === "audit" ? "Ação" : T === "sec" ? "Evento" : "Mensagem"}</th><th>${T === "err" ? "Página" : "Alvo"}</th></tr></thead><tbody>` +
+      (rows.length ? rows.slice(-500).reverse().map(r => `<tr><td>${dtm(r[0])}</td><td>${esc(r[1])}</td><td>${esc(r[2])}</td><td>${esc(r[3])}</td></tr>`).join("") : '<tr><td class="none" colspan="4">Nenhum registro ainda</td></tr>') + "</tbody></table></div></div>";
     },
     config(){
       const e = S.emp, v = k => esc(e[k] || ""), admins = S.users.filter(u => u.role === "admin").length, vis = S.users.filter(u => u.role !== "ti");
@@ -1394,6 +1401,7 @@
 
   function render(){
     if (!S.me) return;
+    S.me.seen = new Date().toISOString();
     if ((S.page === "config" && !isAdm()) || (S.page === "ti" && !isTi())) S.page = "painel";
     if (S.map){ S.map.remove(); S.map = null; }
     document.body.dataset.page = S.page;
@@ -1442,6 +1450,8 @@
   }
 
   function bindTi(){
+    $$("[data-tlog]").forEach(b => b.onclick = () => { S.tiTab = b.dataset.tlog; render(); });
+    $$("[data-tact]").forEach(b => b.onclick = () => { const u = S.users.find(x => x.id == b.dataset.tact && x.role !== "ti"); if (!u) return; u.active = u.active === false; audit(u.active ? "TI ativou usuário" : "TI desativou usuário", u.user); render(); });
     const usr = id => S.users.find(u => u.id == id && u.role !== "ti");
     $$("[data-trole]").forEach(x => x.onchange = () => { const u = usr(x.dataset.trole); if (!u) return; u.role = x.value; audit("TI alterou o papel", u.user + " → " + u.role); render(); });
     $$("[data-treset]").forEach(b => b.onclick = async () => {
@@ -1491,13 +1501,14 @@
     let ok = false;
     try { ok = (await hashPw($("lPass").value, u ? u.salt : "x")) === (u && u.hash); }
     catch(e){ m.textContent = "Este navegador não permite o login seguro. Abra por localhost ou https."; return; }
-    if (!ok){ if (++S.fails >= 5){ S.lockUntil = Date.now() + 30000; S.fails = 0; } m.textContent = "Usuário ou senha incorretos."; return; }
-    S.fails = 0; S.me = u; m.textContent = ""; $("lPass").value = ""; audit("Entrou no sistema");
+    if (ok && u.active === false){ sec("Login de usuário desativado", u.user); m.textContent = "Usuário desativado. Fale com o administrador."; return; }
+    if (!ok){ sec("Falha de login", $("lUser").value.trim().slice(0, 20)); if (++S.fails >= 5){ S.lockUntil = Date.now() + 30000; S.fails = 0; sec("Bloqueio temporário por 5 tentativas"); } m.textContent = "Usuário ou senha incorretos."; return; }
+    S.fails = 0; S.me = u; u.on = true; u.seen = new Date().toISOString(); m.textContent = ""; $("lPass").value = ""; audit("Entrou no sistema");
     $("login").hidden = true; $("shell").hidden = false; S.page = "painel"; render();
     if (u.must) openPw(true);
   };
   function logout(){
-    audit("Saiu do sistema");
+    audit("Saiu do sistema"); S.me.on = false; S.me.seen = new Date().toISOString();
     $$("dialog").forEach(d => d.open && d.close());
     if (S.map){ S.map.remove(); S.map = null; }
     S.me = null; S.cred = null; $("shell").hidden = true; $("login").hidden = false; $("lUser").value = ""; $("lUser").focus();
@@ -1925,6 +1936,7 @@
   $("logout2").onclick = logout;
   /* histórico de versões (1 entrada por etapa entregue; a mais nova primeiro). Ao commitar, acrescente aqui e suba APP_VERSION. */
   const CHANGELOG = [
+    {v:"0.8.0", d:"2026-09-19", t:["Painel do Administrador com status do sistema, usuários e sessões online, ativar/desativar usuário", "Logs de auditoria, segurança e erros graves", "Correção de contraste nas listas de seleção"]},
     {v:"0.7.0", d:"2026-09-19", t:["Acesso de administrador de TI com senha exclusiva e poderes mestre", "Painel do Administrador: papéis, redefinição de senha, remoção de usuários e auditoria completa", "Perfil de TI oculto e protegido contra remoção"]},
     {v:"0.6.0", d:"2026-09-19", t:["Histórico de versões: clique na versão no rodapé para ver as novidades"]},
     {v:"0.5.2", d:"2026-09-18", t:["Gráfico financeiro com números legíveis", "Dados de demonstração com balanço positivo", "Documentação do projeto (README)"]},
@@ -2033,6 +2045,12 @@
     ].forEach(([o, cat, desc, v]) => S.desp.push({id:S.dseq++, data:d(o), cat, desc, valor:v, por:"admin"}));
     S.priv = {dpo:"Carlos Pinheiro", dpoMail:"privacidade@pinheirolocacoes.example", guarda:5};
     S.finMonth = ym(T);
+    const ago = m => new Date(Date.now() - m * 6e4).toISOString(), me = (m, o) => Object.assign({salt:"x", hash:"", must:true}, o, {seen:ago(m)});
+    S.users.find(u => u.id === 1).seen = ago(3); S.users.find(u => u.id === 1).on = true;
+    S.users.push(me(2, {id:S.useq++, nome:"Marcos Lima", user:"marcos", role:"operador", on:true}), me(400, {id:S.useq++, nome:"Ana Souza", user:"ana", role:"operador", on:false}), me(4000, {id:S.useq++, nome:"João Batista", user:"joao", role:"operador", on:false, active:false}));
+    [[300, "admin", "Criou locação", "#" + S.con.length], [240, "marcos", "Registrou devolução", "#" + Math.max(1, S.con.length - 1)], [180, "admin", "Emitiu documento", "orc #1"], [90, "marcos", "Cadastrou cliente", "—"], [30, "admin", "Registrou despesa", "Combustível"]].forEach(([m, user, acao, alvo]) => S.log.push({t:ago(m), user, acao, alvo}));
+    [[600, "Falha de login", "marcos"], [590, "Falha de login", "marcos"], [1500, "Login de usuário desativado", "joao"], [50, "Bloqueio temporário por 5 tentativas", ""]].forEach(([m, evento, det]) => S.sec.push({t:ago(m), evento, det}));
+    S.err.push({t:ago(700), path:"/pinheiro-locacoes/", msg:"Falha ao carregar o mapa (Leaflet indisponível)"});
   }
   if (DEMO) seedDemo();
   loadMap();
